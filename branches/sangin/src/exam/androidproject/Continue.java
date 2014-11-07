@@ -1,7 +1,6 @@
 package exam.androidproject;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,8 +18,8 @@ public class Continue extends Activity
                                    {
                                        if (msg.what == 0)
                                        {
-                                           Intent tmpIntent = new Intent(getApplicationContext(), Map.class);
-                                           startActivity(tmpIntent);
+                                           setResult(RESULT_OK);
+                                           finish();
                                        }
                                    }
 

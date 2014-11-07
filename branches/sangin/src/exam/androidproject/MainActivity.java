@@ -6,66 +6,74 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import exam.androidproject.R;
 
 public class MainActivity extends Activity
 {
+    // 액티비티 간 통신을 위한 요청코드 상수
+    private static final int ACT_NEWGAME  = 0;
+    private static final int ACT_CONTINUE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        findViewById(R.id.gamestart_btn).setOnClickListener(mClickListener);
-        findViewById(R.id.continue_btn).setOnClickListener(mClickListener);
-        findViewById(R.id.exit_btn).setOnClickListener(mClickListener);
     }
 
-    Button.OnClickListener mClickListener = new View.OnClickListener()
-                                          {
+    public void mOnClick(View v)
+    {
+        switch (v.getId())
+        {
+        case R.id.gamestart_btn:
+            Intent intent1 = new Intent(MainActivity.this, Picturebook.class);
+            startActivityForResult(intent1, ACT_NEWGAME);
+            break;
+        case R.id.continue_btn:
+            Intent intent2 = new Intent(MainActivity.this, Continue.class);
+            startActivityForResult(intent2, ACT_CONTINUE);
+            break;
 
-                                              @Override
-                                              public void onClick(View v)
-                                              {
-                                                  // TODO Auto-generated method stub
-                                                  {
-                                                      switch (v.getId())
-                                                      {
-                                                      case R.id.gamestart_btn:
-                                                          Intent intent1 = new Intent(MainActivity.this, NewGame.class);
-                                                          startActivity(intent1);
-                                                          break;
-                                                      case R.id.continue_btn:
-                                                          Intent intent2 = new Intent(MainActivity.this, Continue.class);
-                                                          startActivity(intent2);
-                                                          break;
+        case R.id.exit_btn:
+            // view가 alert 이면 팝업실행 즉 버튼을 누르면 팝업창이 뜨는 조건
+            new AlertDialog.Builder(MainActivity.this).setTitle("게임종료") // 팝업창 타이틀바
+                    .setMessage("종료하시겠습니까?")  // 팝업창 내용
+                    .setPositiveButton("게임종료", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            // TODO Auto-generated method stub
+                            finish();
+                        }
+                    }).setNeutralButton("닫기", new DialogInterface.OnClickListener()
+                    {
+                        public void onClick(DialogInterface dlg, int sumthin)
+                        {
+                            // 닫기 버튼을 누르면 아무것도 안하고 닫기 때문에 그냥 비움
+                        }
+                    }).show(); // 팝업창 보여줌
+            break;
+        }
+    }
 
-                                                      case R.id.exit_btn:
-                                                          // view가 alert 이면 팝업실행 즉 버튼을 누르면 팝업창이 뜨는 조건
-                                                          new AlertDialog.Builder(MainActivity.this).setTitle("게임종료") // 팝업창 타이틀바
-                                                                  .setMessage("종료하시겠습니까?")  // 팝업창 내용
-                                                                  .setPositiveButton("게임종료", new DialogInterface.OnClickListener()
-                                                                  {
-                                                                      @Override
-                                                                      public void onClick(DialogInterface dialog, int which)
-                                                                      {
-                                                                          // TODO Auto-generated method stub
-                                                                          System.exit(0);
-                                                                      }
-                                                                  }).setNeutralButton("닫기", new DialogInterface.OnClickListener()
-                                                                  {
-                                                                      public void onClick(DialogInterface dlg, int sumthin)
-                                                                      {
-                                                                          // 닫기 버튼을 누르면 아무것도 안하고 닫기 때문에 그냥 비움
-                                                                      }
-                                                                  }).show(); // 팝업창 보여줌
-                                                          break;
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        switch (requestCode)
+        {
+        case ACT_NEWGAME:
+        case ACT_CONTINUE:
+            if (resultCode == RESULT_OK)
+            {
+                Intent intentForActMap = new Intent(getApplicationContext(), Map.class);
+                startActivity(intentForActMap);
+            }
 
-                                                      }
-                                                  }
-                                              }
-                                          };
-
+            break;
+        }
+    }
 }

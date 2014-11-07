@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.widget.ImageView;
-import exam.androidproject.R;
 
 public class NewGame extends Activity
 {
@@ -24,7 +23,6 @@ public class NewGame extends Activity
             {
                 mAni.setOneShot(true);
                 mAni.start();
-
             }
         });
     }
