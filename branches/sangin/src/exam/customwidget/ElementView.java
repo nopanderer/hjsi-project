@@ -64,6 +64,7 @@ public class ElementView extends RelativeLayout
     {
         ICON, NAME, DAMAGE, RATE, LAST;
 
+        @SuppressWarnings("unused")
         public int getIndex()
         {
             return this.ordinal();

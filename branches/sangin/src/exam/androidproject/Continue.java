@@ -41,7 +41,7 @@ public class Continue extends Activity
             {
                 try
                 {
-                    Thread.sleep(5000); // 여기서 로딩 작업을 한다고 치고..
+                    Thread.sleep(2000); // 여기서 로딩 작업을 한다고 치고..
                 }
                 catch (InterruptedException e)
                 {
@@ -57,5 +57,6 @@ public class Continue extends Activity
         mAni.setOneShot(false);
         mAni.start();
         worker.start();
+
     }
 }
