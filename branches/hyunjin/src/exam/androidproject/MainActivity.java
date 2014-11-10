@@ -25,12 +25,12 @@ public class MainActivity extends Activity
         switch (v.getId())
         {
         case R.id.gamestart_btn:
-            Intent intent1 = new Intent(MainActivity.this, Picturebook.class);
-            startActivityForResult(intent1, ACT_NEWGAME);
+            Intent intentForNewGame = new Intent(MainActivity.this, Picturebook.class);
+            startActivityForResult(intentForNewGame, ACT_NEWGAME);
             break;
         case R.id.continue_btn:
-            Intent intent2 = new Intent(MainActivity.this, Continue.class);
-            startActivityForResult(intent2, ACT_CONTINUE);
+            Intent intentForContGame = new Intent(MainActivity.this, Continue.class);
+            startActivityForResult(intentForContGame, ACT_CONTINUE);
             break;
 
         case R.id.exit_btn:
@@ -69,7 +69,7 @@ public class MainActivity extends Activity
         case ACT_CONTINUE:
             if (resultCode == RESULT_OK)
             {
-                Intent intentForActMap = new Intent(getApplicationContext(), Map.class);
+                Intent intentForActMap = new Intent(MainActivity.this, Map.class);
                 startActivity(intentForActMap);
             }
 

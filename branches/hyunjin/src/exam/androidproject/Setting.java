@@ -47,6 +47,7 @@ public class Setting extends Dialog implements OnClickListener
         else if (v == quit)
         {
             dismiss();
+
         }
 
     }

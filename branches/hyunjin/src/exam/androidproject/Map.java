@@ -1,6 +1,8 @@
 package exam.androidproject;
 
 import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,17 +23,17 @@ public class Map extends Activity
         setting = new Setting(Map.this);
 
         setting.setCanceledOnTouchOutside(false);
-        /*
-         * setting.setOnDismissListener(new OnDismissListener()
-         * {
-         * @Override
-         * public void onDismiss(DialogInterface arg0)
-         * {
-         * // TODO Auto-generated method stub
-         * Map.this.finish();
-         * }
-         * });
-         */
+
+        setting.setOnDismissListener(new OnDismissListener()
+        {
+            @Override
+            public void onDismiss(DialogInterface arg0)
+            {
+                // TODO Auto-generated method stub
+                finish();
+            }
+        });
+
         settingBtn.setOnClickListener(new OnClickListener()
         {
             public void onClick(View arg0)
