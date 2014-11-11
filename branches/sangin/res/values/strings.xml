@@ -4,6 +4,10 @@
     <string name="app_name">AndroidProject</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="button_back">뒤로</string>
+    <string name="btn_back">뒤로</string>
+    
+    <string name="btn_elementbox">원소 상자</string>
+    <string name="btn_tower">타워</string>
+    <string name="btn_cashonly">캐시 전용</string>
 
 </resources>
