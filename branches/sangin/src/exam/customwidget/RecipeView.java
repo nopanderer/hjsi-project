@@ -95,8 +95,8 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener
         if (flag == false)
         {
             // 전체 객체 중에서 객체를 처음 생성 할 때 수행함.
-            drawablePlus = getResources().getDrawable(R.drawable.plus);
-            drawableEqual = getResources().getDrawable(R.drawable.equal);
+            drawablePlus = getResources().getDrawable(R.drawable.recipeview_plus_img);
+            drawableEqual = getResources().getDrawable(R.drawable.recipeview_equal_img);
             flag = true;
         }
         mImgPlus.setImageDrawable(drawablePlus);
