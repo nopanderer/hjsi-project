@@ -21,7 +21,7 @@ public class EDElement
         type = 0;
         dmg = 5;
         rate = 0.5f;
-        imgName = "match";
+        imgName = "element_match";
     }
 
     @Override

@@ -101,8 +101,8 @@ public class ElementView extends RelativeLayout
         mRate.setId(viewId.RATE.getId());
 
         // 기타 멤버 변수를 초기화함.
-        viewWidth = 280;
-        viewHeight = 0;
+        viewWidth = Math.max(280, getWidth());
+        viewHeight = Math.max(0, getHeight());
         elementIconSize = 180;
         detailLevel = 0;
 

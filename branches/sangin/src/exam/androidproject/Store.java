@@ -26,6 +26,8 @@ public class Store extends Activity implements View.OnClickListener
     private static final int UPGRADE = REPAIR + 1;
     private static final int REBUILD = UPGRADE + 1;
 
+    DlgStore                 dlgStore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -42,6 +44,8 @@ public class Store extends Activity implements View.OnClickListener
                 onBackPressed();
             }
         });
+
+        dlgStore = new DlgStore(this);
 
         initTabElement();
         initTabTower();
@@ -130,6 +134,7 @@ public class Store extends Activity implements View.OnClickListener
         switch (gv.getId())
         {
         case LOW:
+            dlgStore.show();
             Log.i("info", "value: " + gv.getValue());
             break;
 
