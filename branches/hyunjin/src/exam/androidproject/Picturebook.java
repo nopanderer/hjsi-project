@@ -2,7 +2,6 @@ package exam.androidproject;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -23,7 +22,7 @@ import exam.game.EDElement;
  * 
  * @author ¿ÃªÛ¿Œ
  */
-public class Picturebook extends Activity
+public class Picturebook extends BaseActivity
 {
     @Override
     protected void onCreate(Bundle savedInstanceState)

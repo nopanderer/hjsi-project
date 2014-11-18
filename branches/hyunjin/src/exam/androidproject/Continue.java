@@ -1,6 +1,5 @@
 package exam.androidproject;
 
-import android.app.Activity;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,7 +7,7 @@ import android.os.Message;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class Continue extends Activity
+public class Continue extends BaseActivity
 {
     AnimationDrawable mAni;
     Handler           mHandler = new Handler()
