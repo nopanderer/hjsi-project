@@ -17,14 +17,19 @@ import exam.customwidget.GoodsView;
  */
 public class Store extends Activity implements View.OnClickListener
 {
+    /* 상점 아이템들의 ID 상수 목록 */
+    // 등급별 원소 상자
     private static final int LOW     = 0;
     private static final int MIDDLE  = 1;
     private static final int HIGH    = 2;
     private static final int SPECIAL = 3;
     private static final int LEGEND  = 4;
-    private static final int REPAIR  = LEGEND + 1;
-    private static final int UPGRADE = REPAIR + 1;
-    private static final int REBUILD = UPGRADE + 1;
+    // 타워 관련 아이템
+    private static final int REPAIR  = LEGEND + 1; // 체력 회복
+    private static final int UPGRADE = REPAIR + 1; // 최대 체력 상승
+    private static final int REBUILD = UPGRADE + 1; // 재건설
+
+    DlgStore                 dlgStore;             // 상점 내 아이템 클릭시 뜰 팝업창
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -33,6 +38,7 @@ public class Store extends Activity implements View.OnClickListener
         setContentView(R.layout.acitivity_store);
 
         // 뒤로가기 버튼 기능 구현
+        // TODO 아래의 중복되는 코드 없앨 수 있을듯
         Button back = (Button) findViewById(R.id.back);
         back.setOnClickListener(new OnClickListener()
         {
@@ -43,8 +49,12 @@ public class Store extends Activity implements View.OnClickListener
             }
         });
 
-        initTabElement();
-        initTabTower();
+        // 구매확인 팝업창 생성
+        dlgStore = new DlgStore(this);
+
+        // 상점 아이템별 탭화면 초기화
+        initTabElement(); // 원소 상자
+        initTabTower(); // 타워 아이템
     }
 
     private void initTabTower()
@@ -103,10 +113,12 @@ public class Store extends Activity implements View.OnClickListener
      */
     public void switchTab(View v)
     {
+        // 일단 전부 안 보이게 한다
         findViewById(R.id.store_tab1).setVisibility(View.INVISIBLE);
         findViewById(R.id.store_tab2).setVisibility(View.INVISIBLE);
         findViewById(R.id.store_tab3).setVisibility(View.INVISIBLE);
 
+        // 그리고 한 놈만 보여준다
         switch (v.getId())
         {
         case R.id.store_btn_elementbox:
@@ -127,9 +139,10 @@ public class Store extends Activity implements View.OnClickListener
         GoodsView gv = (GoodsView) v;
         Log.i("info", "caption: " + gv.getCaption());
 
-        switch (gv.getId())
+        switch (gv.getGoodsId())
         {
         case LOW:
+            dlgStore.show(); // 구매 확인창을 띄운다
             Log.i("info", "value: " + gv.getValue());
             break;
 
