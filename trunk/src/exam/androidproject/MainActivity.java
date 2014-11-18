@@ -1,13 +1,12 @@
 package exam.androidproject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-public class MainActivity extends Activity
+public class MainActivity extends BaseActivity
 {
     // 액티비티 간 통신을 위한 요청코드 상수
     private static final int ACT_NEWGAME  = 0;
@@ -16,6 +15,7 @@ public class MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        actList.add(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
@@ -25,12 +25,12 @@ public class MainActivity extends Activity
         switch (v.getId())
         {
         case R.id.gamestart_btn:
-            Intent intent1 = new Intent(MainActivity.this, Picturebook.class);
-            startActivityForResult(intent1, ACT_NEWGAME);
+            Intent intentForNewGame = new Intent(MainActivity.this, Picturebook.class);
+            startActivityForResult(intentForNewGame, ACT_NEWGAME);
             break;
         case R.id.continue_btn:
-            Intent intent2 = new Intent(MainActivity.this, Continue.class);
-            startActivityForResult(intent2, ACT_CONTINUE);
+            Intent intentForContGame = new Intent(MainActivity.this, Continue.class);
+            startActivityForResult(intentForContGame, ACT_CONTINUE);
             break;
 
         case R.id.exit_btn:

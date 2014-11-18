@@ -1,11 +1,10 @@
 package exam.androidproject;
 
-import android.app.Activity;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.widget.ImageView;
 
-public class NewGame extends Activity
+public class NewGame extends BaseActivity
 {
     AnimationDrawable mAni;
 
