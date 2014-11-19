@@ -1,4 +1,4 @@
-package exam.customwidget;
+ï»¿package exam.customwidget;
 
 import java.util.HashMap;
 
@@ -14,16 +14,16 @@ import android.widget.TextView;
 import exam.game.EDElement;
 
 /**
- * ¿ø¼ÒÀÇ Á¤º¸¸¦ º¸¿©ÁÖ´Â ºä<br/>
+ * ì›ì†Œì˜ ì •ë³´ë¥¼ ë³´ì—¬ì£¼ëŠ” ë·°<br/>
  * <br/>
- * <<<ÇÒ ÀÏ>>><br/>
- * Å¬¸¯ °¡´É ¿©ºÎ ±¸ÇöÇØ¾ßÇÔ.
+ * <<<í•  ì¼>>><br/>
+ * í´ë¦­ ê°€ëŠ¥ ì—¬ë¶€ êµ¬í˜„í•´ì•¼í•¨.
  * 
- * @author ÀÌ»óÀÎ
+ * @author ì´ìƒì¸
  */
 public class ElementView extends RelativeLayout
 {
-    /* »ı¼ºÀÚ (º°µµÀÇ ÃÊ±âÈ­´Â ¹İµå½Ã init()À» ÅëÇØ¼­ ÇØ¾ßÇÑ´Ù!) */
+    /* ìƒì„±ì (ë³„ë„ì˜ ì´ˆê¸°í™”ëŠ” ë°˜ë“œì‹œ init()ì„ í†µí•´ì„œ í•´ì•¼í•œë‹¤!) */
     public ElementView(Context context, AttributeSet attrs, int defStyle)
     {
         super(context, attrs, defStyle);
@@ -42,22 +42,22 @@ public class ElementView extends RelativeLayout
         init(null);
     }
 
-    /* static ¸â¹ö º¯¼ö */
-    static private HashMap<String, RoundedDrawable> arDrawable;     // ¸®¼Ò½º º¸°ü¿ë
+    /* static ë©¤ë²„ ë³€ìˆ˜ */
+    static private HashMap<String, RoundedDrawable> arDrawable;     // ë¦¬ì†ŒìŠ¤ ë³´ê´€ìš©
 
-    /* ±âÅ¸ ¸â¹ö º¯¼ö */
-    private EDElement                               mElement;       // ¿¤¸®¸ÕÆ® ÀÚÃ¼
-    private int                                     viewWidth;      // ºä ÀÚÃ¼ÀÇ °¡·Î Å©±â
-    private int                                     viewHeight;     // ºä ÀÚÃ¼ÀÇ ¼¼·Î Å©±â
-    private int                                     elementIconSize; // È­¸é ÇØ»óµµ, »ç¿ëÇÏ´Â »óÈ²¿¡ ¸Â°Ô Å©±â¸¦ Á¤ÇØ¾ßÇÔ.
-    private int                                     detailLevel;    // ÀÚ¼¼È÷º¸±â ·¹º§
-    private LayoutParams                            mParam;         // ÀÌ ºäÀÇ ·¹ÀÌ¾Æ¿ô ¼Ó¼º
+    /* ê¸°íƒ€ ë©¤ë²„ ë³€ìˆ˜ */
+    private EDElement                               mElement;       // ì—˜ë¦¬ë¨¼íŠ¸ ìì²´
+    private int                                     viewWidth;      // ë·° ìì²´ì˜ ê°€ë¡œ í¬ê¸°
+    private int                                     viewHeight;     // ë·° ìì²´ì˜ ì„¸ë¡œ í¬ê¸°
+    private int                                     elementIconSize; // í™”ë©´ í•´ìƒë„, ì‚¬ìš©í•˜ëŠ” ìƒí™©ì— ë§ê²Œ í¬ê¸°ë¥¼ ì •í•´ì•¼í•¨.
+    private int                                     detailLevel;    // ìì„¸íˆë³´ê¸° ë ˆë²¨
+    private LayoutParams                            mParam;         // ì´ ë·°ì˜ ë ˆì´ì•„ì›ƒ ì†ì„±
 
-    /* ·¹ÀÌ¾Æ¿ô ±¸¼º ¿ä¼Òµé */
-    private ImageView                               mElementIcon;   // ¿¤¸®¸ÕÆ® ¾ÆÀÌÄÜÀ» º¸¿©ÁÜ
-    private TextView                                mName;          // ¿¤¸®¸ÕÆ® µî±Ş°ú ÀÌ¸§À» Ç¥½ÃÇÔ
-    private TextView                                mDmg;           // ¿¤¸®¸ÕÆ® °ø°İ·ÂÀ» Ç¥½ÃÇÔ
-    private TextView                                mRate;          // ¿¤¸®¸ÕÆ® °ø°İ¼Óµµ¸¦ Ç¥½ÃÇÔ
+    /* ë ˆì´ì•„ì›ƒ êµ¬ì„± ìš”ì†Œë“¤ */
+    private ImageView                               mElementIcon;   // ì—˜ë¦¬ë¨¼íŠ¸ ì•„ì´ì½˜ì„ ë³´ì—¬ì¤Œ
+    private TextView                                mName;          // ì—˜ë¦¬ë¨¼íŠ¸ ë“±ê¸‰ê³¼ ì´ë¦„ì„ í‘œì‹œí•¨
+    private TextView                                mDmg;           // ì—˜ë¦¬ë¨¼íŠ¸ ê³µê²©ë ¥ì„ í‘œì‹œí•¨
+    private TextView                                mRate;          // ì—˜ë¦¬ë¨¼íŠ¸ ê³µê²©ì†ë„ë¥¼ í‘œì‹œí•¨
 
     /* Identifiers of views */
     private enum viewId
@@ -76,7 +76,7 @@ public class ElementView extends RelativeLayout
         }
     }
 
-    /* static ÃÊ±âÈ­ */
+    /* static ì´ˆê¸°í™” */
     static
     {
         arDrawable = new HashMap<String, RoundedDrawable>();
@@ -84,13 +84,13 @@ public class ElementView extends RelativeLayout
 
     private void init(EDElement element)
     {
-        // element°¡ nullÀÌ¸é ±âº»°ª Element¸¦ ÇÒ´çÇÑ´Ù. °ÔÀÓ ´Ù ¸¸µé¸é ±âº»°ª Element ¾µ ÀÏÀº ¾øÀ½.
+        // elementê°€ nullì´ë©´ ê¸°ë³¸ê°’ Elementë¥¼ í• ë‹¹í•œë‹¤. ê²Œì„ ë‹¤ ë§Œë“¤ë©´ ê¸°ë³¸ê°’ Element ì“¸ ì¼ì€ ì—†ìŒ.
         if (element != null)
             mElement = element;
         else
             mElement = new EDElement();
 
-        // ³»ºÎ¿¡ µé¾î°¡´Â ºä¸¦ »ı¼ºÇÏ°í id °ªµµ ÇÒ´çÇØÁÜ
+        // ë‚´ë¶€ì— ë“¤ì–´ê°€ëŠ” ë·°ë¥¼ ìƒì„±í•˜ê³  id ê°’ë„ í• ë‹¹í•´ì¤Œ
         mElementIcon = new ImageView(getContext());
         mElementIcon.setId(viewId.ICON.getId());
         mName = new TextView(getContext());
@@ -100,33 +100,33 @@ public class ElementView extends RelativeLayout
         mRate = new TextView(getContext());
         mRate.setId(viewId.RATE.getId());
 
-        // ±âÅ¸ ¸â¹ö º¯¼ö¸¦ ÃÊ±âÈ­ÇÔ.
+        // ê¸°íƒ€ ë©¤ë²„ ë³€ìˆ˜ë¥¼ ì´ˆê¸°í™”í•¨.
         viewWidth = Math.max(280, getWidth());
         viewHeight = Math.max(0, getHeight());
         elementIconSize = 180;
         detailLevel = 0;
 
-        // ElementView ÀÚÃ¼ÀÇ ·¹ÀÌ¾Æ¿ô ¼Ó¼ºÀ» ¼³Á¤ÇÑ´Ù. (Å©±â)
+        // ElementView ìì²´ì˜ ë ˆì´ì•„ì›ƒ ì†ì„±ì„ ì„¤ì •í•œë‹¤. (í¬ê¸°)
         mParam = new LayoutParams(Math.max(viewWidth, elementIconSize), Math.max(viewHeight, elementIconSize));
         setLayoutParams(mParam);
         setPadding(10, 10, 10, 10);
-        setBackgroundColor(Color.argb(128, 255, 0, 0));// Å×½ºÆ®¿ë ¹è°æ»ö
+        setBackgroundColor(Color.argb(128, 255, 0, 0));// í…ŒìŠ¤íŠ¸ìš© ë°°ê²½ìƒ‰
 
-        // elementÀÇ °¢ ¼Ó¼º °ªµéÀ» view¸¦ ÅëÇØ Ç¥½ÃÇÑ´Ù.
+        // elementì˜ ê° ì†ì„± ê°’ë“¤ì„ viewë¥¼ í†µí•´ í‘œì‹œí•œë‹¤.
         updateText();
-        // ±×¸²¸¸ º¸ÀÌ´Â »óÅÂ·Î ÃÊ±âÈ­ÇÔ
+        // ê·¸ë¦¼ë§Œ ë³´ì´ëŠ” ìƒíƒœë¡œ ì´ˆê¸°í™”í•¨
         changeDetailLevel(detailLevel);
 
-        // ³»ºÎ ·¹ÀÌ¾Æ¿ôÀ» ¼³Á¤ÇÔ.
+        // ë‚´ë¶€ ë ˆì´ì•„ì›ƒì„ ì„¤ì •í•¨.
         designInnerLayout();
     }
 
     /**
-     * ElementView ³»ºÎÀÇ ·¹ÀÌ¾Æ¿ôÀ» µğÀÚÀÎÇÑ´Ù.
+     * ElementView ë‚´ë¶€ì˜ ë ˆì´ì•„ì›ƒì„ ë””ìì¸í•œë‹¤.
      */
     private void designInnerLayout()
     {
-        // ¾ÆÀÌÄÜ Ç¥½ÃºÎºĞ ·¹ÀÌ¾Æ¿ô
+        // ì•„ì´ì½˜ í‘œì‹œë¶€ë¶„ ë ˆì´ì•„ì›ƒ
         LayoutParams lpIcon = new LayoutParams(elementIconSize, elementIconSize);
         lpIcon.addRule(RelativeLayout.CENTER_HORIZONTAL);
         lpIcon.addRule(RelativeLayout.ALIGN_PARENT_TOP);
@@ -136,18 +136,18 @@ public class ElementView extends RelativeLayout
         LayoutParams lpDmg = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         LayoutParams lpRate = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
-        // ÀÌ¸§, µî±Ş Ç¥½ÃºÎºĞ ·¹ÀÌ¾Æ¿ô
-        // ¾ÆÀÌÄÜÀÇ ¹Ø¿¡ ºÙ¿©¼­ Ç¥½Ã
+        // ì´ë¦„, ë“±ê¸‰ í‘œì‹œë¶€ë¶„ ë ˆì´ì•„ì›ƒ
+        // ì•„ì´ì½˜ì˜ ë°‘ì— ë¶™ì—¬ì„œ í‘œì‹œ
         lpName.addRule(RelativeLayout.BELOW, viewId.ICON.getId());
         addView(mName, lpName);
 
-        // °ø°İ·Â Ç¥½ÃºÎºĞ ·¹ÀÌ¾Æ¿ô
-        // ÀÌ¸§, µî±Ş ¹Ø¿¡ Ç¥½Ã
+        // ê³µê²©ë ¥ í‘œì‹œë¶€ë¶„ ë ˆì´ì•„ì›ƒ
+        // ì´ë¦„, ë“±ê¸‰ ë°‘ì— í‘œì‹œ
         lpDmg.addRule(RelativeLayout.BELOW, viewId.NAME.getId());
         addView(mDmg, lpDmg);
 
-        // °ø°İ¼Óµµ Ç¥½ÃºÎºĞ ·¹ÀÌ¾Æ¿ô
-        // °ø°İ·Â ¹Ø¿¡ Ç¥½Ã
+        // ê³µê²©ì†ë„ í‘œì‹œë¶€ë¶„ ë ˆì´ì•„ì›ƒ
+        // ê³µê²©ë ¥ ë°‘ì— í‘œì‹œ
         lpRate.addRule(RelativeLayout.BELOW, viewId.DAMAGE.getId());
         addView(mRate, lpRate);
     }
@@ -163,58 +163,58 @@ public class ElementView extends RelativeLayout
     }
 
     /**
-     * ElementView¿¡ º¸¿©Áú EDElement¸¦ ÇÒ´çÇÏ¿© ÀÌ ºä¸¦ ±¸¼ºÇÏ´Â À§Á¬µé¿¡°Ô µ¥ÀÌÅÍ¸¦ ¼³Á¤ÇÔ.
+     * ElementViewì— ë³´ì—¬ì§ˆ EDElementë¥¼ í• ë‹¹í•˜ì—¬ ì´ ë·°ë¥¼ êµ¬ì„±í•˜ëŠ” ìœ„ì ¯ë“¤ì—ê²Œ ë°ì´í„°ë¥¼ ì„¤ì •í•¨.
      * 
      * @param element
-     *            ÀÌ ºä¿¡ º¸¿©ÁÙ ¿ø¼Ò
+     *            ì´ ë·°ì— ë³´ì—¬ì¤„ ì›ì†Œ
      */
     public void setElement(EDElement element)
     {
         if (element == null)
-            Log.e("null error", "EDElement ¿ä¼Ò°¡ null °ªÀÓ!");
+            Log.e("null error", "EDElement ìš”ì†Œê°€ null ê°’ì„!");
         else
             mElement = element;
 
         RoundedDrawable roundIcon;
 
-        // drawableÀ» »ı¼ºÇÑ ÀûÀÌ ÀÖÀ¸¸é »õ·Î ¸¸µéÁö ¾Ê°í °¡Á®´Ù ¾´´Ù.
-        // ¾ÈÇÏ¸é ¸®½ºÆ®ºä¿¡¼­ ·º°É¸²..
+        // drawableì„ ìƒì„±í•œ ì ì´ ìˆìœ¼ë©´ ìƒˆë¡œ ë§Œë“¤ì§€ ì•Šê³  ê°€ì ¸ë‹¤ ì“´ë‹¤.
+        // ì•ˆí•˜ë©´ ë¦¬ìŠ¤íŠ¸ë·°ì—ì„œ ë ‰ê±¸ë¦¼..
         if (arDrawable.containsKey(mElement.imgName))
         {
             roundIcon = arDrawable.get(mElement.imgName);
         }
         else
         {
-            // ÆÄÀÏ ÀÌ¸§À¸·Î ¸®¼Ò½º ID ±¸ÇØ¼­ ºñÆ®¸Ê ÆÄÀÏÀ» ¸¸µç´Ù
+            // íŒŒì¼ ì´ë¦„ìœ¼ë¡œ ë¦¬ì†ŒìŠ¤ ID êµ¬í•´ì„œ ë¹„íŠ¸ë§µ íŒŒì¼ì„ ë§Œë“ ë‹¤
             int drawableId = getResources().getIdentifier(mElement.imgName, "drawable", "exam.androidproject");
             Bitmap bm = BitmapFactory.decodeResource(getResources(), drawableId);
 
-            // Å×½ºÆ®¿ëÀ¸·Î »çÀÌÁî ´Ù¸¥ ÀÌ¹ÌÁö ´ëÃæ ¾²´Ï±î Å©±â Á¶ÀıÇØ¾ßÇÔ.
+            // í…ŒìŠ¤íŠ¸ìš©ìœ¼ë¡œ ì‚¬ì´ì¦ˆ ë‹¤ë¥¸ ì´ë¯¸ì§€ ëŒ€ì¶© ì“°ë‹ˆê¹Œ í¬ê¸° ì¡°ì ˆí•´ì•¼í•¨.
             if (bm.getWidth() != elementIconSize || bm.getHeight() != elementIconSize)
                 bm = Bitmap.createScaledBitmap(bm, elementIconSize, elementIconSize, true);
 
             roundIcon = new RoundedDrawable(bm);
-            // ÇÑ ¹ø »ı¼ºÇÑ µå·Îºí °´Ã¼´Â ¸Ê ±¸Á¶¿¡ ³Ö¾î¼­ º¸°üÇÔ. ÀçÈ°¿ëÀ» À§ÇÑ Á¶Ä¡
+            // í•œ ë²ˆ ìƒì„±í•œ ë“œë¡œë¸” ê°ì²´ëŠ” ë§µ êµ¬ì¡°ì— ë„£ì–´ì„œ ë³´ê´€í•¨. ì¬í™œìš©ì„ ìœ„í•œ ì¡°ì¹˜
             arDrawable.put(mElement.imgName, roundIcon);
         }
 
         mElementIcon.setImageDrawable(roundIcon);
 
-        // ¹Ù²ï °Íµé °»½Å
+        // ë°”ë€ ê²ƒë“¤ ê°±ì‹ 
         updateText();
         updateHeight();
     }
 
     /**
-     * ElementÀÇ ¼Ó¼ºÀ» º¸¿©ÁÖ´Â Á¤µµ¸¦ ¹Ù²Û´Ù.<br/>
-     * º¸¿©ÁÖ´Â ¾çÀÌ ¹Ù²î¹Ç·Î ºäÀÇ Å©±âµµ ¹Ù²ï´Ù.
+     * Elementì˜ ì†ì„±ì„ ë³´ì—¬ì£¼ëŠ” ì •ë„ë¥¼ ë°”ê¾¼ë‹¤.<br/>
+     * ë³´ì—¬ì£¼ëŠ” ì–‘ì´ ë°”ë€Œë¯€ë¡œ ë·°ì˜ í¬ê¸°ë„ ë°”ë€ë‹¤.
      * 
      * @param detailLevel
-     *            0~2 »çÀÌÀÇ °ªÀ» ¼³Á¤ÇÑ´Ù.
+     *            0~2 ì‚¬ì´ì˜ ê°’ì„ ì„¤ì •í•œë‹¤.
      *            <ul>
-     *            <li>0: ±×¸²¸¸ º¸¿©ÁØ´Ù.</li>
-     *            <li>1: µî±Ş, ÀÌ¸§±îÁö º¸¿©ÁØ´Ù.</li>
-     *            <li>2: °ø°İ·Â, °ø°İ¼Óµµ±îÁö º¸¿©ÁØ´Ù.</li>
+     *            <li>0: ê·¸ë¦¼ë§Œ ë³´ì—¬ì¤€ë‹¤.</li>
+     *            <li>1: ë“±ê¸‰, ì´ë¦„ê¹Œì§€ ë³´ì—¬ì¤€ë‹¤.</li>
+     *            <li>2: ê³µê²©ë ¥, ê³µê²©ì†ë„ê¹Œì§€ ë³´ì—¬ì¤€ë‹¤.</li>
      *            </ul>
      */
     public void changeDetailLevel(int detailLevel)
@@ -245,7 +245,7 @@ public class ElementView extends RelativeLayout
     }
 
     /**
-     * ÇöÀç °®°í ÀÖ´Â EDElementÀÇ ³»¿ëÀ¸·Î View¸¦ °»½ÅÇÑ´Ù.
+     * í˜„ì¬ ê°–ê³  ìˆëŠ” EDElementì˜ ë‚´ìš©ìœ¼ë¡œ Viewë¥¼ ê°±ì‹ í•œë‹¤.
      */
     private void updateText()
     {
@@ -255,7 +255,7 @@ public class ElementView extends RelativeLayout
     }
 
     /**
-     * ¼¼·Î Å©±â¸¦ Àû´çÈ÷ °è»êÇÏ¿© ElementViewÀÇ Å©±â¸¦ º¯°æÇÔ.
+     * ì„¸ë¡œ í¬ê¸°ë¥¼ ì ë‹¹íˆ ê³„ì‚°í•˜ì—¬ ElementViewì˜ í¬ê¸°ë¥¼ ë³€ê²½í•¨.
      */
     private void updateHeight()
     {

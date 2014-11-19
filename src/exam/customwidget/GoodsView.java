@@ -1,4 +1,4 @@
-package exam.customwidget;
+ï»¿package exam.customwidget;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -35,29 +35,29 @@ public class GoodsView extends LinearLayout
         init();
     }
 
-    /* Å¬·¡½º °ø¿ë ÀÚ¿ø static º¯¼ö */
-    private static Bitmap    bmpTreasure;      // ¿ø¼Ò »óÀÚ ÀÌ¹ÌÁö¸¦ Áö±İÀº °øÅëÀ¸·Î ½á¼­ staticÀ¸·Î ÇØµ×´Âµ¥,
-                                                // ³ªÁß¿¡ µî±Şº°·Î ´Ù¸¥ ÀÌ¹ÌÁö¸¦ ¾²¸é staticÀ¸·Î ÇÏ¸é ¾ÈµÊ
-    private static boolean   flag      = false; // Ã³À½¿¡ ÇÑ ¹ø »ı¼ºÀ» ÇØ¼­ ¿ø¼Ò »óÀÚ ÀÌ¹ÌÁö¸¦ ·Îµù ½ÃÄ×´ÂÁö Ã¼Å©
+    /* í´ë˜ìŠ¤ ê³µìš© ìì› static ë³€ìˆ˜ */
+    private static Bitmap    bmpTreasure;      // ì›ì†Œ ìƒì ì´ë¯¸ì§€ë¥¼ ì§€ê¸ˆì€ ê³µí†µìœ¼ë¡œ ì¨ì„œ staticìœ¼ë¡œ í•´ë’€ëŠ”ë°,
+                                                // ë‚˜ì¤‘ì— ë“±ê¸‰ë³„ë¡œ ë‹¤ë¥¸ ì´ë¯¸ì§€ë¥¼ ì“°ë©´ staticìœ¼ë¡œ í•˜ë©´ ì•ˆë¨
+    private static boolean   flag      = false; // ì²˜ìŒì— í•œ ë²ˆ ìƒì„±ì„ í•´ì„œ ì›ì†Œ ìƒì ì´ë¯¸ì§€ë¥¼ ë¡œë”© ì‹œì¼°ëŠ”ì§€ ì²´í¬
 
-    /* view id (Áö±İÀº ÇÊ¿ä´Â ¾øÀ½) */
+    /* view id (ì§€ê¸ˆì€ í•„ìš”ëŠ” ì—†ìŒ) */
     private static final int IMG_GOODS = 0;
     private static final int TXT_NAME  = 1;
     private static final int TXT_VALUE = 2;
     /* view */
-    private ImageView        imgGoods;         // »óÇ° ÀÌ¹ÌÁö
-    public TextView          txtCaption;       // »óÇ°¸í
-    private int              goodsId;          // »óÇ° Á¾·ù¸¦ ±¸º°ÇÒ ½Äº°ÀÚ (ÇÏ±Ş »óÀÚÀÎÁö Å¸¿ö Àç°Ç¼³ÀÎÁö µî)
-    private TextView         txtValue;         // °¡°İ Ç¥½Ã¿ë ÅØ½ºÆ®
-    private String           valueUnit = "G";  // °¡°İ ´ÜÀ§
-    private int              value     = 1000; // »óÇ° °¡°İ
+    private ImageView        imgGoods;         // ìƒí’ˆ ì´ë¯¸ì§€
+    public TextView          txtCaption;       // ìƒí’ˆëª…
+    private int              goodsId;          // ìƒí’ˆ ì¢…ë¥˜ë¥¼ êµ¬ë³„í•  ì‹ë³„ì (í•˜ê¸‰ ìƒìì¸ì§€ íƒ€ì›Œ ì¬ê±´ì„¤ì¸ì§€ ë“±)
+    private TextView         txtValue;         // ê°€ê²© í‘œì‹œìš© í…ìŠ¤íŠ¸
+    private String           valueUnit = "G";  // ê°€ê²© ë‹¨ìœ„
+    private int              value     = 1000; // ìƒí’ˆ ê°€ê²©
 
     private void init()
     {
         imgGoods = new ImageView(getContext());
-        imgGoods.setId(IMG_GOODS); // Áö±İ ´çÀåÀº ¾È ¾²´Âµ¥ ÀÏ´Ü ½áµÒ. ³ª¸ÓÁö viewµµ ¸¶Âù°¡Áö
+        imgGoods.setId(IMG_GOODS); // ì§€ê¸ˆ ë‹¹ì¥ì€ ì•ˆ ì“°ëŠ”ë° ì¼ë‹¨ ì¨ë‘ . ë‚˜ë¨¸ì§€ viewë„ ë§ˆì°¬ê°€ì§€
 
-        /* ÀÌ ºä¸¦ ÇÑ ¹øµµ ¾È ¸¸µé¾ú´Ù¸é ¿ø¼Ò »óÀÚ ÀÌ¹ÌÁö¸¦ ºÒ·¯¿Í¼­ static º¯¼ö¿¡ ÀúÀå */
+        /* ì´ ë·°ë¥¼ í•œ ë²ˆë„ ì•ˆ ë§Œë“¤ì—ˆë‹¤ë©´ ì›ì†Œ ìƒì ì´ë¯¸ì§€ë¥¼ ë¶ˆëŸ¬ì™€ì„œ static ë³€ìˆ˜ì— ì €ì¥ */
         if (flag == false)
         {
             bmpTreasure = BitmapFactory.decodeResource(getResources(), R.drawable.goodsview_treasurebox_img);
@@ -66,33 +66,33 @@ public class GoodsView extends LinearLayout
         }
         imgGoods.setImageBitmap(bmpTreasure);
 
-        // ³ª¸ÓÁö ºä »ı¼º
+        // ë‚˜ë¨¸ì§€ ë·° ìƒì„±
         txtCaption = new TextView(getContext());
         txtCaption.setId(TXT_NAME);
         txtValue = new TextView(getContext());
         txtValue.setId(TXT_VALUE);
 
-        // ºä ¼Ó¼ºÀÌ³ª À§Ä¡ µî ÀÚ¼¼ÇÑ ¼³Á¤
+        // ë·° ì†ì„±ì´ë‚˜ ìœ„ì¹˜ ë“± ìì„¸í•œ ì„¤ì •
         designInnerLayout();
     }
 
     private void designInnerLayout()
     {
-        DisplayMetrics screen = getResources().getDisplayMetrics(); // È­¸é Å©±â ±¸ÇÏ±â À§ÇÑ °´Ã¼
+        DisplayMetrics screen = getResources().getDisplayMetrics(); // í™”ë©´ í¬ê¸° êµ¬í•˜ê¸° ìœ„í•œ ê°ì²´
 
         setBackgroundColor(Color.DKGRAY);
         setOrientation(LinearLayout.VERTICAL);
-        setWeightSum(5); // ¸®´Ï¾î ·¹ÀÌ¾Æ¿ôÀÇ Å©±â¸¦ 5·Î Àâ°í, ³ª¸ÓÁö Â÷ÀÏµå ºäµéÀÇ Å©±â¸¦ 5ºĞÀÇ 1ÀÌ³ª 5ºĞÀÇ 2¿Í °°Àº ½ÄÀ¸·Î ¼³Á¤
+        setWeightSum(5); // ë¦¬ë‹ˆì–´ ë ˆì´ì•„ì›ƒì˜ í¬ê¸°ë¥¼ 5ë¡œ ì¡ê³ , ë‚˜ë¨¸ì§€ ì°¨ì¼ë“œ ë·°ë“¤ì˜ í¬ê¸°ë¥¼ 5ë¶„ì˜ 1ì´ë‚˜ 5ë¶„ì˜ 2ì™€ ê°™ì€ ì‹ìœ¼ë¡œ ì„¤ì •
 
-        float scaleWidth = 1f / 4f; // ÇÏ³ªÀÇ ¾ÆÀÌÅÛ ¹öÆ°ÀÌ È­¸é¿¡¼­ Â÷ÁöÇÏ´Â ºñÀ²
+        float scaleWidth = 1f / 4f; // í•˜ë‚˜ì˜ ì•„ì´í…œ ë²„íŠ¼ì´ í™”ë©´ì—ì„œ ì°¨ì§€í•˜ëŠ” ë¹„ìœ¨
 
         LayoutParams lp = new LayoutParams((int) (screen.widthPixels * scaleWidth), screen.heightPixels * 3 / 5);
-        lp.weight = 3; // ºÎ¸ğ ºäÀÇ weightSum °ª¿¡¼­ Â÷ÁöÇÏ´Â ºñÀ² (imgGoods´Â 3/5)
+        lp.weight = 3; // ë¶€ëª¨ ë·°ì˜ weightSum ê°’ì—ì„œ ì°¨ì§€í•˜ëŠ” ë¹„ìœ¨ (imgGoodsëŠ” 3/5)
         addView(imgGoods, lp);
 
         lp = new LayoutParams((int) (screen.widthPixels * scaleWidth), screen.heightPixels * 1 / 5);
         lp.weight = 1;
-        txtCaption.setText("ÇÏ±Ş");
+        txtCaption.setText("í•˜ê¸‰");
         txtCaption.setBackgroundColor(Color.RED);
         txtCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 40);
         txtCaption.setGravity(Gravity.CENTER);
@@ -100,13 +100,13 @@ public class GoodsView extends LinearLayout
 
         lp = new LayoutParams((int) (screen.widthPixels * scaleWidth), screen.heightPixels * 1 / 5);
         lp.weight = 1;
-        txtValue.setText(String.valueOf(value) + valueUnit); // °¡°İ + "´ÜÀ§" Çü½ÄÀ¸·Î Ç¥½ÃÇÔ
+        txtValue.setText(String.valueOf(value) + valueUnit); // ê°€ê²© + "ë‹¨ìœ„" í˜•ì‹ìœ¼ë¡œ í‘œì‹œí•¨
         txtValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, 35);
         txtValue.setGravity(Gravity.CENTER);
         addView(txtValue, lp);
     }
 
-    // ÀÌ¹ÌÁö Á¦¿ÜÇÑ »óÇ°¸í, °¡°İ, È­Æó´ÜÀ§ ¼³Á¤
+    // ì´ë¯¸ì§€ ì œì™¸í•œ ìƒí’ˆëª…, ê°€ê²©, í™”íë‹¨ìœ„ ì„¤ì •
     public void setProperties(String caption, String valueUnit, int value)
     {
         setCaption(caption);

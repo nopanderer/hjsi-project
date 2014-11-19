@@ -1,4 +1,4 @@
-package exam.androidproject;
+﻿package exam.androidproject;
 
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;

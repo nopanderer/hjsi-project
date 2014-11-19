@@ -1,4 +1,4 @@
-package exam.customwidget;
+ï»¿package exam.customwidget;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -12,7 +12,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 
 /**
- * ÀÌ¹ÌÁö¸¦ µÕ±×·¸°Ô ±×·ÁÁØ´Ù!!
+ * ì´ë¯¸ì§€ë¥¼ ë‘¥ê·¸ë ‡ê²Œ ê·¸ë ¤ì¤€ë‹¤!!
  * 
  * @author internet
  */

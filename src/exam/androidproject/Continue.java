@@ -1,4 +1,4 @@
-package exam.androidproject;
+ï»¿package exam.androidproject;
 
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
@@ -40,7 +40,7 @@ public class Continue extends BaseActivity
             {
                 try
                 {
-                    Thread.sleep(2000); // ¿©±â¼­ ·Îµù ÀÛ¾÷À» ÇÑ´Ù°í Ä¡°í..
+                    Thread.sleep(2000); // ì—¬ê¸°ì„œ ë¡œë”© ì‘ì—…ì„ í•œë‹¤ê³  ì¹˜ê³ ..
                 }
                 catch (InterruptedException e)
                 {
