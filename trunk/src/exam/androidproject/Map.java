@@ -12,7 +12,7 @@ import android.widget.ToggleButton;
 
 public class Map extends BaseActivity implements OnClickListener
 {
-    Button                    settingBtn, btnBook;
+    Button                    settingBtn, btnBook, btnStore;
     ToggleButton              btnPlay;
     Setting                   setting;
     public static MediaPlayer music;
@@ -29,6 +29,7 @@ public class Map extends BaseActivity implements OnClickListener
         settingBtn = (Button) findViewById(R.id.setting_btn);
         btnBook = (Button) findViewById(R.id.btn_book);
         btnPlay = (ToggleButton) findViewById(R.id.btn_play);
+        btnStore = (Button) findViewById(R.id.btn_store);
 
         setting = new Setting(Map.this);
 
@@ -48,6 +49,7 @@ public class Map extends BaseActivity implements OnClickListener
         settingBtn.setOnClickListener(this);
         btnBook.setOnClickListener(this);
         btnPlay.setOnClickListener(this);
+        btnStore.setOnClickListener(this);
 
     }
 
@@ -70,6 +72,11 @@ public class Map extends BaseActivity implements OnClickListener
             {
                 btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
             }
+        }
+        else if (v == btnStore)
+        {
+            Intent Store = new Intent(Map.this, Store.class);
+            startActivity(Store);
         }
     }
 }

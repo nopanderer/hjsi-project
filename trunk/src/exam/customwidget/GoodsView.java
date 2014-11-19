@@ -60,7 +60,7 @@ public class GoodsView extends LinearLayout
         /* 이 뷰를 한 번도 안 만들었다면 원소 상자 이미지를 불러와서 static 변수에 저장 */
         if (flag == false)
         {
-            bmpTreasure = BitmapFactory.decodeResource(getResources(), R.drawable.goodsview_treasurebox_img);
+            bmpTreasure = BitmapFactory.decodeResource(getResources(), R.drawable.img_goodsview_treasurebox);
             bmpTreasure = Bitmap.createScaledBitmap(bmpTreasure, 400, 300, true);
             flag = true;
         }

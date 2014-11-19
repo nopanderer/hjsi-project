@@ -51,12 +51,12 @@ public class Setting extends Dialog implements OnClickListener
         {
             if (sound.isChecked())
             {
-                sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.set_soundoff_img));
+                sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
                 Map.music.pause();
             }
             else
             {
-                sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.set_soundon_img));
+                sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundon));
                 Map.music.start();
             }
         }

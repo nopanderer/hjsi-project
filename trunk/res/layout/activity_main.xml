@@ -7,33 +7,33 @@
     android:orientation="vertical" >
 
     <Button
-        android:id="@+id/gamestart_btn"
+        android:id="@+id/btn_gamestart"
         android:layout_width="400px"
         android:layout_height="100px"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="20dip"
         android:layout_marginRight="30dip"
-        android:background="@drawable/newgame_btn"
+        android:background="@drawable/btn_newgame"
         android:onClick="mOnClick" />
 
     <Button
-        android:id="@+id/continue_btn"
+        android:id="@+id/btn_continue"
         android:layout_width="400px"
         android:layout_height="100px"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="20dip"
         android:layout_marginRight="30dip"
-        android:background="@drawable/continue_btn"
+        android:background="@drawable/btn_continue"
         android:onClick="mOnClick" />
 
     <Button
-        android:id="@+id/exit_btn"
+        android:id="@+id/btn_exit"
         android:layout_width="400px"
         android:layout_height="100px"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="20dip"
         android:layout_marginRight="30dip"
-        android:background="@drawable/exit_btn"
+        android:background="@drawable/btn_exit"
         android:onClick="mOnClick" />
 
 </LinearLayout>

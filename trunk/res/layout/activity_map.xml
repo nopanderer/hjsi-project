@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ff0000"
 	>
 	
     <Button
@@ -11,7 +12,7 @@
         android:layout_height="80px"
         android:layout_marginTop="10dip"
         android:layout_marginLeft="10dip"
-        android:background="@drawable/setting_btn"
+        android:background="@drawable/btn_setting"
         />
 
     <TextView
@@ -40,5 +41,15 @@
         android:background="@drawable/btn_play"
         android:textOff=""
 		android:textOn="" />
+
+    <Button
+        android:id="@+id/btn_store"
+        android:layout_width="80px"
+        android:layout_height="80px"
+        android:layout_alignBaseline="@+id/setting_btn"
+        android:layout_alignBottom="@+id/setting_btn"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/btn_store" />
 
 </RelativeLayout>

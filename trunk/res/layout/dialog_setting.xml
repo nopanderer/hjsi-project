@@ -12,14 +12,14 @@
         android:layout_width="200px"
         android:layout_height="70px"
         android:layout_marginBottom="10dp"
-        android:background="@drawable/set_resume_btn"
+        android:background="@drawable/btn_set_resume"
         />
     <Button
         android:id="@+id/set_help_btn"
         android:layout_width="200px"
         android:layout_height="70px"
         android:layout_marginBottom="10dp"
-        android:background="@drawable/set_help_btn"
+        android:background="@drawable/btn_set_help"
         />
     
     <ToggleButton
@@ -27,7 +27,7 @@
         android:layout_width="200px"
         android:layout_height="70px"
         android:layout_marginBottom="10dp"
-        android:background="@drawable/set_soundon_img"
+        android:background="@drawable/img_set_soundon"
         android:textOff=""
 		android:textOn=""
         />
@@ -37,7 +37,7 @@
         android:layout_width="200px"
         android:layout_height="70px"
         android:layout_marginBottom="10dp"
-        android:background="@drawable/set_credits_btn"
+        android:background="@drawable/btn_set_credits"
         />
     
     <Button
@@ -45,7 +45,7 @@
         android:layout_width="200px"
         android:layout_height="70px"
         android:layout_marginBottom="10dp"
-        android:background="@drawable/set_quit_btn"
+        android:background="@drawable/btn_set_quit"
         />
 
 </LinearLayout>
