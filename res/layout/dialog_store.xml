@@ -24,7 +24,7 @@
             <ImageView
                 android:layout_width="180dp"
                 android:layout_height="90dp"
-                android:background="@drawable/goodsview_treasurebox_img" />
+                android:background="@drawable/img_goodsview_treasurebox" />
 
             <TextView
                 android:layout_width="match_parent"

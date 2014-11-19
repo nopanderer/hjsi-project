@@ -24,16 +24,16 @@ public class MainActivity extends BaseActivity
     {
         switch (v.getId())
         {
-        case R.id.gamestart_btn:
+        case R.id.btn_gamestart:
             Intent intentForNewGame = new Intent(MainActivity.this, Picturebook.class);
             startActivityForResult(intentForNewGame, ACT_NEWGAME);
             break;
-        case R.id.continue_btn:
+        case R.id.btn_continue:
             Intent intentForContGame = new Intent(MainActivity.this, Continue.class);
             startActivityForResult(intentForContGame, ACT_CONTINUE);
             break;
 
-        case R.id.exit_btn:
+        case R.id.btn_exit:
             // view가 alert 이면 팝업실행 즉 버튼을 누르면 팝업창이 뜨는 조건
             new AlertDialog.Builder(MainActivity.this).setTitle("게임종료") // 팝업창 타이틀바
                     .setMessage("종료하시겠습니까?")  // 팝업창 내용
