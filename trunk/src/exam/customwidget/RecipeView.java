@@ -1,4 +1,4 @@
-package exam.customwidget;
+ï»¿package exam.customwidget;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -10,15 +10,15 @@ import exam.androidproject.R;
 import exam.game.EDElement;
 
 /**
- * ListView¿¡ µé¾î°¡´Â ÇÑ ÁÙÂ¥¸® View. <br/>
- * ÇÑ °¡ÁöÀÇ Á¶ÇÕ¹ıÀ» º¸¿©ÁÖ´Â ¿ªÇÒÀ» ÇÑ´Ù.
+ * ListViewì— ë“¤ì–´ê°€ëŠ” í•œ ì¤„ì§œë¦¬ View. <br/>
+ * í•œ ê°€ì§€ì˜ ì¡°í•©ë²•ì„ ë³´ì—¬ì£¼ëŠ” ì—­í• ì„ í•œë‹¤.
  * 
- * @author ÀÌ»óÀÎ
+ * @author ì´ìƒì¸
  * 
  */
 public class RecipeView extends RelativeLayout implements View.OnClickListener
 {
-    /* »ı¼ºÀÚ */
+    /* ìƒì„±ì */
     public RecipeView(Context context)
     {
         super(context);
@@ -37,24 +37,24 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener
         init();
     }
 
-    /* static ¸â¹ö º¯¼ö */
+    /* static ë©¤ë²„ ë³€ìˆ˜ */
     private static Drawable drawablePlus;
     private static Drawable drawableEqual;
     private static boolean  flag             = false;
 
-    /* ¸â¹ö º¯¼ö */
-    private int             detailLevel      = 1;                 // ElementÀÇ ÀÌ¸§±îÁö º¸ÀÌ´Â »óÅÂ¸¦ ³ªÅ¸³¿
+    /* ë©¤ë²„ ë³€ìˆ˜ */
+    private int             detailLevel      = 1;                 // Elementì˜ ì´ë¦„ê¹Œì§€ ë³´ì´ëŠ” ìƒíƒœë¥¼ ë‚˜íƒ€ëƒ„
 
     /* Views of layout */
     private ImageView       mImgPlus;
     private ImageView       mImgEqual;
     /**
-     * Á¶ÇÕÀÌ µÇ´Â Àç·áÀÎ µÎ °³ÀÇ Element¿Í °á°ú¹° Element ÇÑ °³¸¦ ´ã´Â º¯¼ö´Ù. <br/>
+     * ì¡°í•©ì´ ë˜ëŠ” ì¬ë£Œì¸ ë‘ ê°œì˜ Elementì™€ ê²°ê³¼ë¬¼ Element í•œ ê°œë¥¼ ë‹´ëŠ” ë³€ìˆ˜ë‹¤. <br/>
      * <ul>
-     * <b>index »ç¿ë¹ı</b>
-     * <li>0: ¿ŞÂÊ Àç·á Element</li>
-     * <li>1: ¿À¸¥ÂÊ Àç·á Element</li>
-     * <li>2: ¿À¸¥ÂÊ Àç·á Element</li>
+     * <b>index ì‚¬ìš©ë²•</b>
+     * <li>0: ì™¼ìª½ ì¬ë£Œ Element</li>
+     * <li>1: ì˜¤ë¥¸ìª½ ì¬ë£Œ Element</li>
+     * <li>2: ì˜¤ë¥¸ìª½ ì¬ë£Œ Element</li>
      * </ul>
      */
     private ElementView     arElementViews[] = new ElementView[3];
@@ -77,13 +77,13 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener
 
     private void init()
     {
-        // ·¹ÀÌ¾Æ¿ô¿¡ µé¾î°¡´Â ºä¸¦ »ı¼ºÇÏ°í id °ªµµ ÇÒ´çÇØÁÜ
+        // ë ˆì´ì•„ì›ƒì— ë“¤ì–´ê°€ëŠ” ë·°ë¥¼ ìƒì„±í•˜ê³  id ê°’ë„ í• ë‹¹í•´ì¤Œ
         mImgPlus = new ImageView(getContext());
         mImgPlus.setId(viewId.IMG_PLUS.getId());
         mImgEqual = new ImageView(getContext());
         mImgEqual.setId(viewId.IMG_EQUAL.getId());
 
-        // ElementViewµéÀ» ÀÌ¸§±îÁö º¸ÀÌ´Â »óÅÂ·Î ÃÊ±âÈ­ÇÑ´Ù.
+        // ElementViewë“¤ì„ ì´ë¦„ê¹Œì§€ ë³´ì´ëŠ” ìƒíƒœë¡œ ì´ˆê¸°í™”í•œë‹¤.
         for (int i = 0; i < arElementViews.length; i++)
         {
             arElementViews[i] = new ElementView(getContext());
@@ -91,10 +91,10 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener
             arElementViews[i].changeDetailLevel(detailLevel);
         }
 
-        // ´õÇÏ±â, µîÈ£ ¸®¼Ò½º ºÒ·¯¿È
+        // ë”í•˜ê¸°, ë“±í˜¸ ë¦¬ì†ŒìŠ¤ ë¶ˆëŸ¬ì˜´
         if (flag == false)
         {
-            // ÀüÃ¼ °´Ã¼ Áß¿¡¼­ °´Ã¼¸¦ Ã³À½ »ı¼º ÇÒ ¶§ ¼öÇàÇÔ.
+            // ì „ì²´ ê°ì²´ ì¤‘ì—ì„œ ê°ì²´ë¥¼ ì²˜ìŒ ìƒì„± í•  ë•Œ ìˆ˜í–‰í•¨.
             drawablePlus = getResources().getDrawable(R.drawable.recipeview_plus_img);
             drawableEqual = getResources().getDrawable(R.drawable.recipeview_equal_img);
             flag = true;
@@ -104,31 +104,31 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener
 
         setPadding(10, 10, 10, 10);
 
-        // ·¹ÀÌ¾Æ¿ô ¼³Á¤
+        // ë ˆì´ì•„ì›ƒ ì„¤ì •
         designInnerLayout();
 
-        // onClick ¸Ş¼Òµå¸¦ µî·ÏÇÔ
+        // onClick ë©”ì†Œë“œë¥¼ ë“±ë¡í•¨
         setOnClickListener(this);
     }
 
     /**
-     * RecipeView ³»ºÎÀÇ ·¹ÀÌ¾Æ¿ôÀ» µğÀÚÀÎÇÑ´Ù.
+     * RecipeView ë‚´ë¶€ì˜ ë ˆì´ì•„ì›ƒì„ ë””ìì¸í•œë‹¤.
      */
     private void designInnerLayout()
     {
         int plusSize = 120;
 
-        // ·¹ÀÌ¾Æ¿ô ÆÄ¶ó¹ÌÅÍ¸¦ ÃÊ±âÈ­
+        // ë ˆì´ì•„ì›ƒ íŒŒë¼ë¯¸í„°ë¥¼ ì´ˆê¸°í™”
         LayoutParams lp[] = new LayoutParams[viewId.LAST.getIndex()];
 
-        /* RecipeView¿¡ °¢ view¸¦ µî·Ï½ÃÅ´ */
-        // ¿ŞÂÊ Àç·á Element ¼³Á¤
+        /* RecipeViewì— ê° viewë¥¼ ë“±ë¡ì‹œí‚´ */
+        // ì™¼ìª½ ì¬ë£Œ Element ì„¤ì •
         int idx = viewId.LHS1.getIndex();
         lp[idx] = arElementViews[idx].getParams();
         lp[idx].addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         addView(arElementViews[idx]);
 
-        // + ÀÌ¹ÌÁö ¼³Á¤
+        // + ì´ë¯¸ì§€ ì„¤ì •
         idx = viewId.IMG_PLUS.getIndex();
         lp[idx] = new LayoutParams(plusSize, plusSize);
         lp[idx].addRule(RelativeLayout.RIGHT_OF, viewId.LHS1.getId());
@@ -137,13 +137,13 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener
         lp[idx].topMargin = (arElementViews[viewId.LHS1.getId()].getIconSize() - plusSize) / 2;
         addView(mImgPlus, lp[idx]);
 
-        // ¿À¸¥ÂÊ Àç·á Element ¼³Á¤
+        // ì˜¤ë¥¸ìª½ ì¬ë£Œ Element ì„¤ì •
         idx = viewId.LHS2.getIndex();
         lp[idx] = arElementViews[idx].getParams();
         lp[idx].addRule(RelativeLayout.RIGHT_OF, viewId.IMG_PLUS.getId());
         addView(arElementViews[idx]);
 
-        // = ÀÌ¹ÌÁö ¼³Á¤
+        // = ì´ë¯¸ì§€ ì„¤ì •
         idx = viewId.IMG_EQUAL.getIndex();
         lp[idx] = new LayoutParams(plusSize, plusSize);
         lp[idx].addRule(RelativeLayout.RIGHT_OF, viewId.LHS2.getId());
@@ -152,7 +152,7 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener
         lp[idx].topMargin = (arElementViews[viewId.LHS2.getId()].getIconSize() - plusSize) / 2;
         addView(mImgEqual, lp[idx]);
 
-        // Á¶ÇÕ°á°ú Element ¼³Á¤
+        // ì¡°í•©ê²°ê³¼ Element ì„¤ì •
         idx = viewId.RESULT.getIndex();
         lp[idx] = arElementViews[idx].getParams();
         lp[idx].addRule(RelativeLayout.RIGHT_OF, viewId.IMG_EQUAL.getId());
@@ -161,7 +161,7 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener
 
     /**
      * @param arElements
-     *            ÇÏ³ªÀÇ ¸®½ºÆ®ºä Ç×¸ñ(O+O=O)¿¡ µé¾î°¥ EDElement °´Ã¼ 3°³ÀÇ ¹è¿­
+     *            í•˜ë‚˜ì˜ ë¦¬ìŠ¤íŠ¸ë·° í•­ëª©(O+O=O)ì— ë“¤ì–´ê°ˆ EDElement ê°ì²´ 3ê°œì˜ ë°°ì—´
      */
     public void setElements(EDElement[] arElements)
     {
@@ -179,7 +179,7 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener
         else
             detailLevel = 1;
 
-        // ¼¼ °³ÀÇ ElementÀÇ ÀÚ¼¼È÷º¸±â »óÅÂ¸¦ ÀüºÎ º¯°æÇÑ´Ù.
+        // ì„¸ ê°œì˜ Elementì˜ ìì„¸íˆë³´ê¸° ìƒíƒœë¥¼ ì „ë¶€ ë³€ê²½í•œë‹¤.
         for (ElementView ev : arElementViews)
         {
             ev.changeDetailLevel(detailLevel);

@@ -1,4 +1,4 @@
-package exam.androidproject;
+﻿package exam.androidproject;
 
 import android.app.Dialog;
 import android.content.Context;

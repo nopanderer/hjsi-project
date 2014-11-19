@@ -1,4 +1,4 @@
-package exam.androidproject;
+ï»¿package exam.androidproject;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -38,26 +38,26 @@ public class DlgStore extends Dialog implements OnClickListener
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE); // ´ÙÀÌ¾ó·Î±× Á¦¸ñ Ç¥½Ã¸¦ ¾ø¾Ø´Ù
-        this.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT)); // ´ÙÀÌ¾ó·Î±× ¹è°æÀ» ¾ø¾Ø´Ù (Å×µÎ¸®µµ ¾øÀ½)
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE); // ë‹¤ì´ì–¼ë¡œê·¸ ì œëª© í‘œì‹œë¥¼ ì—†ì•¤ë‹¤
+        this.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT)); // ë‹¤ì´ì–¼ë¡œê·¸ ë°°ê²½ì„ ì—†ì•¤ë‹¤ (í…Œë‘ë¦¬ë„ ì—†ìŒ)
         setContentView(R.layout.dialog_store);
 
-        // ±¸¸Å¸¦ Ãë¼ÒÇÏ°Å³ª ±¸¸Å ÈÄ "°è¼Ó ±¸¸Å", "¹èÄ¡"µµ ´©¸£Áö ¾Ê´Â °æ¿ì¸¦ À§ÇÑ ¸®½º³Ê
+        // êµ¬ë§¤ë¥¼ ì·¨ì†Œí•˜ê±°ë‚˜ êµ¬ë§¤ í›„ "ê³„ì† êµ¬ë§¤", "ë°°ì¹˜"ë„ ëˆ„ë¥´ì§€ ì•ŠëŠ” ê²½ìš°ë¥¼ ìœ„í•œ ë¦¬ìŠ¤ë„ˆ
         setOnCancelListener(new OnCancelListener()
         {
             @Override
             public void onCancel(DialogInterface dialog)
             {
-                // ±¸¸Å ¹öÆ°À» ´Ù½Ã ´©¸¦ ¼ö ÀÖ°Ô ÆË¾÷¿¡¼­ Ç¥½ÃÇÒ Ã¢À» ¹Ù²ãÁÖ´Â °Í
+                // êµ¬ë§¤ ë²„íŠ¼ì„ ë‹¤ì‹œ ëˆ„ë¥¼ ìˆ˜ ìˆê²Œ íŒì—…ì—ì„œ í‘œì‹œí•  ì°½ì„ ë°”ê¿”ì£¼ëŠ” ê²ƒ
                 page1.setVisibility(View.VISIBLE);
                 page2.setVisibility(View.INVISIBLE);
             }
         });
 
-        page1 = findViewById(R.id.dlg_store_goods_page1); // ¿ø¼Ò ±¸¸Å È®ÀÎÃ¢
-        page2 = findViewById(R.id.dlg_store_goods_page2); // ±¸¸ÅÇÑ ¿ø¼Ò Ç¥½Ã ¹× °è¼Ó ±¸¸ÅÇÒÁö ¹èÄ¡ÇÒÁö ¹¯´Â Ã¢
+        page1 = findViewById(R.id.dlg_store_goods_page1); // ì›ì†Œ êµ¬ë§¤ í™•ì¸ì°½
+        page2 = findViewById(R.id.dlg_store_goods_page2); // êµ¬ë§¤í•œ ì›ì†Œ í‘œì‹œ ë° ê³„ì† êµ¬ë§¤í• ì§€ ë°°ì¹˜í• ì§€ ë¬»ëŠ” ì°½
 
-        // °¢ ¹öÆ°µé(µÎ °³ÀÇ Ã¢¿¡ µÎ °³ÀÇ ¹öÆ°)¿¡ ¸®½º³Ê¸¦ µî·ÏÇÑ´Ù.
+        // ê° ë²„íŠ¼ë“¤(ë‘ ê°œì˜ ì°½ì— ë‘ ê°œì˜ ë²„íŠ¼)ì— ë¦¬ìŠ¤ë„ˆë¥¼ ë“±ë¡í•œë‹¤.
         ((TextView) findViewById(R.id.dlg_store_btn_buy)).setOnClickListener(this);
         ((TextView) findViewById(R.id.dlg_store_btn_cancel)).setOnClickListener(this);
         ((TextView) findViewById(R.id.dlg_store_btn_morebuy)).setOnClickListener(this);
@@ -69,28 +69,28 @@ public class DlgStore extends Dialog implements OnClickListener
     {
         switch (v.getId())
         {
-        case R.id.dlg_store_btn_buy: // Á¤¸»·Î ¿ø¼Ò ±¸¸ÅÇÒÁö È®ÀÎÇÏ´Â Ã¢ÀÇ ±¸¸Å ¹öÆ°
-            page1.setVisibility(View.INVISIBLE);   // ÇöÀç Ã¢À» ¼û±â°í
-            page2.setVisibility(View.VISIBLE);     // ´ÙÀ½ Ã¢À» º¸¿©ÁÜ
+        case R.id.dlg_store_btn_buy: // ì •ë§ë¡œ ì›ì†Œ êµ¬ë§¤í• ì§€ í™•ì¸í•˜ëŠ” ì°½ì˜ êµ¬ë§¤ ë²„íŠ¼
+            page1.setVisibility(View.INVISIBLE);   // í˜„ì¬ ì°½ì„ ìˆ¨ê¸°ê³ 
+            page2.setVisibility(View.VISIBLE);     // ë‹¤ìŒ ì°½ì„ ë³´ì—¬ì¤Œ
 
-            // TODO ±¸¸Å °ü·Ã ¸Ş¼Òµå¸¦ ÀÛ¼ºÇÑ´Ù
+            // TODO êµ¬ë§¤ ê´€ë ¨ ë©”ì†Œë“œë¥¼ ì‘ì„±í•œë‹¤
 
-            // Å×½ºÆ®¿ëÀ¸·Î ±âº» element ¸¸µé¾î¼­ ºä¿¡ ¼³Á¤ÇÑ´Ù.
+            // í…ŒìŠ¤íŠ¸ìš©ìœ¼ë¡œ ê¸°ë³¸ element ë§Œë“¤ì–´ì„œ ë·°ì— ì„¤ì •í•œë‹¤.
             ElementView ev = (ElementView) findViewById(R.id.dlg_store_goods_element);
             ev.setElement(new EDElement());
             ev.changeDetailLevel(1);
             break;
 
-        case R.id.dlg_store_btn_cancel: // Ãë¼Ò ¹öÆ°À» ´©¸£´Â °æ¿ì
+        case R.id.dlg_store_btn_cancel: // ì·¨ì†Œ ë²„íŠ¼ì„ ëˆ„ë¥´ëŠ” ê²½ìš°
             hide();
             break;
 
-        case R.id.dlg_store_btn_morebuy: // ´õ ±¸¸ÅÇÏ·Á´Â °æ¿ì
-            // TODO À§ÀÇ element ±¸¸Å °ü·Ã ¸Ş¼Òµå¸¦ ½ÇÇàÇÏ¸é µÉµí.
+        case R.id.dlg_store_btn_morebuy: // ë” êµ¬ë§¤í•˜ë ¤ëŠ” ê²½ìš°
+            // TODO ìœ„ì˜ element êµ¬ë§¤ ê´€ë ¨ ë©”ì†Œë“œë¥¼ ì‹¤í–‰í•˜ë©´ ë ë“¯.
             break;
 
-        case R.id.dlg_store_btn_arrangement: // ±¸¸ÅÇÑ ¿ø¼Ò¸¦ ¹Ù·Î ¹èÄ¡ÇÏ·Á´Â °æ¿ì´Ù
-            // TODO ÇöÀç ±¸¸ÅÇØ¼­ ³ª¿Â ¿ø¼Ò¸¦ ¸Ê¿¡ ¹Ù·Î ¹èÄ¡ÇÒ ¼ö ÀÖ°Ô Ã³¸®ÇÑ´Ù
+        case R.id.dlg_store_btn_arrangement: // êµ¬ë§¤í•œ ì›ì†Œë¥¼ ë°”ë¡œ ë°°ì¹˜í•˜ë ¤ëŠ” ê²½ìš°ë‹¤
+            // TODO í˜„ì¬ êµ¬ë§¤í•´ì„œ ë‚˜ì˜¨ ì›ì†Œë¥¼ ë§µì— ë°”ë¡œ ë°°ì¹˜í•  ìˆ˜ ìˆê²Œ ì²˜ë¦¬í•œë‹¤
             break;
         }
     }

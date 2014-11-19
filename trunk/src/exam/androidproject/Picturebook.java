@@ -1,4 +1,4 @@
-package exam.androidproject;
+ï»¿package exam.androidproject;
 
 import java.util.ArrayList;
 
@@ -18,9 +18,9 @@ import exam.customwidget.RecipeView;
 import exam.game.EDElement;
 
 /**
- * Á¶ÇÕµµ°¨ ¾×Æ¼ºñÆ¼
+ * ì¡°í•©ë„ê° ì•¡í‹°ë¹„í‹°
  * 
- * @author ÀÌ»óÀÎ
+ * @author ì´ìƒì¸
  */
 public class Picturebook extends BaseActivity
 {
@@ -30,7 +30,7 @@ public class Picturebook extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_picturebook);
 
-        // µÚ·Î°¡±â ¹öÆ° ±â´É ±¸Çö
+        // ë’¤ë¡œê°€ê¸° ë²„íŠ¼ ê¸°ëŠ¥ êµ¬í˜„
         Button back = (Button) findViewById(R.id.back);
         back.setOnClickListener(new OnClickListener()
         {
@@ -41,21 +41,21 @@ public class Picturebook extends BaseActivity
             }
         });
 
-        // Å×½ºÆ®¿ë Element »ı¼º
+        // í…ŒìŠ¤íŠ¸ìš© Element ìƒì„±
         EDElement ede = new EDElement();
-        ede.name = "³ª·çÅä";
+        ede.name = "ë‚˜ë£¨í† ";
         ede.imgName = "naruto01";
         ede.dmg = 10;
         ede.rate = 0.8f;
 
         EDElement ede2 = new EDElement();
-        ede2.name = "»çÄí¶ó";
+        ede2.name = "ì‚¬ì¿ ë¼";
         ede2.imgName = "naruto04";
         ede2.dmg = 9;
         ede2.rate = 1.0f;
 
         EDElement ede3 = new EDElement();
-        ede3.name = "»ç½ºÄÉ";
+        ede3.name = "ì‚¬ìŠ¤ì¼€";
         ede3.imgName = "naruto07";
         ede3.dmg = 11;
         ede3.rate = 0.9f;
@@ -64,9 +64,9 @@ public class Picturebook extends BaseActivity
 
         ArrayList<Recipe> tmpList = makeRecipeList();
         tmpList.set(0, new Recipe(ede, ede2, ede3));
-        recipeListAdapter.add("ÇÏ±Ş", tmpList);
-        recipeListAdapter.add("Áß±Ş", makeRecipeList());
-        recipeListAdapter.add("°í±Ş", makeRecipeList());
+        recipeListAdapter.add("í•˜ê¸‰", tmpList);
+        recipeListAdapter.add("ì¤‘ê¸‰", makeRecipeList());
+        recipeListAdapter.add("ê³ ê¸‰", makeRecipeList());
 
         ExpandableListView recipeList = (ExpandableListView) findViewById(R.id.grouplist);
         recipeList.setAdapter(recipeListAdapter);
@@ -74,7 +74,7 @@ public class Picturebook extends BaseActivity
     }
 
     /**
-     * Áö±İÀº Å×½ºÆ®¿ëÀ¸·Î ´ëÃæ 5°³ÀÇ ·¹½ÃÇÇ¸¦ °®´Â ¸®½ºÆ®¸¦ ¹İÈ¯ÇÑ´Ù
+     * ì§€ê¸ˆì€ í…ŒìŠ¤íŠ¸ìš©ìœ¼ë¡œ ëŒ€ì¶© 5ê°œì˜ ë ˆì‹œí”¼ë¥¼ ê°–ëŠ” ë¦¬ìŠ¤íŠ¸ë¥¼ ë°˜í™˜í•œë‹¤
      */
     private ArrayList<Recipe> makeRecipeList()
     {
@@ -136,7 +136,7 @@ class RecipeExpandibleAdapter extends BaseExpandableListAdapter
 
         if (v == null)
         {
-            // »õ·Î ·¹ÀÌ¾Æ¿ôÀ» ¸¸µç´Ù
+            // ìƒˆë¡œ ë ˆì´ì•„ì›ƒì„ ë§Œë“ ë‹¤
             v = new RelativeLayout(context);
             RelativeLayout layout = (RelativeLayout) v;
             textName = new TextView(context);
@@ -210,7 +210,7 @@ class RecipeExpandibleAdapter extends BaseExpandableListAdapter
     }
 }
 
-// ExpandibleListView¸¦ À§ÇÑ ÀÚ·á±¸Á¶
+// ExpandibleListViewë¥¼ ìœ„í•œ ìë£Œêµ¬ì¡°
 class Recipe
 {
     EDElement arElements[] = new EDElement[3];

@@ -1,4 +1,4 @@
-package exam.androidproject;
+ï»¿package exam.androidproject;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -12,24 +12,24 @@ import android.widget.LinearLayout.LayoutParams;
 import exam.customwidget.GoodsView;
 
 /**
- * @author ÀÌ»óÀÎ
+ * @author ì´ìƒì¸
  * 
  */
 public class Store extends Activity implements View.OnClickListener
 {
-    /* »óÁ¡ ¾ÆÀÌÅÛµéÀÇ ID »ó¼ö ¸ñ·Ï */
-    // µî±Şº° ¿ø¼Ò »óÀÚ
+    /* ìƒì  ì•„ì´í…œë“¤ì˜ ID ìƒìˆ˜ ëª©ë¡ */
+    // ë“±ê¸‰ë³„ ì›ì†Œ ìƒì
     private static final int LOW     = 0;
     private static final int MIDDLE  = 1;
     private static final int HIGH    = 2;
     private static final int SPECIAL = 3;
     private static final int LEGEND  = 4;
-    // Å¸¿ö °ü·Ã ¾ÆÀÌÅÛ
-    private static final int REPAIR  = LEGEND + 1; // Ã¼·Â È¸º¹
-    private static final int UPGRADE = REPAIR + 1; // ÃÖ´ë Ã¼·Â »ó½Â
-    private static final int REBUILD = UPGRADE + 1; // Àç°Ç¼³
+    // íƒ€ì›Œ ê´€ë ¨ ì•„ì´í…œ
+    private static final int REPAIR  = LEGEND + 1; // ì²´ë ¥ íšŒë³µ
+    private static final int UPGRADE = REPAIR + 1; // ìµœëŒ€ ì²´ë ¥ ìƒìŠ¹
+    private static final int REBUILD = UPGRADE + 1; // ì¬ê±´ì„¤
 
-    DlgStore                 dlgStore;             // »óÁ¡ ³» ¾ÆÀÌÅÛ Å¬¸¯½Ã ¶ã ÆË¾÷Ã¢
+    DlgStore                 dlgStore;             // ìƒì  ë‚´ ì•„ì´í…œ í´ë¦­ì‹œ ëœ° íŒì—…ì°½
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -37,8 +37,8 @@ public class Store extends Activity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.acitivity_store);
 
-        // µÚ·Î°¡±â ¹öÆ° ±â´É ±¸Çö
-        // TODO ¾Æ·¡ÀÇ Áßº¹µÇ´Â ÄÚµå ¾ø¾Ù ¼ö ÀÖÀ»µí
+        // ë’¤ë¡œê°€ê¸° ë²„íŠ¼ ê¸°ëŠ¥ êµ¬í˜„
+        // TODO ì•„ë˜ì˜ ì¤‘ë³µë˜ëŠ” ì½”ë“œ ì—†ì•¨ ìˆ˜ ìˆì„ë“¯
         Button back = (Button) findViewById(R.id.back);
         back.setOnClickListener(new OnClickListener()
         {
@@ -49,12 +49,12 @@ public class Store extends Activity implements View.OnClickListener
             }
         });
 
-        // ±¸¸ÅÈ®ÀÎ ÆË¾÷Ã¢ »ı¼º
+        // êµ¬ë§¤í™•ì¸ íŒì—…ì°½ ìƒì„±
         dlgStore = new DlgStore(this);
 
-        // »óÁ¡ ¾ÆÀÌÅÛº° ÅÇÈ­¸é ÃÊ±âÈ­
-        initTabElement(); // ¿ø¼Ò »óÀÚ
-        initTabTower(); // Å¸¿ö ¾ÆÀÌÅÛ
+        // ìƒì  ì•„ì´í…œë³„ íƒ­í™”ë©´ ì´ˆê¸°í™”
+        initTabElement(); // ì›ì†Œ ìƒì
+        initTabTower(); // íƒ€ì›Œ ì•„ì´í…œ
     }
 
     private void initTabTower()
@@ -65,17 +65,17 @@ public class Store extends Activity implements View.OnClickListener
         lp.rightMargin = 30;
 
         GoodsView gv = new GoodsView(this, this, REPAIR);
-        gv.setProperties("Å¸¿ö Ã¼·Â È¸º¹", "¿ø", 3000);
+        gv.setProperties("íƒ€ì›Œ ì²´ë ¥ íšŒë³µ", "ì›", 3000);
         gv.txtCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         vg.addView(gv, lp);
 
         gv = new GoodsView(this, this, UPGRADE);
-        gv.setProperties("ÃÖ´ë Ã¼·Â Áõ°¡", "¿ø", 10000);
+        gv.setProperties("ìµœëŒ€ ì²´ë ¥ ì¦ê°€", "ì›", 10000);
         gv.txtCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         vg.addView(gv, lp);
 
         gv = new GoodsView(this, this, REBUILD);
-        gv.setProperties("Å¸¿ö Àç°Ç¼³", "¿ø", 20000);
+        gv.setProperties("íƒ€ì›Œ ì¬ê±´ì„¤", "ì›", 20000);
         gv.txtCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         vg.addView(gv, lp);
     }
@@ -88,37 +88,37 @@ public class Store extends Activity implements View.OnClickListener
         lp.rightMargin = 30;
 
         GoodsView gv = new GoodsView(this, this, LOW);
-        gv.setProperties("ÇÏ±Ş", "G", 1000);
+        gv.setProperties("í•˜ê¸‰", "G", 1000);
         vg.addView(gv, lp);
 
         gv = new GoodsView(this, this, MIDDLE);
-        gv.setProperties("Áß±Ş", "G", 2500);
+        gv.setProperties("ì¤‘ê¸‰", "G", 2500);
         vg.addView(gv, lp);
 
         gv = new GoodsView(this, this, HIGH);
-        gv.setProperties("»ó±Ş", "G", 5000);
+        gv.setProperties("ìƒê¸‰", "G", 5000);
         vg.addView(gv, lp);
 
         gv = new GoodsView(this, this, SPECIAL);
-        gv.setProperties("Æ¯º°", "G", 10000);
+        gv.setProperties("íŠ¹ë³„", "G", 10000);
         vg.addView(gv, lp);
 
         gv = new GoodsView(this, this, LEGEND);
-        gv.setProperties("Àü¼³", "G", 20000);
+        gv.setProperties("ì „ì„¤", "G", 20000);
         vg.addView(gv, lp);
     }
 
     /**
-     * »óÁ¡ÀÇ ÅÇÀ» ¹Ù²Ù´Â ¸Ş¼Òµå
+     * ìƒì ì˜ íƒ­ì„ ë°”ê¾¸ëŠ” ë©”ì†Œë“œ
      */
     public void switchTab(View v)
     {
-        // ÀÏ´Ü ÀüºÎ ¾È º¸ÀÌ°Ô ÇÑ´Ù
+        // ì¼ë‹¨ ì „ë¶€ ì•ˆ ë³´ì´ê²Œ í•œë‹¤
         findViewById(R.id.store_tab1).setVisibility(View.INVISIBLE);
         findViewById(R.id.store_tab2).setVisibility(View.INVISIBLE);
         findViewById(R.id.store_tab3).setVisibility(View.INVISIBLE);
 
-        // ±×¸®°í ÇÑ ³ğ¸¸ º¸¿©ÁØ´Ù
+        // ê·¸ë¦¬ê³  í•œ ë†ˆë§Œ ë³´ì—¬ì¤€ë‹¤
         switch (v.getId())
         {
         case R.id.store_btn_elementbox:
@@ -142,7 +142,7 @@ public class Store extends Activity implements View.OnClickListener
         switch (gv.getGoodsId())
         {
         case LOW:
-            dlgStore.show(); // ±¸¸Å È®ÀÎÃ¢À» ¶ç¿î´Ù
+            dlgStore.show(); // êµ¬ë§¤ í™•ì¸ì°½ì„ ë„ìš´ë‹¤
             Log.i("info", "value: " + gv.getValue());
             break;
 

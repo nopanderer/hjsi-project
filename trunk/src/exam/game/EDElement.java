@@ -1,9 +1,9 @@
-package exam.game;
+ï»¿package exam.game;
 
 /**
- * ElementView Å×½ºÆ®¿ëÀ¸·Î ÇÏ³ª ¸¸µê
+ * ElementView í…ŒìŠ¤íŠ¸ìš©ìœ¼ë¡œ í•˜ë‚˜ ë§Œë“¦
  * 
- * @author ÀÌ»óÀÎ
+ * @author ì´ìƒì¸
  */
 public class EDElement
 {
@@ -16,7 +16,7 @@ public class EDElement
 
     public EDElement()
     {
-        name = "ºÒ";
+        name = "ë¶ˆ";
         level = 0;
         type = 0;
         dmg = 5;
@@ -27,7 +27,7 @@ public class EDElement
     @Override
     public String toString()
     {
-        String element = "<ÇÏ±Ş> " + name;
+        String element = "<í•˜ê¸‰> " + name;
 
         return element;
 

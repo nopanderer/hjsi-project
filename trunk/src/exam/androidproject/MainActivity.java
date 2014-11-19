@@ -1,4 +1,4 @@
-package exam.androidproject;
+ï»¿package exam.androidproject;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -8,7 +8,7 @@ import android.view.View;
 
 public class MainActivity extends BaseActivity
 {
-    // ¾×Æ¼ºñÆ¼ °£ Åë½ÅÀ» À§ÇÑ ¿äÃ»ÄÚµå »ó¼ö
+    // ì•¡í‹°ë¹„í‹° ê°„ í†µì‹ ì„ ìœ„í•œ ìš”ì²­ì½”ë“œ ìƒìˆ˜
     private static final int ACT_NEWGAME  = 0;
     private static final int ACT_CONTINUE = 1;
 
@@ -34,10 +34,10 @@ public class MainActivity extends BaseActivity
             break;
 
         case R.id.exit_btn:
-            // view°¡ alert ÀÌ¸é ÆË¾÷½ÇÇà Áï ¹öÆ°À» ´©¸£¸é ÆË¾÷Ã¢ÀÌ ¶ß´Â Á¶°Ç
-            new AlertDialog.Builder(MainActivity.this).setTitle("°ÔÀÓÁ¾·á") // ÆË¾÷Ã¢ Å¸ÀÌÆ²¹Ù
-                    .setMessage("Á¾·áÇÏ½Ã°Ú½À´Ï±î?")  // ÆË¾÷Ã¢ ³»¿ë
-                    .setPositiveButton("°ÔÀÓÁ¾·á", new DialogInterface.OnClickListener()
+            // viewê°€ alert ì´ë©´ íŒì—…ì‹¤í–‰ ì¦‰ ë²„íŠ¼ì„ ëˆ„ë¥´ë©´ íŒì—…ì°½ì´ ëœ¨ëŠ” ì¡°ê±´
+            new AlertDialog.Builder(MainActivity.this).setTitle("ê²Œì„ì¢…ë£Œ") // íŒì—…ì°½ íƒ€ì´í‹€ë°”
+                    .setMessage("ì¢…ë£Œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?")  // íŒì—…ì°½ ë‚´ìš©
+                    .setPositiveButton("ê²Œì„ì¢…ë£Œ", new DialogInterface.OnClickListener()
                     {
                         @Override
                         public void onClick(DialogInterface dialog, int which)
@@ -45,13 +45,13 @@ public class MainActivity extends BaseActivity
                             // TODO Auto-generated method stub
                             finish();
                         }
-                    }).setNeutralButton("´İ±â", new DialogInterface.OnClickListener()
+                    }).setNeutralButton("ë‹«ê¸°", new DialogInterface.OnClickListener()
                     {
                         public void onClick(DialogInterface dlg, int sumthin)
                         {
-                            // ´İ±â ¹öÆ°À» ´©¸£¸é ¾Æ¹«°Íµµ ¾ÈÇÏ°í ´İ±â ¶§¹®¿¡ ±×³É ºñ¿ò
+                            // ë‹«ê¸° ë²„íŠ¼ì„ ëˆ„ë¥´ë©´ ì•„ë¬´ê²ƒë„ ì•ˆí•˜ê³  ë‹«ê¸° ë•Œë¬¸ì— ê·¸ëƒ¥ ë¹„ì›€
                         }
-                    }).show(); // ÆË¾÷Ã¢ º¸¿©ÁÜ
+                    }).show(); // íŒì—…ì°½ ë³´ì—¬ì¤Œ
             break;
         }
     }
