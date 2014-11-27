@@ -1,15 +1,20 @@
 ﻿package exam.androidproject;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.view.MotionEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 import android.widget.ToggleButton;
 
 /**
@@ -17,6 +22,7 @@ import android.widget.ToggleButton;
  * 기능
  * - UI
  * - 터치 이벤트 관리(드래그, 핀치줌)
+ * - 맵 그리기
  * 
  * @author HJ
  *
@@ -27,7 +33,6 @@ public class Map extends BaseActivity implements OnClickListener
     ToggleButton              btnPlay;
     Setting                   setting;
     public static MediaPlayer music;
-    TextView                  touch;
 
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -35,9 +40,13 @@ public class Map extends BaseActivity implements OnClickListener
         actList.add(this);
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
+        DrawMap draw = new DrawMap(this);
+        LayoutInflater inflater = getLayoutInflater();
 
-        touch = (TextView) findViewById(R.id.touch);
+        setContentView(draw);
+
+        View layout = (View) inflater.inflate(R.layout.activity_map, null);
+        addContentView(layout, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         // 배경음악
         music = MediaPlayer.create(this, R.raw.bgm);
@@ -99,46 +108,20 @@ public class Map extends BaseActivity implements OnClickListener
         }
     }
 
-    public boolean onTouchEvent(MotionEvent event)
+    class DrawMap extends View
     {
-
-        super.onTouchEvent(event);
-
-        int x1 = (int) event.getX();
-
-        int y1 = (int) event.getY();
-
-        String message = "Touch - ";
-
-        if (event.getAction() == MotionEvent.ACTION_DOWN)
+        public DrawMap(Context context)
         {
-
-            message += ("DOWN : " + x1 + " / " + y1);
-
-            touch.setText(message);
-
+            super(context);
         }
 
-        else if (event.getAction() == MotionEvent.ACTION_MOVE)
+        public void onDraw(Canvas canvas)
         {
-
-            message += ("MOVE : " + x1 + " / " + y1);
-
-            touch.setText(message);
-
+            canvas.drawColor(Color.LTGRAY);
+            Paint Pnt = new Paint();
+            Pnt.setColor(Color.BLUE);
+            canvas.drawRect(400, 400, 1400, 800, Pnt);
         }
-
-        else if (event.getAction() == MotionEvent.ACTION_UP)
-        {
-
-            message += ("UP : " + x1 + " / " + y1);
-
-            touch.setText(message);
-
-        }
-
-        return true;
-
     }
 
 }

@@ -1,7 +1,6 @@
 package exam.androidproject;
 
 /**
- * ElementMatrix
  * 설명
  * - 원소 배치 정보를 담고 있는 2차원 배열
  * 기능
@@ -20,12 +19,42 @@ public class ElementMatrix
 
     public int[][]           matrix     = new int[6][8];
 
-    // 배열 초기화
+    /**
+     * 배열 초기화
+     */
     public ElementMatrix()
     {
         for (int i = 0; i < matrix.length; i++)
             for (int j = 0; j < matrix[i].length; j++)
                 matrix[i][j] = 0;
+    }
+
+    /**
+     * 비어 있는지 확인하는 함수
+     */
+    public boolean isEmpty(int x, int y)
+    {
+        if (matrix[x][y] == EMPTY)
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * 배치하는 함수
+     * 
+     * @return 자리가 있거나 배치불가일 경우 false
+     *         아니면 RESERVED로 바꾸고 true
+     */
+    public boolean deployElement(int x, int y)
+    {
+        if (matrix[x][y] == RESERVED || matrix[x][y] == RESTRICTED)
+            return false;
+        else
+        {
+            matrix[x][y] = RESERVED;
+            return true;
+        }
     }
 
 }
