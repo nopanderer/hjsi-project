@@ -1,12 +1,8 @@
 ﻿package exam.androidproject;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -40,10 +36,12 @@ public class Map extends BaseActivity implements OnClickListener
         actList.add(this);
 
         super.onCreate(savedInstanceState);
-        DrawMap draw = new DrawMap(this);
+        DrawMap dm = new DrawMap(this);
+
         LayoutInflater inflater = getLayoutInflater();
 
-        setContentView(draw);
+        dm.setImage("/res/drawable-hdpi/img_map.png");
+        setContentView(dm);
 
         View layout = (View) inflater.inflate(R.layout.activity_map, null);
         addContentView(layout, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -105,22 +103,6 @@ public class Map extends BaseActivity implements OnClickListener
         {
             Intent Store = new Intent(Map.this, Store.class);
             startActivity(Store);
-        }
-    }
-
-    class DrawMap extends View
-    {
-        public DrawMap(Context context)
-        {
-            super(context);
-        }
-
-        public void onDraw(Canvas canvas)
-        {
-            canvas.drawColor(Color.LTGRAY);
-            Paint Pnt = new Paint();
-            Pnt.setColor(Color.BLUE);
-            canvas.drawRect(400, 400, 1400, 800, Pnt);
         }
     }
 

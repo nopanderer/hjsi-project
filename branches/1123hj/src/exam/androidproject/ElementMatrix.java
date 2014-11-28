@@ -1,26 +1,26 @@
 package exam.androidproject;
 
 /**
- * ¼³¸í
- * - ¿ø¼Ò ¹èÄ¡ Á¤º¸¸¦ ´ã°í ÀÖ´Â 2Â÷¿ø ¹è¿­
- * ±â´É
- * - ¿ø¼Ò ¹èÄ¡ Á¤º¸¸¦ ´ã°í ÀÖ´Â 6 by 8 2Â÷¿ø ÇÔ¼ö
- * - LEFTTOPÀÇ ÁÂÇ¥ Á¤º¸
- * - °¡·Î ¼¼·ÎÀÇ ½ÇÁ¦ Å©±â Á¤º¸
+ * ì„¤ëª…
+ * - ì›ì†Œ ë°°ì¹˜ ì •ë³´ë¥¼ ë‹´ê³  ìˆëŠ” 2ì°¨ì› ë°°ì—´
+ * ê¸°ëŠ¥
+ * - ì›ì†Œ ë°°ì¹˜ ì •ë³´ë¥¼ ë‹´ê³  ìˆëŠ” 6 by 8 2ì°¨ì› í•¨ìˆ˜
+ * - LEFTTOPì˜ ì¢Œí‘œ ì •ë³´
+ * - ê°€ë¡œ ì„¸ë¡œì˜ ì‹¤ì œ í¬ê¸° ì •ë³´
  * 
  * @author HJ
  *
  */
 public class ElementMatrix
 {
-    private static final int EMPTY      = 0;            // 0: ºó ÀÚ¸®
-    private static final int RESERVED   = 1;            // 1: Å¸¿ö°¡ ÀÌ¹Ì ¹èÄ¡µÇ¾î ÀÖÀ½
-    private static final int RESTRICTED = 2;            // 2: ¹èÄ¡ ºÒ°¡´É
+    private static final int EMPTY      = 0;            // 0: ï¿½ï¿½ ï¿½Ú¸ï¿½
+    private static final int RESERVED   = 1;            // 1: Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¹ï¿½ ï¿½ï¿½Ä¡ï¿½Ç¾ï¿½ ï¿½ï¿½ï¿½ï¿½
+    private static final int RESTRICTED = 2;            // 2: ï¿½ï¿½Ä¡ ï¿½Ò°ï¿½ï¿½ï¿½
 
     public int[][]           matrix     = new int[6][8];
 
     /**
-     * ¹è¿­ ÃÊ±âÈ­
+     * ë°°ì—´ ì´ˆê¸°í™”
      */
     public ElementMatrix()
     {
@@ -30,7 +30,7 @@ public class ElementMatrix
     }
 
     /**
-     * ºñ¾î ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+     * ë¹„ì–´ìˆëŠ”ì§€ í™•ì¸
      */
     public boolean isEmpty(int x, int y)
     {
@@ -41,10 +41,8 @@ public class ElementMatrix
     }
 
     /**
-     * ¹èÄ¡ÇÏ´Â ÇÔ¼ö
+     * RESERVEDë‚˜ RESTRICTEDê°€ ì•„ë‹ ê²½ìš° ë°°ì¹˜
      * 
-     * @return ÀÚ¸®°¡ ÀÖ°Å³ª ¹èÄ¡ºÒ°¡ÀÏ °æ¿ì false
-     *         ¾Æ´Ï¸é RESERVED·Î ¹Ù²Ù°í true
      */
     public boolean deployElement(int x, int y)
     {
