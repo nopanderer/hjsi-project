@@ -39,9 +39,9 @@ public class GameState
         }
 
         /* 테스트용 유닛 생성 */
-        for (int xx = 0; xx <= GameCamera.mLogicalWidth; xx += 192)
+        for (int xx = 0; xx <= GameCamera.gameSize.width; xx += 192)
         {
-            for (int yy = 0; yy <= GameCamera.mLogicalHeight; yy += 216)
+            for (int yy = 0; yy <= GameCamera.gameSize.height; yy += 216)
             {
                 arTestUnits.add(new Unit(xx, yy));
             }
@@ -59,11 +59,11 @@ public class GameState
     {
         x += dx;
         y += dy;
-        if ((x < 0) || (x > GameCamera.mLogicalWidth))
+        if ((x < 0) || (x > GameCamera.gameSize.width))
         {
             dx = -dx;
         }
-        if ((y < 0) || (y > GameCamera.mLogicalHeight))
+        if ((y < 0) || (y > GameCamera.gameSize.height))
         {
             dy = -dy;
         }
