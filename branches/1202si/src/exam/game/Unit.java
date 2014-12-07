@@ -41,10 +41,12 @@ public class Unit extends Bounds
         // 텍스트 가로 사이즈 구하기
         // mWidth = (int) Math.ceil(mPaint.measureText(mCaption));
 
+        /* 뻘짓 */
         face = Bitmap.createBitmap(width, height, Config.ARGB_8888);
         Canvas canvas = new Canvas(face);
         canvas.drawRect(0, 0, width, height, mPaintRect);
         canvas.drawText(mCaption, 0, 25, mPaintText);
+        face = Bitmap.createBitmap(face); // 개뻘짓 (immutable과 mutable 비트맵에 성능 차이가 있나싶어서 해봄)
     }
 
     public Bitmap getFace()
