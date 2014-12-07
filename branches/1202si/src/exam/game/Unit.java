@@ -1,56 +1,55 @@
 package exam.game;
 
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
-import android.graphics.Rect;
 
 /*
  * 게임 오브젝트의 기본이 되는 추상 클래스(가 될 예정)
  */
-public class Unit
+public class Unit extends Bounds
 {
     /* 처리를 위한 변수 */
-    private String mCaption;
-    private Paint  mPaint;
-    private Paint  mPaint2;
-    private Rect   mBound = new Rect();
+    public String  mCaption;
+    private Paint  mPaintText;
+    private Paint  mPaintRect;
+
+    /* 그림으로 그려질 비트맵 */
+    private Bitmap face;
 
     /* 게임 속성 */
-    private int    posX, posY;
-    private int    mWidth, mHeight;
 
     public Unit(int x, int y)
     {
-        posX = x;
-        posY = y;
-        mCaption = "(" + posX + ", " + posY + ")";
-        mWidth = 192;
-        mHeight = 216;
+        super(x, y, 192, 216);
 
-        mPaint = new Paint();
-        mPaint.setColor(Color.DKGRAY);
-        mPaint.setAntiAlias(true);
-        mPaint.setTextSize(25);
+        mCaption = "(" + x + ", " + y + ")";
 
-        mPaint2 = new Paint();
-        mPaint2.setColor(Color.DKGRAY);
-        mPaint2.setStyle(Style.STROKE);
-        mPaint2.setAntiAlias(true);
+        mPaintText = new Paint();
+        mPaintText.setColor(Color.DKGRAY);
+        mPaintText.setAntiAlias(true);
+        mPaintText.setTextSize(25);
+
+        mPaintRect = new Paint();
+        mPaintRect.setColor(Color.DKGRAY);
+        mPaintRect.setStyle(Style.STROKE);
+        mPaintRect.setAntiAlias(true);
 
         // 텍스트 가로 사이즈 구하기
         // mWidth = (int) Math.ceil(mPaint.measureText(mCaption));
+
+        face = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+        Canvas canvas = new Canvas(face);
+        canvas.drawRect(0, 0, width, height, mPaintRect);
+        canvas.drawText(mCaption, 0, 25, mPaintText);
     }
 
-    public void draw(Canvas canvas, GameCamera camera)
+    public Bitmap getFace()
     {
-        camera.getPhysicalBound(mBound, posX, posY, mWidth, mHeight);
-        if (camera.isInScreen(mBound))
-        {
-            canvas.drawRect(mBound, mPaint2);
-            canvas.drawText(mCaption, mBound.left, mBound.top, mPaint);
-        }
+        return face;
     }
 
     public void action()

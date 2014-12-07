@@ -1,6 +1,5 @@
 package exam.game;
 
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -9,48 +8,86 @@ import android.view.MotionEvent;
  * 카메라 클래스. 화면에 보이는 영역을 관리한다.
  * 게임 오브젝트를 화면에 출력할 때 필요한 좌표 값 등도 변환한다.
  */
-public class GameCamera
+public class GameCamera extends Bounds
 {
-    private int                mLeft          = 0;           // 카메라 x 좌표
-    private int                mTop           = 0;           // 카메라 y 좌표
-    public int                 mPhysicalWidth;               // 실제 화면 가로 크기
-    public int                 mPhysicalHeight;              // 실제 화면 세로 크기
-    public static final int    mLogicalWidth  = 3840;        // 논리적인 가로 크기(인게임)
-    public static final int    mLogicalHeight = 2160;        // 논리적인 세로 크기(인게임)
+    /* 그리기 판정에 관한 변수들 */
+    private static final int   SHOWN_HIDDEN = 0;
+    private static final int   SHOWN_LEFT   = 1;
+    private static final int   SHOWN_RIGHT  = 2;
+    private static final int   SHOWN_TOP    = 4;
+    private static final int   SHOWN_BOTTOM = 8;
+    private static final int   SHOWN_ENTIRE = SHOWN_LEFT | SHOWN_RIGHT | SHOWN_TOP | SHOWN_BOTTOM;
+
+    /*
+     * 게임 자체의 크기 (= 맵 크기)
+     */
+    public static final Bounds gameSize     = new Bounds(0, 0, 3840, 2160);
 
     /* 카메라 조작에 관한 변수들 */
-    private PointF             mPtPrevTouch   = new PointF();    // 드래그에 사용할 좌표
-    private PointF             ptActionUp     = new PointF();
+    private int                scrollFactor = 20;
 
-    boolean                    modeZoom       = false;
+    private boolean            modeZoom     = false;
 
-    private static final float STEP           = 300;
-    private float              mScale         = 1.0f;        // 화면 배율
+    private static final float STEP         = 300;
+    private float              scale        = 1.0f;
     private float              mPrevScale;
     private int                mPrevDist;
 
-    public GameCamera()
-    {
-    }
-
-    /*
-     * 실제 화면 크기를 설정한다.
+    /**
+     * @param width
+     *            화면의 가로 크기
+     * @param height
+     *            화면의 세로 크기
      */
-    public void setPhysicalSize(int width, int height)
+    public GameCamera(int width, int height)
     {
-        mPhysicalWidth = width;
-        mPhysicalHeight = height;
+        super(0, 0, width, height);
     }
 
-    /*
+    /**
+     * 화면 크기를 설정한다.
+     * 
+     * @param width
+     *            화면의 가로 크기
+     * 
+     * @param height
+     *            화면의 세로 크기
+     */
+    public void setCamSize(int width, int height)
+    {
+        this.width = width;
+        this.height = height;
+    }
+
+    /**
      * 현재 화면에 보이는 대상이면 true를 반환한다.
      */
-    public boolean isInScreen(Rect physicalBound)
+    public boolean showInCamera(Unit unit)
     {
-        boolean bHorizontal = (physicalBound.right >= 0) && (physicalBound.left < (mPhysicalWidth));
-        boolean bVertical = (physicalBound.bottom >= 0) && (physicalBound.top < (mPhysicalHeight));
+        // 필요할까봐 비트플래그로 만들어둠 (비트맵을 보이는 부분만 그려야할 때)
+        int visibleFlag = SHOWN_HIDDEN;
 
-        if (bHorizontal && bVertical)
+        if (unit.left() < this.right())
+        {
+            visibleFlag = visibleFlag | SHOWN_LEFT;
+        }
+
+        if (unit.right() > this.left())
+        {
+            visibleFlag = visibleFlag | SHOWN_RIGHT;
+        }
+
+        if (unit.top() < this.bottom())
+        {
+            visibleFlag = visibleFlag | SHOWN_TOP;
+        }
+
+        if (unit.bottom() > this.top())
+        {
+            visibleFlag = visibleFlag | SHOWN_BOTTOM;
+        }
+
+        if (visibleFlag == SHOWN_ENTIRE)
         {
             return true;
         }
@@ -70,36 +107,36 @@ public class GameCamera
             output = new Rect();
         }
 
-        output.left = x - mLeft;
-        output.top = y - mTop;
-        output.right = (x + width) - mLeft;
-        output.bottom = (y + height) - mTop;
+        output.left = x - this.x;
+        output.top = y - this.y;
+        output.right = (x + width) - this.x;
+        output.bottom = (y + height) - this.y;
     }
 
-    /*
-     * 입력받은 x를 기준으로 실제로 화면상에 그려줄 x 좌표를 계산한다.
-     */
-    public int getDrawX(int x)
+    public float scale()
     {
-        return x - mLeft;
+        return scale;
     }
 
-    /*
-     * 입력받은 y를 기준으로 실제로 화면상에 그려줄 y 좌표를 계산한다.
-     */
-    public int getDrawY(int y)
+    public void fillSpace()
     {
-        return y - mTop;
-    }
+        if (left() < 0)
+        {
+            x = Math.min(0, x + scrollFactor);
+        }
+        else if (right() > gameSize.right())
+        {
+            x = Math.max(gameSize.right() - width, x - scrollFactor);
+        }
 
-    public int getLeft()
-    {
-        return mLeft;
-    }
-
-    public int getTop()
-    {
-        return mTop;
+        if (top() < 0)
+        {
+            y = Math.min(0, y + scrollFactor);
+        }
+        else if (bottom() > gameSize.bottom())
+        {
+            y = Math.max(gameSize.bottom() - height, y - scrollFactor);
+        }
     }
 
     /*
@@ -113,6 +150,9 @@ public class GameCamera
         return (int) (Math.sqrt((dx * dx) + (dy * dy)));
     }
 
+    private float prevX;
+    private float prevY;
+
     /**
      * <strong>false</strong>를 반환하는 경우, 이 함수를 호출한 곳에서 나머지 처리를 하면 된다.
      * 
@@ -121,56 +161,52 @@ public class GameCamera
      * @return 카메라에 관련된 터치(드래그 혹은 핀치 줌 인&아웃)가 제대로 처리되었으면 <strong>true</strong>를 반환하고,
      *         카메라 클래스에서 처리하지 않는 이벤트라면 <strong>false</strong>를 반환한다.
      */
-    public boolean controlCamera(MotionEvent event)
+    public boolean touchHandler(MotionEvent event)
     {
-
-        float x = event.getX();
-        float y = event.getY();
+        String caption = "empty";
 
         float dx = 0f, dy = 0f; // 터치 이동 값
 
-        String caption = "empty";
+        switch (event.getActionMasked())
+        {
+        case MotionEvent.ACTION_DOWN:
+            caption = "action_down ";
+            prevX = event.getX();
+            prevY = event.getY();
+            break;
 
-        // 손가락 두 개일 때
-        if (event.getPointerCount() == 2)
-        {
-            modeZoom = true;
-            zoomCamera(event);
-        }
-        else
-        {
-            switch (event.getAction())
+        case MotionEvent.ACTION_POINTER_DOWN:
+            break;
+
+        case MotionEvent.ACTION_MOVE:
+            caption = "action_move ";
+
+            if (event.getPointerCount() == 1) // MotionEvent.getPointerCount()로 터치 수를 가져온다.
             {
-            case MotionEvent.ACTION_DOWN:
-                modeZoom = false;
+                /* 손가락 하나 */
+                dx = event.getX() - prevX;
+                dy = event.getY() - prevY;
+                prevX = event.getX();
+                prevY = event.getY();
 
-                mPtPrevTouch.x = x;
-                mPtPrevTouch.y = y;
-                caption = "action_down ";
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-                if (modeZoom == false)
-                {
-                    dx = x - mPtPrevTouch.x;
-                    dy = y - mPtPrevTouch.y;
-                    mPtPrevTouch.set(x, y);
-
-                    slideCamera(dx, dy);
-
-                    caption = "action_move ";
-                }
-                break;
-
-            case MotionEvent.ACTION_UP:
-                ptActionUp.x = x;
-                ptActionUp.y = y;
-                caption = "action_up ";
-                break;
-
-            default:
-                return false;
+                x = (int) (x - dx);
+                y = (int) (y - dy);
             }
+            else
+            {
+                /* 손가락 둘 */
+            }
+            break;
+
+        case MotionEvent.ACTION_POINTER_UP:
+            break;
+
+        case MotionEvent.ACTION_UP:
+            caption = "action_up ";
+            break;
+
+        default:
+            break;
         }
 
         caption = caption + "(" + dx + ", " + dy + ")";
@@ -186,48 +222,19 @@ public class GameCamera
         if (action == MotionEvent.ACTION_POINTER_DOWN)
         {
             mPrevDist = getDistance(event);
-            mPrevScale = getmScale();
+            mPrevScale = getScale();
         }
         else if (action == MotionEvent.ACTION_MOVE)
         {
             float delta = (getDistance(event) - mPrevDist) / STEP;
-            mScale = (Math.min(3.0f, Math.max(0.5f, mPrevScale + delta)));
+            scale = (Math.min(3.0f, Math.max(0.5f, mPrevScale + delta)));
 
-            // Log.i("scale", "delta: " + delta + ", mScale: " + mScale);
+            // Log.i("scale", "delta: " + delta + ", scale: " + scale);
         }
     }
 
-    /*
-     * 카메라의 좌상단 좌표를 설정한다.
-     * 주의사항으로 카메라의 좌상단 좌표가 좌상단 한계점(0, 0)보다 작거나,
-     * 카메라의 우하단 좌표(mLeft + mPhysicalWidth...)가 우하단 한계점(mLogicalWidth...)을 넘지 않도록 제한한다.
-     */
-    private void slideCamera(float dx, float dy)
+    public float getScale()
     {
-        mLeft = (int) (mLeft - dx);
-        mTop = (int) (mTop - dy);
-
-        if (dx > 0)
-        {
-            mLeft = Math.max(0, mLeft);
-        }
-        else if ((mLeft + mPhysicalWidth) > mLogicalWidth)
-        {
-            mLeft = mLogicalWidth - mPhysicalWidth;
-        }
-
-        if (dy > 0)
-        {
-            mTop = Math.max(0, mTop);
-        }
-        else if ((mTop + mPhysicalHeight) > mLogicalHeight)
-        {
-            mTop = mLogicalHeight - mPhysicalHeight;
-        }
-    }
-
-    public float getmScale()
-    {
-        return mScale;
+        return scale;
     }
 }
