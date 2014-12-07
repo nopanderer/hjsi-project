@@ -29,7 +29,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     {
         super(context);
         mState = state;
-        mCamera = new GameCamera(0, 0);
+        camera = new GameCamera();
         init();
     }
 
@@ -55,7 +55,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     private int           mFps;          // 그리기 fps
 
     /* 카메라 */
-    private GameCamera    mCamera;
+    private GameCamera    camera;
 
     /* 게임 리소스 등 */
     private GameState     mState;        // 인게임 오브젝트에 접근하기 위해서 필요함
@@ -99,10 +99,17 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
     {
+        /*
+         * ☆★☆★☆★중요☆★☆★☆★☆★
+         * 게임 화면을 띄운채로 핸드폰 잠궜다가 켜면, 게임 화면도 세로로 돌아가는 일이 생긴다.
+         * 그 때 에러남
+         * 나중에 액티비티 생명주기에 따른 처리(전화왔을 때 내려가는 경우 등등)
+         * 화면이 180도 돌아가거나 하는 경우도 처리해줘야겠다.
+         */
         Log.i("surface", "surfaceChanged() (width: " + width + ", height: " + height + ")");
 
         // 표면의 크기가 바뀔 때 그 크기를 기록한다.
-        mCamera.setCamSize(width, height);
+        camera.setCamSize(width, height);
     }
 
     @Override
@@ -119,43 +126,36 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
          */
         mIsRunning = false;
         while (true)
-        {
-            try
-            {
+            try {
                 mThreadPainter.join();
                 break;
             }
-            catch (Exception e)
-            {}
-        }
+            catch (Exception e) {
+            }
     }
 
+    /**
+     * 지금은 터치이벤트를 카메라에 짬때린다.
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        boolean isCameraEvent = mCamera.touchHandler(event);
+        boolean isCameraEvent = camera.touchHandler(event);
 
         if (event.getAction() == MotionEvent.ACTION_UP)
-        {
             /*
              * 터치 이벤트 처리에서 ACTION_UP의 경우에 무조건 performClick을 호출해줘야한다고 함.
              * 안 하면 경고 뜸. performClick() 자체도 오버라이드 해줘야함
              */
             performClick();
-        }
 
         if (isCameraEvent == false)
-        {
-            // 드래그나 핀치 등의 카메라 관련 이벤트가 아닐 때 타워 등에 대한 이벤트 처리
-
             return super.onTouchEvent(event); // 내가 사용할 이벤트와 전혀 상관없으면 슈퍼클래스에서 처리
-        }
         else
-        {
             return true;
-        }
     }
 
+    /* 필요하다고 해서 했음 */
     @Override
     public boolean performClick()
     {
@@ -180,74 +180,66 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
          * int oldX = 0, oldY = 0;
          */
 
-        while (mIsRunning)
-        {
+        while (mIsRunning) {
             // 프레임 시작 시간을 구한다.
             fpsStartTime = System.currentTimeMillis();
 
             // 전체 그리기 수행
-            synchronized (mHolder)
-            {
+            synchronized (mHolder) {
                 // 캔버스를 잠그는 듯
                 canvas = mHolder.lockCanvas();
                 if (canvas == null)
-                {
                     break;
+
+                if (camera.isBorderOut()) {
+                    camera.autoBackCamera();
+                    // 카메라가 벗어난 배경 바깥을 메꾼다.
+                    canvas.drawColor(Color.DKGRAY);
                 }
 
-                // 지나친 스크롤을 되돌린다.
-                mCamera.fillSpace();
-
-                // 배경 바깥을 메꾼다.
-                canvas.drawColor(Color.DKGRAY);
-
                 // 맵 배경을 그린다.
-                canvas.drawBitmap(mImgBackground, 0 - mCamera.left(), 0 - mCamera.top(), null);
+                canvas.drawBitmap(mImgBackground, 0 - camera.left(), 0 - camera.top(), null);
                 /* 배경 이미지 확대&축소 코드 (실패!) */
                 /*
-                 * int visibleWidth = (int) ((GameCamera.mLogicalWidth - mCamera.mPhysicalWidth) / mCamera.getmScale());
-                 * int visibleHeight = (int) ((GameCamera.mLogicalHeight - mCamera.mPhysicalHeight) / mCamera.getmScale());
-                 * int visibleLeft = mCamera.getLeft();
-                 * int visibleTop = mCamera.getTop();
+                 * int visibleWidth = (int) ((GameCamera.mLogicalWidth - camera.mPhysicalWidth) / camera.getmScale());
+                 * int visibleHeight = (int) ((GameCamera.mLogicalHeight - camera.mPhysicalHeight) /
+                 * camera.getmScale());
+                 * int visibleLeft = camera.getLeft();
+                 * int visibleTop = camera.getTop();
                  * if ((visibleWidth != oldWidth) || (oldX != visibleLeft) || (oldY != visibleTop))
                  * {
                  * oldWidth = visibleWidth;
                  * oldX = visibleLeft;
                  * oldY = visibleTop;
                  * scaledBg = Bitmap.createBitmap(mImgBackground, visibleLeft, visibleTop, visibleWidth, visibleHeight);
-                 * scaledBg = Bitmap.createScaledBitmap(scaledBg, (int) (visibleWidth * mCamera.getmScale()), (int) (visibleHeight * mCamera.getmScale()), false);
+                 * scaledBg = Bitmap.createScaledBitmap(scaledBg, (int) (visibleWidth * camera.getmScale()), (int)
+                 * (visibleHeight * camera.getmScale()), false);
                  * }
                  * canvas.drawBitmap(scaledBg, 0, 0, null);
                  */
 
                 /* 기타 그리기 수행 */
                 // game 오브젝트를 그린다
-                synchronized (mState)
-                {
+                synchronized (mState) {
                     // 게임의 유닛들을 그린다.
                     for (Unit unit : mState.getUnits())
-                    {
                         // 1. 보이는지 검사
-                        if (mCamera.showInCamera(unit))
-                        {
+                        if (camera.showInCamera(unit)) {
                             // 보이므로 그린다
                             face = unit.getFace();
-                            canvas.drawBitmap(face, unit.left() - mCamera.left(), unit.top() - mCamera.top(), null);
+                            canvas.drawBitmap(face, unit.left() - camera.left(), unit.top() - camera.top(), null);
 
                             /*
                              * 스레드 종료가 필요한 경우 최대한 빨리 끝내기 위해
                              * 그림을 그리는 도중에도 스레드 종료 조건을 검사한다.
                              */
                             if (mIsRunning == false)
-                            {
                                 break;
-                            }
                         }
-                    }
 
                     // 테스트용 움직이는 성냥 그리기
                     Rect rect = new Rect();
-                    mCamera.getPhysicalBound(rect, mState.x, mState.y, 64, 64);
+                    camera.getPhysicalBound(rect, mState.x, mState.y, 64, 64);
                     canvas.drawBitmap(mState.mImgElement, rect.left, rect.top, null);
                 }
 
@@ -260,7 +252,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
 
             // 프레임을 구한다.
             fps++;
-            fpsElapsedTime += (System.currentTimeMillis() - fpsStartTime);
+            fpsElapsedTime += System.currentTimeMillis() - fpsStartTime;
             if (fpsElapsedTime >= 1000) // 프레임율 표시는 1초마다 갱신함
             {
                 mFps = fps;
@@ -270,10 +262,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         }
     }
 
+    /* 개발 참고용 정보 표시 */
     private void displayInformation(Canvas canvas)
     {
-        if (mPaintInfo == null)
-        {
+        if (mPaintInfo == null) {
             mPaintInfo = new Paint();
             mPaintInfo.setAntiAlias(true);
             mPaintInfo.setTextSize(50);
@@ -282,9 +274,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         // 그리기 fps, 게임 로직 fps
         canvas.drawText(mFps + " fps (" + mState.getLogicFps() + " fps)", 120, 60, mPaintInfo);
         // 카메라 좌상단 좌표 (논리적인 기준점)
-        canvas.drawText("CAM left: " + mCamera.left() + " / top: " + mCamera.top() + " / scale: " + ((int) (mCamera.getScale() * 1000) / 10f) + "%", 120, 120, mPaintInfo);
+        canvas.drawText("CAM left: " + camera.left() + " / top: " + camera.top() + " / scale: " + (int) (camera.getScale() * 1000) / 10f + "%", 120, 120, mPaintInfo);
         // 성냥의 화면 좌표
-        canvas.drawText("Physical x: " + (mState.x - mCamera.left()) + ", y: " + (mState.y - mCamera.top()), 120, 180, mPaintInfo);
+        canvas.drawText("Physical x: " + (mState.x - camera.left()) + ", y: " + (mState.y - camera.top()), 120, 180, mPaintInfo);
         // 성냥의 인게임 좌표
         canvas.drawText("Logical x: " + mState.x + ", y: " + mState.y, 120, 240, mPaintInfo);
     }

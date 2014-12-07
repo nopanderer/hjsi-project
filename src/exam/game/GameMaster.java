@@ -47,7 +47,7 @@ public class GameMaster implements Runnable
                 // 프레임 시작 시간을 구한다.
                 fpsStartTime = System.currentTimeMillis();
 
-                // mHolder와 동기화한다. lockCanvas는 할 필요없음
+                // 다른 스레드와 공통적으로 사용하는 mState를 동기화한다.
                 synchronized (mState)
                 {
                     mState.move();
