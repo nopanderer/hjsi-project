@@ -5,11 +5,13 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ToggleButton;
+import exam.game.AppManager;
 
 public class Setting extends Dialog implements OnClickListener
 {
@@ -21,8 +23,10 @@ public class Setting extends Dialog implements OnClickListener
         super(context);
     }
 
+    @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        AppManager.printSimpleLogInfo();
         super.onCreate(savedInstanceState);
 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -41,33 +45,37 @@ public class Setting extends Dialog implements OnClickListener
         quit.setOnClickListener(this);
     }
 
+    @Override
     public void onClick(View v)
     {
-        if (v == resume)
-        {
+        Log.d(toString(), AppManager.getMethodName() + "() " + v.toString());
+
+        if (v == resume) {
             hide();
         }
-        else if (v == sound)
-        {
-            if (sound.isChecked())
-            {
+        else if (v == sound) {
+            if (sound.isChecked()) {
                 sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
                 Map.music.pause();
             }
-            else
-            {
+            else {
                 sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundon));
                 Map.music.start();
             }
         }
-        else if (v == quit)
-        {
+        else if (v == quit) {
             Map.music.stop();
             Map.music.release();
             Map.music = null;
+
             dismiss();
         }
-
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        AppManager.printSimpleLogInfo();
+        hide();
+    }
 }

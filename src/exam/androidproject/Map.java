@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,11 +14,14 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ToggleButton;
+import exam.game.AppManager;
 import exam.game.GameMaster;
 import exam.game.GameState;
 
 public class Map extends BaseActivity implements OnClickListener
 {
+    private boolean           explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
+
     Button                    settingBtn, btnBook, btnStore;
     ToggleButton              btnPlay;
     Drawable                  drawableBtnPlay_Pause;
@@ -33,7 +37,7 @@ public class Map extends BaseActivity implements OnClickListener
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        actList.add(this);
+        AppManager.printSimpleLogInfo();
         super.onCreate(savedInstanceState);
 
         // GameState 생성
@@ -42,7 +46,6 @@ public class Map extends BaseActivity implements OnClickListener
         // surfaceview 등록
         GameSurface gameView = new GameSurface(this, gameState);
         setContentView(gameView);
-        // setContentView(R.layout.activity_map);
 
         LayoutInflater inflater = getLayoutInflater();
         View layout = inflater.inflate(R.layout.activity_map, null);
@@ -63,11 +66,9 @@ public class Map extends BaseActivity implements OnClickListener
             @Override
             public void onDismiss(DialogInterface arg0)
             {
-                // TODO Auto-generated method stub
-                for (int i = 0; i < actList.size(); i++)
-                {
-                    actList.get(i).finish();
-                }
+                AppManager.printSimpleLogInfo();
+                quitExplicitly(); // 이번에 Map.onDestroy() 될 때 리소스 해제하라고 알림
+                AppManager.getInstance().quitApp();
             }
         });
 
@@ -87,15 +88,15 @@ public class Map extends BaseActivity implements OnClickListener
     @Override
     protected void onPause()
     {
+        AppManager.printSimpleLogInfo();
         super.onStop();
-        if (gameMaster != null)
-        {
+
+        if (gameMaster != null) {
             gameMaster.pauseGame();
             btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
         }
 
-        if (music != null)
-        {
+        if (music != null) {
             music.pause();
         }
     }
@@ -103,9 +104,10 @@ public class Map extends BaseActivity implements OnClickListener
     @Override
     protected void onResume()
     {
+        AppManager.printSimpleLogInfo();
         super.onResume();
-        if (music != null)
-        {
+
+        if (music != null) {
             music.start();
         }
     }
@@ -113,54 +115,76 @@ public class Map extends BaseActivity implements OnClickListener
     @Override
     protected void onDestroy()
     {
+        AppManager.printSimpleLogInfo();
         super.onDestroy();
-        if (gameMaster != null)
-        {
+
+        if (gameMaster != null) {
             gameMaster.quitGame();
         }
 
-        if (music != null)
-        {
+        if (music != null) {
             music.stop();
-            music.release(); // 그냥 해봄ㅋ
+            music.release();
         }
+
+        if (explicitQuit) {
+            /* 사용했던 리소스를 해제한다. */
+            AppManager.getInstance().allRecycle();
+        }
+    }
+
+    /**
+     * back 키를 누르면 옵션 메뉴가 열리도록 함
+     */
+    @Override
+    public void onBackPressed()
+    {
+        AppManager.printSimpleLogInfo();
+        showSettingMenu();
     }
 
     @Override
     public void onClick(View v)
     {
-        if (v == settingBtn)
-        {
-            setting.show();
+        Log.d(toString(), AppManager.getMethodName() + "() " + v.toString());
 
-            if (btnPlay.isChecked())
-            {
-                btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
-                gameMaster.pauseGame();
-            }
+        if (v == settingBtn) {
+            showSettingMenu();
         }
-        else if (v == btnBook)
-        {
+        else if (v == btnBook) {
             Intent Book = new Intent(Map.this, Picturebook.class);
             startActivity(Book);
         }
-        else if (v == btnPlay)
-        {
-            if (btnPlay.isChecked())
-            {
+        else if (v == btnPlay) {
+            if (btnPlay.isChecked()) {
                 btnPlay.setBackgroundDrawable(drawableBtnPlay_Pause);
                 gameMaster.playGame();
             }
-            else
-            {
+            else {
                 btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
                 gameMaster.pauseGame();
             }
         }
-        else if (v == btnStore)
-        {
+        else if (v == btnStore) {
             Intent Store = new Intent(Map.this, Store.class);
             startActivity(Store);
+        }
+    }
+
+    public void quitExplicitly()
+    {
+        AppManager.printSimpleLogInfo();
+        explicitQuit = true;
+    }
+
+    private void showSettingMenu()
+    {
+        AppManager.printSimpleLogInfo();
+        setting.show();
+
+        if (btnPlay.isChecked()) {
+            btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
+            gameMaster.pauseGame();
         }
     }
 }

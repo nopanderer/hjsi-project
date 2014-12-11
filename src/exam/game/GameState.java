@@ -33,21 +33,16 @@ public class GameState
         mImgElement = BitmapFactory.decodeResource(res, drawableId);
 
         // 테스트용으로 사이즈 다른 이미지 대충 쓰니까 크기 조절해야함.
-        if ((mImgElement.getWidth() != 64) || (mImgElement.getHeight() != 64))
-        {
+        if (mImgElement.getWidth() != 64 || mImgElement.getHeight() != 64) {
             mImgElement = Bitmap.createScaledBitmap(mImgElement, 64, 64, true);
         }
 
         /* 테스트용 유닛 생성 */
-        for (int xx = 0; xx <= GameCamera.gameSize.width; xx += 192)
-        {
-            for (int yy = 0; yy <= GameCamera.gameSize.height; yy += 216)
-            {
+        for (int xx = 0; xx <= GameCamera.getInstance().worldWidth(); xx += 192) {
+            for (int yy = 0; yy <= GameCamera.getInstance().worldHeight(); yy += 216) {
                 arTestUnits.add(new Unit(xx, yy));
             }
         }
-
-        // arTestUnits.add(new Unit(0, 0));
     }
 
     public ArrayList<Unit> getUnits()
@@ -59,12 +54,10 @@ public class GameState
     {
         x += dx;
         y += dy;
-        if ((x < 0) || (x > GameCamera.gameSize.width))
-        {
+        if (x < 0 || x > GameCamera.getInstance().worldWidth()) {
             dx = -dx;
         }
-        if ((y < 0) || (y > GameCamera.gameSize.height))
-        {
+        if (y < 0 || y > GameCamera.getInstance().worldHeight()) {
             dy = -dy;
         }
     }

@@ -13,12 +13,9 @@ import android.graphics.Paint.Style;
 public class Unit extends Bounds
 {
     /* 처리를 위한 변수 */
-    public String  mCaption;
-    private Paint  mPaintText;
-    private Paint  mPaintRect;
-
-    /* 그림으로 그려질 비트맵 */
-    private Bitmap face;
+    public String mCaption;
+    private Paint mPaintText;
+    private Paint mPaintRect;
 
     /* 게임 속성 */
 
@@ -42,16 +39,16 @@ public class Unit extends Bounds
         // mWidth = (int) Math.ceil(mPaint.measureText(mCaption));
 
         /* 뻘짓 */
-        face = Bitmap.createBitmap(width, height, Config.ARGB_8888);
-        Canvas canvas = new Canvas(face);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
         canvas.drawRect(0, 0, width, height, mPaintRect);
         canvas.drawText(mCaption, 0, 25, mPaintText);
-        face = Bitmap.createBitmap(face); // 개뻘짓 (immutable과 mutable 비트맵에 성능 차이가 있나싶어서 해봄)
+        AppManager.getInstance().addBitmap(mCaption, bitmap);
     }
 
-    public Bitmap getFace()
+    public String getBitmapKey()
     {
-        return face;
+        return mCaption;
     }
 
     public void action()
