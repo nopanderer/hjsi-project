@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import exam.game.AppManager;
 
 public class MainActivity extends BaseActivity
 {
@@ -15,13 +17,15 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        actList.add(this);
+        AppManager.printSimpleLogInfo();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
 
     public void mOnClick(View v)
     {
+        Log.d(toString(), AppManager.getMethodName() + "() " + v.toString());
+
         switch (v.getId())
         {
         case R.id.btn_gamestart:
@@ -47,6 +51,7 @@ public class MainActivity extends BaseActivity
                         }
                     }).setNeutralButton("닫기", new DialogInterface.OnClickListener()
                     {
+                        @Override
                         public void onClick(DialogInterface dlg, int sumthin)
                         {
                             // 닫기 버튼을 누르면 아무것도 안하고 닫기 때문에 그냥 비움
@@ -63,17 +68,24 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        AppManager.printSimpleLogInfo();
         switch (requestCode)
         {
         case ACT_NEWGAME:
         case ACT_CONTINUE:
-            if (resultCode == RESULT_OK)
-            {
+            if (resultCode == RESULT_OK) {
                 Intent intentForActMap = new Intent(getApplicationContext(), Map.class);
                 startActivity(intentForActMap);
             }
 
             break;
         }
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        AppManager.printSimpleLogInfo();
+        super.onDestroy();
     }
 }

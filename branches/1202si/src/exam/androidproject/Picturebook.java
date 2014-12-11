@@ -15,11 +15,11 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import exam.customwidget.RecipeView;
+import exam.game.AppManager;
 import exam.game.EDElement;
 
 /**
  * 조합도감 액티비티
- * 
  * @author 이상인
  */
 public class Picturebook extends BaseActivity
@@ -27,6 +27,7 @@ public class Picturebook extends BaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        AppManager.printSimpleLogInfo();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_picturebook);
 
@@ -78,6 +79,7 @@ public class Picturebook extends BaseActivity
      */
     private ArrayList<Recipe> makeRecipeList()
     {
+        AppManager.printSimpleLogInfo();
         ArrayList<Recipe> ar = new ArrayList<Recipe>(5);
 
         ar.add(new Recipe());
@@ -134,8 +136,7 @@ class RecipeExpandibleAdapter extends BaseExpandableListAdapter
         TextView textName;
         TextView textNum;
 
-        if (v == null)
-        {
+        if (v == null) {
             // 새로 레이아웃을 만든다
             v = new RelativeLayout(context);
             RelativeLayout layout = (RelativeLayout) v;
@@ -154,8 +155,7 @@ class RecipeExpandibleAdapter extends BaseExpandableListAdapter
             lpNum.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             layout.addView(textNum, lpNum);
         }
-        else
-        {
+        else {
             textName = (TextView) v.findViewById(1);
             textNum = (TextView) v.findViewById(2);
         }
@@ -187,8 +187,9 @@ class RecipeExpandibleAdapter extends BaseExpandableListAdapter
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View v, ViewGroup parent)
     {
-        if (v == null)
+        if (v == null) {
             v = new RecipeView(context);
+        }
 
         RecipeView recipeView = (RecipeView) v;
 
@@ -217,8 +218,7 @@ class Recipe
 
     Recipe()
     {
-        for (int i = 0; i < arElements.length; i++)
-        {
+        for (int i = 0; i < arElements.length; i++) {
             arElements[i] = new EDElement();
         }
     }

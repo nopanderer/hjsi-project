@@ -1,71 +1,106 @@
 package exam.game;
 
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 
-/*
+/**
  * 카메라 클래스. 화면에 보이는 영역을 관리한다.
  * 게임 오브젝트를 화면에 출력할 때 필요한 좌표 값 등도 변환한다.
  */
-/**
- * @author 이상인
- */
-/**
- * @author 이상인
- */
-/**
- * @author 이상인
- */
-public class GameCamera extends Bounds
+public class GameCamera
 {
-    /*
-     * 그리기 판정에 관한 변수들
-     * 구체적인 상황에 따라 상수를 지정해놨으나 현재 자세한 의미는 없다.
-     */
-    private static final int   SHOWN_HIDDEN = 0;    // 개체가 카메라(화면)에 아예 안 보이는 상태
-    private static final int   SHOWN_LEFT   = 1;    // 개체의 왼쪽 부분이 카메라에 보이는 상태
-    private static final int   SHOWN_RIGHT  = 2;    // ... 오른쪽 부분이 ...
-    private static final int   SHOWN_TOP    = 4;    // 상동
-    private static final int   SHOWN_BOTTOM = 8;
-    private static final int   SHOWN_ENTIRE = 15;   // 개체의 전체 모습이 보이는 상태
+    private static final String tag = GameCamera.class.getSimpleName();
+    private static GameCamera   uniqueInstance;
 
-    /*
-     * 게임 자체의 크기 (= 맵 크기)
-     */
-    public static final Bounds gameSize;
-
-    /*
-     * 카메라 자동 복귀에 관한 변수들
-     */
-    private boolean            scrolling    = false; // 카메라 스크롤 중일 때는 원위치로 돌아가지 않도록 하기 위한, 스크롤 중인가를 나타내는 변수
-    private int                minSpeed     = 20;   // 원위치 최저 속도
-    private int                maxSpeed     = 128;  // 원위치 최고 속도
-    private int                hDestination;        // 카메라가 복귀해야 하는 수평 좌표
-    private int                vDestination;        // 카메라가 복귀해야 하는 수직 좌표
-    private int                hScrollSpeed;        // 카메라의 현재 수평 방향 복귀 속도
-    private int                vScrollSpeed;        // 카메라의 현재 수직 방향 복귀 속도
-    private boolean            hBorderOut   = false; // 카메라가 게임의 수평 경계를 넘었는지 여부
-    private boolean            vBorderOut   = false; // 카메라가 게임의 수직 경계를 넘었는지 여부
-
-    /* 쓰레기 */
-    private static final float STEP         = 300;
-    private float              scale        = 1.0f;
-    private float              mPrevScale;
-    private int                mPrevDist;
-
-    /* static 변수 초기화 */
-    static {
-        gameSize = new Bounds(0, 0, 3840, 2160);
-    }
-
-    /**
-     * 카메라의 가로, 세로 크기는 서피스뷰의 표면이 생성되면서 surfaceChanged()가 호출 될 때 값을 얻어온다.
-     */
-    public GameCamera()
+    private GameCamera()
     {
-        super(0, 0, 0, 0);
+        position = new Point(0, 0);
+        viewport = new Rect(0, 0, 0, 0);
+        worldRect = new Rect(0, 0, 3840, 2160);
+        worldMargin = new Rect(125, 125, 125, 125);
     }
+
+    public static GameCamera getInstance()
+    {
+        if (uniqueInstance == null) {
+            synchronized (GameCamera.class) {
+                if (uniqueInstance == null) {
+                    uniqueInstance = new GameCamera();
+                }
+            }
+        }
+
+        return uniqueInstance;
+    }
+
+    /*
+     * 카메라 스크롤 속도 배수에 대한 상수
+     */
+    private static final int maxScrollScale = 5;
+    private static final int minScrollScale = 1;
+
+    /*
+     * 카메라 확대/축소 배율에 대한 상수
+     */
+    private final float      maxZoom        = 2.0f;        // 최대 화면 배율
+    private final float      minZoom        = 0.5f;        // 최소 화면 배율
+    private final float      zoomStep       = 0.05f;       // 화면 배율 증감 단위 (+-5%)
+
+    /*
+     * OUT_XXXX: 카메라가 worldRect + worldMargin을 벗어난 경우 그 방향을 표시하기 위한 상수들
+     */
+    private static final int OUT_NONE       = 0;
+    private static final int OUT_LEFT       = 1;           // position.x < worldRect.left - worldMargin.left
+    private static final int OUT_RIGHT      = 2;           // position.x > worldRect.right + worldMargin.right
+    private static final int OUT_TOP        = 4;           // position.y < worldRect.top - worldMargin.top
+    private static final int OUT_BOTTOM     = 8;           // position.y > worldRect.bottom + worldMargin.bottom
+
+    /*
+     * 카메라 현재 상태와 기본 정보
+     * 생성자에서 초기화한다
+     */
+    private Point            position;                     // 카메라의 현재 위치
+    private Rect             viewport;                     // 카메라 뷰 영역
+    private Rect             worldRect;                    // 게임월드 영역
+    private Rect             worldMargin;                  // 카메라가 게임월드를 벗어날 때 여백의 제한 값
+
+    /*
+     * 카메라 스크롤에 필요한 변수
+     */
+    private PointF           oldTouch       = new PointF(); // 이전 터치 좌표
+    private int              scrollStep     = 20;          // 카메라의 기본 스크롤 속도
+    private Point            scrollDebt     = new Point();
+
+    /*
+     * 멀리 벗어났을 수록 배수가 커져서 카메라 스크롤 속도가 증가함
+     */
+    private int              hScrollScale   = 1;
+    private int              vScrollScale   = 1;
+
+    private int              outDirection   = OUT_NONE;    // 카메라가 벗어난 방향을 갖고 있음
+
+    private int              hGapLength     = 0;           // 좌우에 상관없이 카메라가 벗어난 거리
+    private int              vGapLength     = 0;           // 상하에 상관없이 카메라가 벗어난 거리
+
+    /*
+     * 카메라 줌에 필요한 변수
+     */
+    private float            oldDistance;                  // 두 포인터 간의 거리
+    private float            zoom           = 1.0f;        // 현재 화면 배율
+    private PointF           midRatio       = new PointF(); // 줌 터치한 중심점의 화면상의 백분율
+
+    /*
+     * 화면을 스크롤 중이면 카메라가 자동복귀하지 못하게 한다.
+     */
+    private boolean          keepScrolling  = false;
+    /*
+     * 터치를 시작하고서 한 번이라도 줌 동작으로 들어갔으면
+     * 터치를 완전히 끝내기 전까지는 스크롤을 못하게 한다.
+     */
+    private boolean          doNotScroll    = false;
 
     /**
      * 화면 크기를 설정한다.
@@ -76,148 +111,70 @@ public class GameCamera extends Bounds
      */
     public void setCamSize(int width, int height)
     {
-        this.width = width;
-        this.height = height;
+        viewport.right = width;
+        viewport.bottom = height;
+    }
+
+    /* get 메소드 */
+    public int x()
+    {
+        return position.x;
+    }
+
+    public int y()
+    {
+        return position.y;
     }
 
     /**
-     * 현재 화면에 보이는 대상이면 true를 반환한다.
-     * 지금은 그냥 보이냐, 안 보이냐만 따진다.
-     * 비트플래그의 결과 자체는 의도대로 되지 않았으니 자세히 보면 손해
+     * @return viewport.right / zoom
      */
-    public boolean showInCamera(Unit unit)
+    public float widthScaled()
     {
-        // 필요할까봐 비트플래그로 만들어둠 (비트맵을 보이는 부분만 그려야할 때)
-        int visibleFlag = SHOWN_HIDDEN;
-
-        if (unit.left() < this.right())
-            visibleFlag = visibleFlag | SHOWN_LEFT;
-
-        if (unit.right() > this.left())
-            visibleFlag = visibleFlag | SHOWN_RIGHT;
-
-        if (unit.top() < this.bottom())
-            visibleFlag = visibleFlag | SHOWN_TOP;
-
-        if (unit.bottom() > this.top())
-            visibleFlag = visibleFlag | SHOWN_BOTTOM;
-
-        if (visibleFlag == SHOWN_ENTIRE)
-            return true;
-        else
-            return false;
-    }
-
-    /*
-     * 인게임 좌표를 화면 좌표로 변환한다.
-     * 현재 테스트용으로 성냥 이미지 출력하는데 쓰고 있으나 제거 예정
-     */
-    public void getPhysicalBound(Rect output, int x, int y, int width, int height)
-    {
-        if (output == null)
-            output = new Rect();
-
-        output.left = x - this.x;
-        output.top = y - this.y;
-        output.right = x + width - this.x;
-        output.bottom = y + height - this.y;
+        return viewport.right / zoom;
     }
 
     /**
-     * @return 현재 화면 배율을 반환한다.
+     * @return viewport.bottom / zoom
      */
+    public float heightScaled()
+    {
+        return viewport.bottom / zoom;
+    }
+
     public float scale()
     {
-        return scale;
+        return zoom;
     }
 
-    /**
-     * 카메라가 게임 경계 밖으로 넘어갔는지 검사한다.
-     * 수평과 수직에 대한 결과를 hBorderOut과 vBorderOut에 반영한다.
-     * 또한, 카메라 자동 복귀에 사용하는 수직/수평 스크롤 속도를 계산한다. (멀리 벗어났을 수록 빠르게 복귀)
-     */
-    private void checkCameraBorderOut()
+    public int worldWidth()
     {
-        int overLength1; // 카메라가 왼쪽이나 위쪽으로 넘어갔을 때, 카메라 좌표와 게임 좌표의 거리를 의미한다.
-        int overLength2; // 마찬가지 (오른쪽이나 아래쪽)
-        int scrollFactor = 100;
-
-        // 가로 범위 검사
-        overLength1 = 0 - left();
-        overLength2 = right() - gameSize.right();
-
-        if (overLength1 > 0) {
-            hDestination = 0;
-            hScrollSpeed = Math.max(minSpeed, Math.min(maxSpeed, 2 << overLength1 / scrollFactor)); // 오른쪽으로 (+ x)
-            hBorderOut = true;
-        }
-        else if (overLength2 > 0) {
-            hDestination = gameSize.right() - width;
-            hScrollSpeed = -Math.max(minSpeed, Math.min(maxSpeed, 2 << overLength2 / scrollFactor)); // 왼쪽으로 (- x)
-            hBorderOut = true;
-        }
-
-        // 세로 범위 검사
-        overLength1 = 0 - top();
-        overLength2 = bottom() - gameSize.bottom();
-
-        if (overLength1 > 0) {
-            vDestination = 0;
-            vScrollSpeed = Math.max(minSpeed, Math.min(maxSpeed, 2 << overLength1 / scrollFactor)); // 아래로 (+ y)
-            vBorderOut = true;
-        }
-        else if (overLength2 > 0) {
-            vDestination = gameSize.bottom() - height;
-            vScrollSpeed = -Math.max(minSpeed, Math.min(maxSpeed, 2 << overLength2 / scrollFactor)); // 위로 (- y)
-            vBorderOut = true;
-        }
+        return worldRect.right;
     }
 
-    /**
-     * 과도하게 스크롤 된 카메라의 위치(x, y)를 제자리로 서서히 되돌린다.
-     * autoBackCamera()를 호출하기에 앞서, 되도록이면 isBorderOut()의 반환 값이 true일 경우에만 호출하도록 한다.
-     */
-    public void autoBackCamera()
+    public int worldHeight()
     {
-        // 카메라 스크롤을 안하고 있으면
-        if (scrolling == false) {
-            // 카메라가 수평으로 넘어갔으면
-            if (hBorderOut) {
-                // 왼쪽으로 넘어간 경우
-                if (hDestination == 0)
-                    x = Math.min(hDestination, x + hScrollSpeed);
-                // 오른쪽으로 넘어간 경우
-                else
-                    x = Math.max(hDestination, x + hScrollSpeed);
-
-                // 카메라 x 좌표가 자동 복귀 목적지에 도달하면 수평으로 넘어갔다는 표시를 끈다.
-                if (x == hDestination)
-                    hBorderOut = false;
-            }
-
-            // 카메라가 수직으로 넘어갔으면
-            if (vBorderOut) {
-                // 위쪽으로 넘어간 경우
-                if (vDestination == 0)
-                    y = Math.min(vDestination, y + vScrollSpeed);
-                // 아래쪽으로 넘어간 경우
-                else
-                    y = Math.max(vDestination, y + vScrollSpeed);
-
-                // 카메라 y 좌표가 자동 복귀 목적지에 도달하면 수직으로 넘어갔다는 표시를 끈다.
-                if (y == vDestination)
-                    vBorderOut = false;
-            }
-        }
+        return worldRect.bottom;
     }
 
-    /**
-     * @return 카메라가 게임의 경계를 수직으로든 수평으로든 넘어간 상태라면 <strong>true</strong>를 반환하고, 정상적인 경계 내에 있으면 <strong>false</strong>를
-     *         반환한다.
-     */
-    public boolean isBorderOut()
+    private int leftLimit()
     {
-        return hBorderOut || vBorderOut;
+        return worldRect.left - (int) (worldMargin.left / zoom);
+    }
+
+    private int rightLimit()
+    {
+        return worldRect.right + (int) (worldMargin.right / zoom);
+    }
+
+    private int topLimit()
+    {
+        return worldRect.top - (int) (worldMargin.top / zoom);
+    }
+
+    private int bottomLimit()
+    {
+        return worldRect.bottom + (int) (worldMargin.bottom / zoom);
     }
 
     /*
@@ -231,100 +188,365 @@ public class GameCamera extends Bounds
         return (int) Math.sqrt(dx * dx + dy * dy);
     }
 
-    private float prevX; // 이전 터치 x 좌표
-    private float prevY; // 이전 터치 y 좌표
-
     /**
-     * 이 주석 자체는 안 중요함
-     * @param event
-     *        MotionEvent 클래스를 인수로 받는다.
-     * @return 카메라에 관련된 터치(드래그 혹은 핀치 줌 인&아웃)가 제대로 처리되었으면 <strong>true</strong>를 반환하고,
-     *         카메라 클래스에서 처리하지 않는 이벤트라면 <strong>false</strong>를 반환한다.
+     * 카메라 이동이나 확대/축소를 한다.
      */
     public boolean touchHandler(MotionEvent event)
     {
-        String caption = "empty";
+        String logMessage = "touchHandler()";
 
         float dx = 0f, dy = 0f; // 터치 이동 값
 
         switch (event.getActionMasked())
         {
         case MotionEvent.ACTION_DOWN:
-            caption = "action_down ";
-            prevX = event.getX(); // 이전 좌표를 구해놓음
-            prevY = event.getY();
+            logMessage += " ACTION_DOWN ";
+            scrollDebt.set(0, 0); // 스크롤 빚이 남아있든말든 새로운 스크롤을 원하므로 초기화
+
+            keepScrolling = true; // 터치한 순간 스크롤은 시작 된 거다
+
+            if (checkCameraOut() == true) {
+                doNotScroll = true; // 새로 터치를 시작할 때도 카메라가 벗어난 상태면 스크롤 금지
+            }
+
+            oldTouch.set(event.getX(), event.getY()); // 이전 좌표를 구해놓음
+            logMessage += "(" + oldTouch.x + "," + oldTouch.y + ")";
             break;
 
         case MotionEvent.ACTION_POINTER_DOWN:
+            logMessage += " ACTION_POINTER_DOWN ";
+            doNotScroll = true; // 두 손가락이 닿는 순간 줌은 시작된거므로 스크롤 금지
+            oldDistance = getDistance(event); // 두 손가락의 터치 좌표 사이의 거리를 구함
+
+            // 줌 터치의 중심점을 구한다
+            PointF midpoint = new PointF();
+            midpoint.x = (event.getX(0) + event.getX(1)) / 2;
+            midpoint.y = (event.getY(0) + event.getY(1)) / 2;
+            logMessage += "크기조절 중심점=(" + midpoint.x + "," + midpoint.y + ")";
+
+            // 줌 터치 중심점의 화면 상의 백분율을 구함.
+            midRatio.x = Math.round(midpoint.x / viewport.right * 100) / 100f; // 0.01 아래로 버림
+            midRatio.y = Math.round(midpoint.y / viewport.bottom * 100) / 100f;
+            logMessage += ", 비율=(" + midRatio.x + "," + midRatio.y + ")";
             break;
 
         case MotionEvent.ACTION_MOVE:
-            caption = "action_move ";
+            logMessage += " ACTION_MOVE ";
 
-            if (event.getPointerCount() == 1) // MotionEvent.getPointerCount()로 터치 수를 가져온다.
-            {
-                /* 손가락 하나일 때 */
+            // MotionEvent.getPointerCount()로 터치 수를 가져온다.
+            if (event.getPointerCount() == 1) { // 포인터가 하나일 때 == 스크롤
+                if (doNotScroll) { // ACTION_UP하기 전까지 한 번이라도 줌을 했으면 스크롤 못 함
+                    break;
+                }
 
-                // 카메라 스크롤을 하고 있다고 표시함
-                scrolling = true;
-                // 카메라가 범위를 벗어났는지 체크해서 멤버 변수(hBorderOut, vBorderOut)에 기록함
-                checkCameraBorderOut();
+                // 현재 좌표와 이전 좌표의 거리를 구해서 그만큼 카메라 좌표를 이동해준다.
+                float nowX = event.getX(), nowY = event.getY();
+                dx = oldTouch.x - nowX;
+                dy = oldTouch.y - nowY;
 
-                /* 현재 좌표와 이전 좌표의 거리를 구해서 그만큼 카메라 좌표를 이동해준다. */
-                // 현재 좌표와 기록된 이전 좌표의 이동 거리를 구함
-                dx = event.getX() - prevX;
-                dy = event.getY() - prevY;
-                // 현재 들어온 좌표를 다음 이벤트에서 활용하기 위해 기록해둠
-                prevX = event.getX();
-                prevY = event.getY();
-                // 카메라 위치 갱신
-                x = (int) (x - dx);
-                y = (int) (y - dy);
+                oldTouch.set(nowX, nowY); // 현재 들어온 좌표를 다음 이벤트에서 활용하기 위해 기록해둠
+
+                moveCamera(dx, dy); // 카메라 위치 갱신
             }
             else {
-                /* 손가락 둘 */
+                // 포인터가 하나가 아닐 때 == 줌 (세번째 포인터는 접근하질 않으므로 자연스럽게 무시함)
+                int nowDistance = getDistance(event); //
+                float delta = nowDistance - oldDistance; // 줌 터치가 새로 이동한 거리
+                int cellWidth = viewport.right / 30; // 가로 길이를 기준으로 30칸으로 나눴을 때, 한 칸이 차지하는 길이를 구함.
+
+                // 배율이 한 번에 0.05씩만 바뀌도록 제한함
+                if (Math.abs(delta) >= cellWidth) {
+                    logMessage += "delta: " + delta; // 로그 출력용
+                    oldDistance = nowDistance; // 현재 거리는 더 이상 쓸 일이 없으니 이전 거리에 보관
+
+                    int movedCells = (int) (delta / cellWidth); // 터치가 이동한 거리를 전체 30칸의 칸 단위로 환산
+
+                    // 기존 zoom 값을 토대로 새로운 zoom 값을 계산 (기존 배율 +- 이동한 칸 수 * 5%)
+                    float freshZoom = Math.min(maxZoom, Math.max(minZoom, zoom + movedCells * zoomStep));
+                    freshZoom = (int) (freshZoom * 100f + 0.05f) / 100f; // 소수점 보정 (정밀도 그지같음)
+
+                    /*
+                     * 구 width와 신 width의 차이를 구하고, 처음 줌 터치할 때의 중점의 X 좌표 값을 화면에 대한 백분율로 환산한 값과 곱한다.
+                     * 그 값만큼 카메라의 left, top을 이동시키면 확대/축소 지점에 적당한 방향으로 카메라가 이동
+                     */
+                    float diff_width = widthScaled() - (viewport.right / freshZoom); // 이전 가로 크기와 새로운 가로 크기의 차이를 구함
+                    float diff_height = heightScaled() - (viewport.bottom / freshZoom); // 이전 세로 크기 - 새로운 세로 크기
+
+                    dx = diff_width * midRatio.x;
+                    dy = diff_height * midRatio.y;
+                    moveCamera(dx, dy);
+
+                    /* 기존 zoom 값이 필요했던 연산(widthScaled()...)을 마쳤으니 이번에 새로 구한 freshZoom 값으로 업데이트 */
+                    zoom = freshZoom;
+                }
             }
+            logMessage += "(" + dx + ", " + dy + ")";
             break;
 
         case MotionEvent.ACTION_POINTER_UP:
+            logMessage += " ACTION_POINTER_UP ";
             break;
 
         case MotionEvent.ACTION_UP:
-            // 스크롤이 끝났다고 표시한다
-            scrolling = false;
-            caption = "action_up ";
+            logMessage += " ACTION_UP ";
+            keepScrolling = false; // 손을 떼야 카메라가 복귀 할 수 있음
+            doNotScroll = false; // 한 번이라도 줌을 했으면 완전히 손을 떼야 스크롤할 수 있도록 함.
             break;
 
         default:
             break;
         }
-
-        caption = caption + "(" + dx + ", " + dy + ")";
-        Log.i("camera", caption);
+        Log.i(tag, logMessage);
 
         return true;
     }
 
-    /* 재활용 쓰레기 */
-    private void zoomCamera(MotionEvent event)
+    /**
+     * 과도하게 스크롤 된 카메라의 위치(x, y)를 제자리로 서서히 되돌린다.
+     */
+    public void autoScroll()
     {
-        int action = event.getAction() & MotionEvent.ACTION_MASK;
+        /*
+         * 스크롤(터치) 중이지도 않고, 카메라가 게임월드영역을 벗어났다면 제자리도 되돌린다.
+         */
+        if ((doNotScroll == true || keepScrolling == false) && checkCameraOut() == true) {
+            String msg = "autoback()";
+            getCameraOutLength();
 
-        if (action == MotionEvent.ACTION_POINTER_DOWN) {
-            mPrevDist = getDistance(event);
-            mPrevScale = getScale();
+            int dx = 0, dy = 0;
+
+            // 카메라를 움직일 거리와 방향을 계산함.
+            if (isOutOfLeft()) {
+                dx = Math.min(scrollStep * hScrollScale, hGapLength);
+                msg += " left";
+
+                scrollDebt.set(0, scrollDebt.y); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
+            }
+            else if (isOutOfRight()) {
+                dx = -Math.min(scrollStep * hScrollScale, hGapLength);
+                msg += " right";
+
+                scrollDebt.set(0, scrollDebt.y); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
+            }
+
+            if (isOutOfTop()) {
+                dy = Math.min(scrollStep * vScrollScale, vGapLength);
+                msg += " top";
+
+                scrollDebt.set(scrollDebt.x, 0); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
+            }
+            else if (isOutOfBottom()) {
+                dy = -Math.min(scrollStep * vScrollScale, vGapLength);
+                msg += " bottom";
+
+                scrollDebt.set(scrollDebt.x, 0); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
+            }
+
+            // 방향에 맞게 dx, dy만큼 카메라를 이동시킴.
+            dx = (int) (dx / scale() * 10 + (dx > 0 ? 5 : -5)) / 10;
+            dy = (int) (dy / scale() * 10 + (dy > 0 ? 5 : -5)) / 10;
+            position.offset(dx, dy);
+
+            // autoScroll을 마치면 현재 터치한 상태에서 스크롤 가능함
+            if (checkCameraOut() == false) {
+                doNotScroll = false;
+            }
+
+            msg += " gap(" + hGapLength + "," + vGapLength + "), (dx: " + dx + ", dy: " + dy + ")";
+            Log.d(tag, msg);
         }
-        else if (action == MotionEvent.ACTION_MOVE) {
-            float delta = (getDistance(event) - mPrevDist) / STEP;
-            scale = Math.min(3.0f, Math.max(0.5f, mPrevScale + delta));
-
-            // Log.i("scale", "delta: " + delta + ", scale: " + scale);
+        /*
+         * 스크롤 해야할 빚이 남아있으면 계속해서 이동시킨다.
+         */
+        else if (scrollDebt.equals(0, 0) == false) {
+            moveCamera(0, 0);
         }
     }
 
-    /* 잉여 */
-    public float getScale()
+    /**
+     * 카메라가 가로, 세로 방향에 대해 게임월드를 벗어난 길이를 구한다.
+     * 해당 값은 hGapLength, vGapLength 필드에 저장된다.
+     */
+    private void getCameraOutLength()
     {
-        return scale;
+        String msg = "gap() ";
+        hGapLength = 0;
+        vGapLength = 0;
+
+        if (isOutOfLeft()) {
+            hGapLength = leftLimit() - position.x;
+        }
+        else if (isOutOfRight()) {
+            hGapLength = position.x + (int) widthScaled() - rightLimit();
+        }
+
+        if (isOutOfTop()) {
+            vGapLength = topLimit() - position.y;
+        }
+        else if (isOutOfBottom()) {
+            vGapLength = position.y + (int) heightScaled() - bottomLimit();
+        }
+
+        int speedScaleCell = viewport.right / (maxScrollScale * 2);
+        hScrollScale = (int) (hGapLength / speedScaleCell);
+        hScrollScale = Math.max(minScrollScale, Math.min(maxScrollScale, hScrollScale));
+
+        speedScaleCell = viewport.bottom / (maxScrollScale * 2);
+        vScrollScale = (int) (vGapLength / speedScaleCell);
+        vScrollScale = Math.max(minScrollScale, Math.min(maxScrollScale, vScrollScale));
+
+        msg += "gap level: " + hScrollScale + ", " + vScrollScale + "(per " + speedScaleCell + ")";
+        Log.d(tag, msg);
+    }
+
+    /**
+     * 카메라가 게임월드의 크기를 벗어났는지 검사한다.
+     * 벗어났다면 true를 반환하고, 한 방향도 벗어나지 않았으면 false를 반환한다.
+     * 만약, 좌/우/상/하 어디로든 벗어난 곳이 있다면 outDirection 필드에 벗어난 방향을 기록한다.
+     */
+    private boolean checkCameraOut()
+    {
+        // 현재 상태를 초기화한다.
+        outDirection = OUT_NONE;
+
+        // 가로 범위를 벗어났는지 체크한다.
+        if (position.x < leftLimit()) {
+            outDirection = OUT_LEFT;
+        }
+        else if (position.x + (int) widthScaled() > rightLimit()) {
+            outDirection = OUT_RIGHT;
+        }
+
+        // 세로 범위를 벗어났는지 체크한다.
+        if (position.y < topLimit()) {
+            outDirection |= OUT_TOP;
+        }
+        else if (position.y + (int) heightScaled() > bottomLimit()) {
+            outDirection |= OUT_BOTTOM;
+        }
+
+        // 어느 하나라도 벗어났으면 true를 리턴한다.
+        return outDirection != OUT_NONE;
+    }
+
+    /**
+     * 카메라를 지정한 좌표로 완전히 이동시킨다.
+     */
+    private void gotoCamera(int x, int y)
+    {
+        position.set(x, y);
+    }
+
+    /**
+     * 카메라를 현재 위치에서 지정한 값만큼 이동시킨다.
+     */
+    private void moveCamera(int dx, int dy)
+    {
+        int debtX = 0, debtY = 0;
+
+        /*
+         * x축 이동 거리가 없을 경우, 스크롤 빚 x를 이용한다.
+         * 스크롤 빚이 남아있는지 자체는 이 메소드가 호출되기 전에 검사된다.
+         */
+        if (dx == 0) {
+            Log.d(tag + "." + AppManager.getMethodName(), "dx:" + dx);
+            if (Math.abs(scrollDebt.x) > scrollStep) {
+                // 스크롤 빚이 scrollStep보다 크면 scrollStep만큼 움직이고, 움직인 거리만큼은 빚을 갚는다.
+
+                if (scrollDebt.x < 0) {
+                    debtX = scrollStep; // 이동하려던 방향이 음수이므로 scrollStep은 더한다.
+                    dx = -scrollStep; // 왼쪽(left) 방향으로 이동할 때는 x 값이 감소
+                }
+                else {
+                    debtX = -scrollStep; // 이동하려던 방향이 양수이므로 scrollStep은 뺀다.
+                    dx = scrollStep; // 오른쪽(right) 방향으로 이동할 때는 x 값이 증가
+                }
+            }
+            else {
+                // 남은 빚이 scrollStep보다 작으면, 남은 빚을 다 청산한다.
+                debtX = -scrollDebt.x;
+            }
+        }
+        /*
+         * x축 이동 거리가 scrollStep보다 크면 scrollStep만큼 이동하고, 남은 거리는 빚진다.
+         */
+        else if (Math.abs(dx) > scrollStep) {
+            if (dx < 0) {
+                debtX = dx + scrollStep; // 이동하려던 방향이 음수이므로 scrollStep은 더한다.
+                dx = -scrollStep; // 왼쪽(left) 방향으로 이동할 때는 x 값이 감소
+            }
+            else {
+                debtX = dx - scrollStep; // 이동하려던 방향이 양수이므로 scrollStep은 뺀다.
+                dx = scrollStep; // 오른쪽(right) 방향으로 이동할 때는 x 값이 증가
+            }
+        }
+
+        /*
+         * y축 이동 거리가 없을 경우, 스크롤 빚 y를 이용한다.
+         * 스크롤 빚이 남아있는지 자체는 이 메소드가 호출되기 전에 검사된다.
+         */
+        if (dy == 0) {
+            if (Math.abs(scrollDebt.y) > scrollStep) {
+                // 스크롤 빚이 scrollStep보다 크면 scrollStep만큼 움직이고, 움직인 거리만큼은 빚을 갚는다.
+
+                if (scrollDebt.y < 0) {
+                    debtY = scrollStep; // 이동하려던 방향이 음수이므로 scrollStep은 더한다.
+                    dy = -scrollStep; // 위(top) 방향으로 이동할 때는 y 값이 감소
+                }
+                else {
+                    debtY = -scrollStep; // 이동하려던 방향이 양수이므로 scrollStep은 뺀다.
+                    dy = scrollStep; // 아래(bottom) 방향으로 이동할 때는 y 값이 증가
+                }
+            }
+            else {
+                // 남은 빚이 scrollStep보다 작으면, 남은 빚을 다 청산한다.
+                debtY = -scrollDebt.y;
+            }
+        }
+        /*
+         * y축 이동 거리가 scrollStep보다 크면 scrollStep만큼 이동하고, 남은 거리는 빚진다.
+         */
+        else if (Math.abs(dy) > scrollStep) {
+            if (dy < 0) {
+                debtY = dy + scrollStep; // 이동하려던 방향이 음수이므로 scrollStep은 더한다.
+                dy = -scrollStep; // 위(top) 방향으로 이동할 때는 y 값이 감소
+            }
+            else {
+                debtY = dy - scrollStep; // 이동하려던 방향이 양수이므로 scrollStep은 뺀다.
+                dy = scrollStep; // 아래(bottom) 방향으로 이동할 때는 y 값이 증가
+            }
+        }
+
+        scrollDebt.offset(debtX, debtY); // debtX, debtY 값만큼 스크롤 빚을 가감한다.
+
+        position.offset(dx, dy); // 계산된 dx, dy만큼 이동한다.
+
+        Log.d(tag + "." + AppManager.getMethodName(), "Debt(" + scrollDebt.x + "," + scrollDebt.y + "), delta(" + dx + "," + dy + ")");
+    }
+
+    private void moveCamera(float dx, float dy)
+    {
+        moveCamera((int) dx, (int) dy);
+    }
+
+    /* 현재 어느 방향으로 나가있는 상태인지 플래그를 확인하는 메소드들 */
+    private boolean isOutOfLeft()
+    {
+        return ((outDirection & OUT_LEFT) == OUT_LEFT);
+    }
+
+    private boolean isOutOfRight()
+    {
+        return ((outDirection & OUT_RIGHT) == OUT_RIGHT);
+    }
+
+    private boolean isOutOfTop()
+    {
+        return ((outDirection & OUT_TOP) == OUT_TOP);
+    }
+
+    private boolean isOutOfBottom()
+    {
+        return ((outDirection & OUT_BOTTOM) == OUT_BOTTOM);
     }
 }

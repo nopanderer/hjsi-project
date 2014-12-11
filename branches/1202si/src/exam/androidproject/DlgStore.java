@@ -6,11 +6,13 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.TextView;
 import exam.customwidget.ElementView;
+import exam.game.AppManager;
 import exam.game.EDElement;
 
 public class DlgStore extends Dialog implements OnClickListener
@@ -37,7 +39,9 @@ public class DlgStore extends Dialog implements OnClickListener
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        AppManager.printSimpleLogInfo();
         super.onCreate(savedInstanceState);
+
         this.requestWindowFeature(Window.FEATURE_NO_TITLE); // 다이얼로그 제목 표시를 없앤다
         this.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT)); // 다이얼로그 배경을 없앤다 (테두리도 없음)
         setContentView(R.layout.dialog_store);
@@ -67,6 +71,8 @@ public class DlgStore extends Dialog implements OnClickListener
     @Override
     public void onClick(View v)
     {
+        Log.d(toString(), AppManager.getMethodName() + "() " + v.toString());
+
         switch (v.getId())
         {
         case R.id.dlg_store_btn_buy: // 정말로 원소 구매할지 확인하는 창의 구매 버튼

@@ -2,15 +2,14 @@ package exam.androidproject;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import exam.game.AppManager;
 import exam.game.GameCamera;
 import exam.game.GameState;
 import exam.game.Unit;
@@ -24,18 +23,11 @@ import exam.game.Unit;
  */
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, Runnable
 {
-    /* 기본적인 생성자 */
-    public GameSurface(Context context, GameState state)
-    {
-        super(context);
-        mState = state;
-        camera = new GameCamera();
-        init();
-    }
+    private final String  tag = getClass().getSimpleName();
 
     /* 서피스뷰 그리기에 필요한 객체 및 변수 */
-    private Thread        mThreadPainter; // 그리기 스레드
-    private boolean       mIsRunning;    // 그리기 스레드 동작 상태
+    private Thread        mThreadPainter;                  // 그리기 스레드
+    private boolean       mIsRunning;                      // 그리기 스레드 동작 상태
     /*
      * 메인스레드가 아닌 따로 생성한 스레드에서 그리는 걸 메인 스레드의 캔버스와 연결하는 역할을 한다.
      * 서피스뷰는 액티비티에 컨텐트뷰로 설정되고, getHolder()를 사용해 그에 대한 홀더를 얻을 수 있다.
@@ -51,15 +43,26 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     /*
      * 테스트 값 출력용
      */
-    private Paint         mPaintInfo;    // 텍스트 출력용 페인트 객체
-    private int           mFps;          // 그리기 fps
+    private Paint         mPaintInfo;                      // 텍스트 출력용 페인트 객체
+    private int           mFps;                            // 그리기 fps
 
     /* 카메라 */
     private GameCamera    camera;
 
     /* 게임 리소스 등 */
-    private GameState     mState;        // 인게임 오브젝트에 접근하기 위해서 필요함
-    private Bitmap        mImgBackground; // 배경 맵 이미지
+    private AppManager    manager;
+    private GameState     mState;                          // 인게임 오브젝트에 접근하기 위해서 필요함
+
+    /* 기본적인 생성자 */
+    public GameSurface(Context context, GameState state)
+    {
+        super(context);
+
+        mState = state;
+        camera = GameCamera.getInstance();
+        manager = AppManager.getInstance();
+        init();
+    }
 
     /* 생성자 호출시 공통 부문 초기화 */
     private void init()
@@ -73,19 +76,13 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
          */
         mHolder = super.getHolder(); // 인게임 스레드에서 필요할 수도 있어서 똑같은 이름의 함수를 구현했기 때문에 super를 사용하게 됐음
         mHolder.addCallback(this); // SurfaceHolder.Callback 구현한 메소드를 등록하는 것
-
-        /*
-         * 그리기에 필요한 각종 리소스를 불러온다
-         */
-        mImgBackground = BitmapFactory.decodeResource(getResources(), R.drawable.img_tempmap); // 맵 배경
     }
 
     /* SurfaceHolder.Callback 구현 */
     @Override
     public void surfaceCreated(SurfaceHolder holder)
     {
-        Log.i("surface", "surfaceCreated()");
-
+        AppManager.printSimpleLogInfo();
         /*
          * 표면이 생성될 때 그리기 스레드를 시작한다.
          * 표면은 아마 화면상에 실제로 보이는 그림을 말하는 것 같다.
@@ -96,18 +93,17 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         mThreadPainter.start();
     }
 
+    /*
+     * ☆★☆★☆★중요☆★☆★☆★☆★
+     * 게임 화면을 띄운채로 핸드폰 잠궜다가 켜면, 게임 화면도 세로로 돌아가는 일이 생긴다.
+     * 그 때 에러남
+     * 나중에 액티비티 생명주기에 따른 처리(전화왔을 때 내려가는 경우 등등)
+     * 화면이 180도 돌아가거나 하는 경우도 처리해줘야겠다.
+     */
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
     {
-        /*
-         * ☆★☆★☆★중요☆★☆★☆★☆★
-         * 게임 화면을 띄운채로 핸드폰 잠궜다가 켜면, 게임 화면도 세로로 돌아가는 일이 생긴다.
-         * 그 때 에러남
-         * 나중에 액티비티 생명주기에 따른 처리(전화왔을 때 내려가는 경우 등등)
-         * 화면이 180도 돌아가거나 하는 경우도 처리해줘야겠다.
-         */
-        Log.i("surface", "surfaceChanged() (width: " + width + ", height: " + height + ")");
-
+        Log.i(tag, AppManager.getMethodName() + "() (width: " + width + ", height: " + height + ")");
         // 표면의 크기가 바뀔 때 그 크기를 기록한다.
         camera.setCamSize(width, height);
     }
@@ -115,8 +111,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder)
     {
-        Log.i("surface", "surfaceDestroyed()");
-
+        AppManager.printSimpleLogInfo();
         /*
          * 표면이 파괴되기 직전에 그리기를 중지한다.
          * 이 콜백이 끝나면 완전히 파괴된다.
@@ -125,13 +120,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
          * 그래서 join을 통해 그리기 스레드가 끝날 때까지 표면 파괴를 늦춘다.
          */
         mIsRunning = false;
-        while (true)
-            try {
-                mThreadPainter.join();
-                break;
-            }
-            catch (Exception e) {
-            }
+        try {
+            mThreadPainter.join();
+        }
+        catch (Exception e) {
+        }
     }
 
     /**
@@ -142,23 +135,27 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     {
         boolean isCameraEvent = camera.touchHandler(event);
 
-        if (event.getAction() == MotionEvent.ACTION_UP)
+        if (event.getAction() == MotionEvent.ACTION_UP) {
             /*
              * 터치 이벤트 처리에서 ACTION_UP의 경우에 무조건 performClick을 호출해줘야한다고 함.
              * 안 하면 경고 뜸. performClick() 자체도 오버라이드 해줘야함
              */
             performClick();
+        }
 
-        if (isCameraEvent == false)
+        if (isCameraEvent == false) {
             return super.onTouchEvent(event); // 내가 사용할 이벤트와 전혀 상관없으면 슈퍼클래스에서 처리
-        else
+        }
+        else {
             return true;
+        }
     }
 
     /* 필요하다고 해서 했음 */
     @Override
     public boolean performClick()
     {
+        AppManager.printSimpleLogInfo();
         return super.performClick();
     }
 
@@ -188,60 +185,48 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
             synchronized (mHolder) {
                 // 캔버스를 잠그는 듯
                 canvas = mHolder.lockCanvas();
-                if (canvas == null)
+                if (canvas == null) {
                     break;
-
-                if (camera.isBorderOut()) {
-                    camera.autoBackCamera();
-                    // 카메라가 벗어난 배경 바깥을 메꾼다.
-                    canvas.drawColor(Color.DKGRAY);
                 }
 
+                GameCamera.getInstance().autoScroll();
+
+                // 카메라가 벗어난 배경 바깥을 메꾼다.
+                canvas.drawColor(Color.DKGRAY);
+
+                // 현재 카메라 배율에 맞게 캔버스를 확대/축소함
+                canvas.save();
+                canvas.scale(GameCamera.getInstance().scale(), GameCamera.getInstance().scale(), 0, 0);
                 // 맵 배경을 그린다.
-                canvas.drawBitmap(mImgBackground, 0 - camera.left(), 0 - camera.top(), null);
-                /* 배경 이미지 확대&축소 코드 (실패!) */
-                /*
-                 * int visibleWidth = (int) ((GameCamera.mLogicalWidth - camera.mPhysicalWidth) / camera.getmScale());
-                 * int visibleHeight = (int) ((GameCamera.mLogicalHeight - camera.mPhysicalHeight) /
-                 * camera.getmScale());
-                 * int visibleLeft = camera.getLeft();
-                 * int visibleTop = camera.getTop();
-                 * if ((visibleWidth != oldWidth) || (oldX != visibleLeft) || (oldY != visibleTop))
-                 * {
-                 * oldWidth = visibleWidth;
-                 * oldX = visibleLeft;
-                 * oldY = visibleTop;
-                 * scaledBg = Bitmap.createBitmap(mImgBackground, visibleLeft, visibleTop, visibleWidth, visibleHeight);
-                 * scaledBg = Bitmap.createScaledBitmap(scaledBg, (int) (visibleWidth * camera.getmScale()), (int)
-                 * (visibleHeight * camera.getmScale()), false);
-                 * }
-                 * canvas.drawBitmap(scaledBg, 0, 0, null);
-                 */
+                canvas.drawBitmap(manager.getBitmap("background"), 0 - camera.x(), 0 - camera.y(), null);
 
                 /* 기타 그리기 수행 */
                 // game 오브젝트를 그린다
                 synchronized (mState) {
                     // 게임의 유닛들을 그린다.
-                    for (Unit unit : mState.getUnits())
+                    for (Unit unit : mState.getUnits()) {
                         // 1. 보이는지 검사
-                        if (camera.showInCamera(unit)) {
-                            // 보이므로 그린다
-                            face = unit.getFace();
-                            canvas.drawBitmap(face, unit.left() - camera.left(), unit.top() - camera.top(), null);
+                        // if (camera.showInCamera(unit)) {
+                        // 보이므로 그린다
+                        face = AppManager.getInstance().getBitmap(unit.getBitmapKey());
+                        canvas.drawBitmap(face, unit.left() - camera.x(), unit.top() - camera.y(), null);
+                        // }
 
-                            /*
-                             * 스레드 종료가 필요한 경우 최대한 빨리 끝내기 위해
-                             * 그림을 그리는 도중에도 스레드 종료 조건을 검사한다.
-                             */
-                            if (mIsRunning == false)
-                                break;
+                        /*
+                         * 스레드 종료가 필요한 경우 최대한 빨리 끝내기 위해
+                         * 그림을 그리는 도중에도 스레드 종료 조건을 검사한다.
+                         */
+                        if (mIsRunning == false) {
+                            break;
                         }
+                    }
 
                     // 테스트용 움직이는 성냥 그리기
-                    Rect rect = new Rect();
-                    camera.getPhysicalBound(rect, mState.x, mState.y, 64, 64);
-                    canvas.drawBitmap(mState.mImgElement, rect.left, rect.top, null);
+                    // Rect rect = new Rect();
+                    // camera.getPhysicalBound(rect, mState.x, mState.y, 64, 64);
+                    // canvas.drawBitmap(mState.mImgElement, rect.left, rect.top, null);
                 }
+                canvas.restore();
 
                 // 테스트 정보 표시
                 displayInformation(canvas);
@@ -260,24 +245,41 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
                 fpsElapsedTime = 0L;
             }
         }
+
+        Log.i(tag, AppManager.getMethodName() + "() is end.");
     }
 
     /* 개발 참고용 정보 표시 */
     private void displayInformation(Canvas canvas)
     {
+        // 현재 메모리 정보 출력용
+        Long totMem = 0L;
+        Long freeMem;
+
         if (mPaintInfo == null) {
             mPaintInfo = new Paint();
             mPaintInfo.setAntiAlias(true);
             mPaintInfo.setTextSize(50);
+            totMem = Runtime.getRuntime().totalMemory();
         }
 
+        freeMem = Runtime.getRuntime().freeMemory();
+
         // 그리기 fps, 게임 로직 fps
+        canvas.save();
         canvas.drawText(mFps + " fps (" + mState.getLogicFps() + " fps)", 120, 60, mPaintInfo);
+        canvas.translate(0, 60);
         // 카메라 좌상단 좌표 (논리적인 기준점)
-        canvas.drawText("CAM left: " + camera.left() + " / top: " + camera.top() + " / scale: " + (int) (camera.getScale() * 1000) / 10f + "%", 120, 120, mPaintInfo);
+        canvas.drawText("CAM left: " + camera.x() + " / top: " + camera.y() + " / scale: " + (int) (camera.scale() * 100 + 0.5) + "%", 120, 60, mPaintInfo);
+        canvas.translate(0, 60);
         // 성냥의 화면 좌표
-        canvas.drawText("Physical x: " + (mState.x - camera.left()) + ", y: " + (mState.y - camera.top()), 120, 180, mPaintInfo);
+        canvas.drawText("Physical x: " + (mState.x - camera.x()) + ", y: " + (mState.y - camera.y()), 120, 60, mPaintInfo);
+        canvas.translate(0, 60);
         // 성냥의 인게임 좌표
-        canvas.drawText("Logical x: " + mState.x + ", y: " + mState.y, 120, 240, mPaintInfo);
+        canvas.drawText("Logical x: " + mState.x + ", y: " + mState.y, 120, 60, mPaintInfo);
+        canvas.translate(0, 60);
+        // 메모리 정보 표시
+        canvas.drawText("Used Memory: " + (totMem - freeMem) / (1024 * 1024) + " / " + totMem / (1024 * 1024) + "M", 120, 60, mPaintInfo);
+        canvas.restore();
     }
 }

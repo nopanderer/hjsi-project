@@ -1,6 +1,5 @@
 ﻿package exam.androidproject;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -10,12 +9,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import exam.customwidget.GoodsView;
+import exam.game.AppManager;
 
 /**
  * @author 이상인
- * 
  */
-public class Store extends Activity implements View.OnClickListener
+public class Store extends BaseActivity implements View.OnClickListener
 {
     /* 상점 아이템들의 ID 상수 목록 */
     // 등급별 원소 상자
@@ -34,6 +33,7 @@ public class Store extends Activity implements View.OnClickListener
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        AppManager.printSimpleLogInfo();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.acitivity_store);
 
@@ -113,6 +113,7 @@ public class Store extends Activity implements View.OnClickListener
      */
     public void switchTab(View v)
     {
+        AppManager.printSimpleLogInfo();
         // 일단 전부 안 보이게 한다
         findViewById(R.id.store_tab1).setVisibility(View.INVISIBLE);
         findViewById(R.id.store_tab2).setVisibility(View.INVISIBLE);
@@ -137,13 +138,11 @@ public class Store extends Activity implements View.OnClickListener
     public void onClick(View v)
     {
         GoodsView gv = (GoodsView) v;
-        Log.i("info", "caption: " + gv.getCaption());
 
         switch (gv.getGoodsId())
         {
         case LOW:
             dlgStore.show(); // 구매 확인창을 띄운다
-            Log.i("info", "value: " + gv.getValue());
             break;
 
         case MIDDLE:
@@ -152,5 +151,7 @@ public class Store extends Activity implements View.OnClickListener
         case HIGH:
             break;
         }
+
+        Log.d(toString(), AppManager.getMethodName() + "() caption: " + gv.getCaption() + ", value: " + gv.getValue());
     }
 }
