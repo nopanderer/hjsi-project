@@ -18,173 +18,159 @@ import exam.game.AppManager;
 import exam.game.GameMaster;
 import exam.game.GameState;
 
-public class Map extends BaseActivity implements OnClickListener
-{
-    private boolean           explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
+public class Map extends BaseActivity implements OnClickListener {
+  private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
 
-    Button                    settingBtn, btnBook, btnStore;
-    ToggleButton              btnPlay;
-    Drawable                  drawableBtnPlay_Pause;
-    Drawable                  drawableBtnPlay_Play;
-    Setting                   setting;
-    public static MediaPlayer music;
+  Button settingBtn, btnBook, btnStore;
+  ToggleButton btnPlay;
+  Drawable drawableBtnPlay_Pause;
+  Drawable drawableBtnPlay_Play;
+  Setting setting;
+  public static MediaPlayer music;
 
-    /* 게임 정보를 갖고있는 개체 */
-    private GameState         gameState;
-    /* 게임을 진행하는 인게임 스레드를 가진 개체 */
-    private GameMaster        gameMaster;
+  /* 게임 정보를 갖고있는 개체 */
+  private GameState gameState;
+  /* 게임을 진행하는 인게임 스레드를 가진 개체 */
+  private GameMaster gameMaster;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    AppManager.printSimpleLogInfo();
+    super.onCreate(savedInstanceState);
+
+    // GameState 생성
+    gameState = new GameState(getResources());
+
+    // surfaceview 등록
+    GameSurface gameView = new GameSurface(this, gameState);
+    setContentView(gameView);
+
+    LayoutInflater inflater = getLayoutInflater();
+    View layout = inflater.inflate(R.layout.activity_map, null);
+    addContentView(layout, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+        LayoutParams.MATCH_PARENT));
+
+    drawableBtnPlay_Pause = getResources().getDrawable(R.drawable.btn_pause);
+    drawableBtnPlay_Play = getResources().getDrawable(R.drawable.btn_play);
+
+    settingBtn = (Button) findViewById(R.id.setting_btn);
+    btnBook = (Button) findViewById(R.id.btn_book);
+    btnPlay = (ToggleButton) findViewById(R.id.btn_play);
+    btnStore = (Button) findViewById(R.id.btn_store);
+
+    setting = new Setting(Map.this);
+    setting.setCanceledOnTouchOutside(false);
+    setting.setOnDismissListener(new OnDismissListener() {
+      @Override
+      public void onDismiss(DialogInterface arg0) {
         AppManager.printSimpleLogInfo();
-        super.onCreate(savedInstanceState);
+        quitExplicitly(); // 이번에 Map.onDestroy() 될 때 리소스 해제하라고 알림
+        AppManager.getInstance().quitApp();
+      }
+    });
 
-        // GameState 생성
-        gameState = new GameState(getResources());
+    settingBtn.setOnClickListener(this);
+    btnBook.setOnClickListener(this);
+    btnPlay.setOnClickListener(this);
+    btnStore.setOnClickListener(this);
 
-        // surfaceview 등록
-        GameSurface gameView = new GameSurface(this, gameState);
-        setContentView(gameView);
+    music = MediaPlayer.create(this, R.raw.bgm);
+    music.setLooping(true);
+    music.start();
 
-        LayoutInflater inflater = getLayoutInflater();
-        View layout = inflater.inflate(R.layout.activity_map, null);
-        addContentView(layout, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    /* GameMaster 생성 */
+    gameMaster = new GameMaster(gameView.getHolder(), gameState);
+  }
 
-        drawableBtnPlay_Pause = getResources().getDrawable(R.drawable.btn_pause);
-        drawableBtnPlay_Play = getResources().getDrawable(R.drawable.btn_play);
+  @Override
+  protected void onPause() {
+    AppManager.printSimpleLogInfo();
+    super.onStop();
 
-        settingBtn = (Button) findViewById(R.id.setting_btn);
-        btnBook = (Button) findViewById(R.id.btn_book);
-        btnPlay = (ToggleButton) findViewById(R.id.btn_play);
-        btnStore = (Button) findViewById(R.id.btn_store);
-
-        setting = new Setting(Map.this);
-        setting.setCanceledOnTouchOutside(false);
-        setting.setOnDismissListener(new OnDismissListener()
-        {
-            @Override
-            public void onDismiss(DialogInterface arg0)
-            {
-                AppManager.printSimpleLogInfo();
-                quitExplicitly(); // 이번에 Map.onDestroy() 될 때 리소스 해제하라고 알림
-                AppManager.getInstance().quitApp();
-            }
-        });
-
-        settingBtn.setOnClickListener(this);
-        btnBook.setOnClickListener(this);
-        btnPlay.setOnClickListener(this);
-        btnStore.setOnClickListener(this);
-
-        music = MediaPlayer.create(this, R.raw.bgm);
-        music.setLooping(true);
-        music.start();
-
-        /* GameMaster 생성 */
-        gameMaster = new GameMaster(gameView.getHolder(), gameState);
+    if (gameMaster != null) {
+      gameMaster.pauseGame();
+      btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
     }
 
-    @Override
-    protected void onPause()
-    {
-        AppManager.printSimpleLogInfo();
-        super.onStop();
+    if (music != null) {
+      music.pause();
+    }
+  }
 
-        if (gameMaster != null) {
-            gameMaster.pauseGame();
-            btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
-        }
+  @Override
+  protected void onResume() {
+    AppManager.printSimpleLogInfo();
+    super.onResume();
 
-        if (music != null) {
-            music.pause();
-        }
+    if (music != null) {
+      music.start();
+    }
+  }
+
+  @Override
+  protected void onDestroy() {
+    AppManager.printSimpleLogInfo();
+    super.onDestroy();
+
+    if (gameMaster != null) {
+      gameMaster.quitGame();
     }
 
-    @Override
-    protected void onResume()
-    {
-        AppManager.printSimpleLogInfo();
-        super.onResume();
-
-        if (music != null) {
-            music.start();
-        }
+    if (music != null) {
+      music.stop();
+      music.release();
     }
 
-    @Override
-    protected void onDestroy()
-    {
-        AppManager.printSimpleLogInfo();
-        super.onDestroy();
-
-        if (gameMaster != null) {
-            gameMaster.quitGame();
-        }
-
-        if (music != null) {
-            music.stop();
-            music.release();
-        }
-
-        if (explicitQuit) {
-            /* 사용했던 리소스를 해제한다. */
-            AppManager.getInstance().allRecycle();
-        }
+    if (explicitQuit) {
+      /* 사용했던 리소스를 해제한다. */
+      AppManager.getInstance().allRecycle();
     }
+  }
 
-    /**
-     * back 키를 누르면 옵션 메뉴가 열리도록 함
-     */
-    @Override
-    public void onBackPressed()
-    {
-        AppManager.printSimpleLogInfo();
-        showSettingMenu();
+  /**
+   * back 키를 누르면 옵션 메뉴가 열리도록 함
+   */
+  @Override
+  public void onBackPressed() {
+    AppManager.printSimpleLogInfo();
+    showSettingMenu();
+  }
+
+  @Override
+  public void onClick(View v) {
+    Log.d(toString(), AppManager.getMethodName() + "() " + v.toString());
+
+    if (v == settingBtn) {
+      showSettingMenu();
+    } else if (v == btnBook) {
+      Intent Book = new Intent(Map.this, Picturebook.class);
+      startActivity(Book);
+    } else if (v == btnPlay) {
+      if (btnPlay.isChecked()) {
+        btnPlay.setBackgroundDrawable(drawableBtnPlay_Pause);
+        gameMaster.playGame();
+      } else {
+        btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
+        gameMaster.pauseGame();
+      }
+    } else if (v == btnStore) {
+      Intent Store = new Intent(Map.this, Store.class);
+      startActivity(Store);
     }
+  }
 
-    @Override
-    public void onClick(View v)
-    {
-        Log.d(toString(), AppManager.getMethodName() + "() " + v.toString());
+  public void quitExplicitly() {
+    AppManager.printSimpleLogInfo();
+    explicitQuit = true;
+  }
 
-        if (v == settingBtn) {
-            showSettingMenu();
-        }
-        else if (v == btnBook) {
-            Intent Book = new Intent(Map.this, Picturebook.class);
-            startActivity(Book);
-        }
-        else if (v == btnPlay) {
-            if (btnPlay.isChecked()) {
-                btnPlay.setBackgroundDrawable(drawableBtnPlay_Pause);
-                gameMaster.playGame();
-            }
-            else {
-                btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
-                gameMaster.pauseGame();
-            }
-        }
-        else if (v == btnStore) {
-            Intent Store = new Intent(Map.this, Store.class);
-            startActivity(Store);
-        }
+  private void showSettingMenu() {
+    AppManager.printSimpleLogInfo();
+    setting.show();
+
+    if (btnPlay.isChecked()) {
+      btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
+      gameMaster.pauseGame();
     }
-
-    public void quitExplicitly()
-    {
-        AppManager.printSimpleLogInfo();
-        explicitQuit = true;
-    }
-
-    private void showSettingMenu()
-    {
-        AppManager.printSimpleLogInfo();
-        setting.show();
-
-        if (btnPlay.isChecked()) {
-            btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
-            gameMaster.pauseGame();
-        }
-    }
+  }
 }
