@@ -34,7 +34,8 @@
         <activity
             android:name=".Map"
             android:label="MapAct"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape" >
+        </activity>
         <activity
             android:name=".Picturebook"
             android:label="PicturebookAct"

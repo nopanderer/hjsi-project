@@ -5,31 +5,28 @@
  * 
  * @author 이상인
  */
-public class EDElement
-{
-    public String name;
-    public int    level;
-    public int    type;
-    public int    dmg;
-    public float  rate;
-    public String imgName;
+public class EDElement {
+  public String name;
+  public int level;
+  public int type;
+  public int dmg;
+  public float rate;
+  public String imgName;
 
-    public EDElement()
-    {
-        name = "불";
-        level = 0;
-        type = 0;
-        dmg = 5;
-        rate = 0.5f;
-        imgName = "element_match";
-    }
+  public EDElement() {
+    name = "불";
+    level = 0;
+    type = 0;
+    dmg = 5;
+    rate = 0.5f;
+    imgName = "element_match";
+  }
 
-    @Override
-    public String toString()
-    {
-        String element = "<하급> " + name;
+  @Override
+  public String toString() {
+    String element = "<하급> " + name;
 
-        return element;
+    return element;
 
-    }
+  }
 }

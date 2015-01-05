@@ -3,27 +3,26 @@
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.widget.ImageView;
+import exam.game.AppManager;
 
-public class NewGame extends BaseActivity
-{
-    AnimationDrawable mAni;
+public class NewGame extends BaseActivity {
+  AnimationDrawable mAni;
 
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_newgame);
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    AppManager.printSimpleLogInfo();
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_newgame);
 
-        ImageView img = (ImageView) findViewById(R.id.loading);
-        mAni = (AnimationDrawable) img.getBackground();
+    ImageView img = (ImageView) findViewById(R.id.loading);
+    mAni = (AnimationDrawable) img.getBackground();
 
-        img.post(new Runnable()
-        {
-            public void run()
-            {
-                mAni.setOneShot(true);
-                mAni.start();
-            }
-        });
-    }
-
+    img.post(new Runnable() {
+      @Override
+      public void run() {
+        mAni.setOneShot(true);
+        mAni.start();
+      }
+    });
+  }
 }
