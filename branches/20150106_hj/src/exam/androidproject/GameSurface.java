@@ -12,242 +12,262 @@ import android.view.SurfaceView;
 import exam.game.AppManager;
 import exam.game.GameCamera;
 import exam.game.GameState;
-import exam.game.Unit;
+import exam.game.Mob;
 
 /*
  * 게임 내용(맵, 타워, 투사체 등)을 그려줄 서피스뷰 클래스이다. 쓰레드 사용해서 canvas에 그림을 그릴 수 있는 유일한 방법이다. 때문에 게임에선 거의 서피스뷰를
  * 사용한다고 한다. 내부적으로 더블버퍼링을 사용한다. 시스템 UI는 Map 액티비티에서 처리하고(Button 등), 게임 자체를 위한 UI(타워 선택, 카메라 이동 등)
  * 이벤트는 이 클래스에서 처리한다.
  */
-public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, Runnable {
-  private final String tag = getClass().getSimpleName();
+public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, Runnable
+{
+    private final String  tag = getClass().getSimpleName();
 
-  /* 서피스뷰 그리기에 필요한 객체 및 변수 */
-  private Thread mThreadPainter; // 그리기 스레드
-  private boolean mIsRunning; // 그리기 스레드 동작 상태
-  /*
-   * 메인스레드가 아닌 따로 생성한 스레드에서 그리는 걸 메인 스레드의 캔버스와 연결하는 역할을 한다. 서피스뷰는 액티비티에 컨텐트뷰로 설정되고, getHolder()를 사용해
-   * 그에 대한 홀더를 얻을 수 있다. 홀더는 더블버퍼링 기법으로 사용하는 (아마 메모리상의) 캔버스를 반환한다. (lockCanvas()를 통해서) 스레드를 이용하므로
-   * 캔버스에 락을 거는 것 같다. 홀더에도 synchronized를 써서 사용한다. 각 스레드가 언제 홀더에 접근하는지는 모르겠다. 홀더에서 구한 캔버스에 그림을 그리는 건
-   * 아무 스레드나 해도 상관없다. (편의상 서피스뷰에 러너블 인터페이스 구현) 스레드에서 홀더로부터 캔버스를 받아서 그림을 그리고, 캔버스를 반환하면 메인 스레드는 실제로 그
-   * 그림을 출력하는 메커니즘인것 같다.
-   */
-  private SurfaceHolder mHolder;
-
-  /*
-   * 테스트 값 출력용
-   */
-  private Paint mPaintInfo; // 텍스트 출력용 페인트 객체
-  private int mFps; // 그리기 fps
-
-  /* 카메라 */
-  private GameCamera camera;
-
-  /* 게임 리소스 등 */
-  private AppManager manager;
-  private GameState mState; // 인게임 오브젝트에 접근하기 위해서 필요함
-
-  /* 기본적인 생성자 */
-  public GameSurface(Context context, GameState state) {
-    super(context);
-
-    mState = state;
-    camera = GameCamera.getInstance();
-    manager = AppManager.getInstance();
-    init();
-  }
-
-  /* 생성자 호출시 공통 부문 초기화 */
-  private void init() {
+    /* 서피스뷰 그리기에 필요한 객체 및 변수 */
+    private Thread        mThreadPainter;                  // 그리기 스레드
+    private boolean       mIsRunning;                      // 그리기 스레드 동작 상태
     /*
-     * 홀더를 가져와서 Callback 인터페이스를 등록한다. 구현한 각 콜백은 surface의 변화가 있을 때마다 호출된다. 서피스뷰를 가진 액티비티가 화면에 보일 때
-     * created(), changed() 호출 화면에서 보이지 않을 때 destroyed() 호출 가로, 세로 전환될 때도 changed() 호출 될거고...
+     * 메인스레드가 아닌 따로 생성한 스레드에서 그리는 걸 메인 스레드의 캔버스와 연결하는 역할을 한다. 서피스뷰는 액티비티에 컨텐트뷰로 설정되고, getHolder()를 사용해
+     * 그에 대한 홀더를 얻을 수 있다. 홀더는 더블버퍼링 기법으로 사용하는 (아마 메모리상의) 캔버스를 반환한다. (lockCanvas()를 통해서) 스레드를 이용하므로
+     * 캔버스에 락을 거는 것 같다. 홀더에도 synchronized를 써서 사용한다. 각 스레드가 언제 홀더에 접근하는지는 모르겠다. 홀더에서 구한 캔버스에 그림을 그리는 건
+     * 아무 스레드나 해도 상관없다. (편의상 서피스뷰에 러너블 인터페이스 구현) 스레드에서 홀더로부터 캔버스를 받아서 그림을 그리고, 캔버스를 반환하면 메인 스레드는 실제로 그
+     * 그림을 출력하는 메커니즘인것 같다.
      */
-    mHolder = super.getHolder(); // 인게임 스레드에서 필요할 수도 있어서 똑같은 이름의 함수를 구현했기 때문에 super를 사용하게 됐음
-    mHolder.addCallback(this); // SurfaceHolder.Callback 구현한 메소드를 등록하는 것
-  }
+    private SurfaceHolder mHolder;
 
-  /* SurfaceHolder.Callback 구현 */
-  @Override
-  public void surfaceCreated(SurfaceHolder holder) {
-    AppManager.printSimpleLogInfo();
     /*
-     * 표면이 생성될 때 그리기 스레드를 시작한다. 표면은 아마 화면상에 실제로 보이는 그림을 말하는 것 같다. lockCanvas() 할 때 뱉어내는 캔버스가 더블버퍼링을
-     * 위한 메모리 상의 캔버스인 것 같고
+     * 테스트 값 출력용
      */
-    mThreadPainter = new Thread(this);
-    mIsRunning = true;
-    mThreadPainter.start();
-  }
+    private Paint         mPaintInfo;                      // 텍스트 출력용 페인트 객체
+    private int           mFps;                            // 그리기 fps
 
-  /*
-   * ☆★☆★☆★중요☆★☆★☆★☆★ 게임 화면을 띄운채로 핸드폰 잠궜다가 켜면, 게임 화면도 세로로 돌아가는 일이 생긴다. 그 때 에러남 나중에 액티비티 생명주기에 따른
-   * 처리(전화왔을 때 내려가는 경우 등등) 화면이 180도 돌아가거나 하는 경우도 처리해줘야겠다.
-   */
-  @Override
-  public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-    Log.i(tag, AppManager.getMethodName() + "() (width: " + width + ", height: " + height + ")");
-    // 표면의 크기가 바뀔 때 그 크기를 기록한다.
-    camera.setCamSize(width, height);
-  }
+    /* 카메라 */
+    private GameCamera    camera;
 
-  @Override
-  public void surfaceDestroyed(SurfaceHolder holder) {
-    AppManager.printSimpleLogInfo();
-    /*
-     * 표면이 파괴되기 직전에 그리기를 중지한다. 이 콜백이 끝나면 완전히 파괴된다. 파괴된 후에도 스레드가 죽지않으면 canvas에 그리기를 시도할 경우 에러가 난다.
-     * 조건문 false를 한다고 스레드가 바로 멈추는 건 아님 그래서 join을 통해 그리기 스레드가 끝날 때까지 표면 파괴를 늦춘다.
-     */
-    mIsRunning = false;
-    try {
-      mThreadPainter.join();
-    } catch (Exception e) {
-    }
-  }
+    /* 게임 리소스 등 */
+    private AppManager    manager;
+    private GameState     mState;                          // 인게임 오브젝트에 접근하기 위해서 필요함
 
-  /**
-   * 지금은 터치이벤트를 카메라에 짬때린다.
-   */
-  @Override
-  public boolean onTouchEvent(MotionEvent event) {
-    boolean isCameraEvent = camera.touchHandler(event);
+    /* 기본적인 생성자 */
+    public GameSurface(Context context, GameState state)
+    {
+        super(context);
 
-    if (event.getAction() == MotionEvent.ACTION_UP) {
-      /*
-       * 터치 이벤트 처리에서 ACTION_UP의 경우에 무조건 performClick을 호출해줘야한다고 함. 안 하면 경고 뜸. performClick() 자체도
-       * 오버라이드 해줘야함
-       */
-      performClick();
+        mState = state;
+        camera = GameCamera.getInstance();
+        manager = AppManager.getInstance();
+        init();
     }
 
-    if (isCameraEvent == false) {
-      return super.onTouchEvent(event); // 내가 사용할 이벤트와 전혀 상관없으면 슈퍼클래스에서 처리
-    } else {
-      return true;
+    /* 생성자 호출시 공통 부문 초기화 */
+    private void init()
+    {
+        /*
+         * 홀더를 가져와서 Callback 인터페이스를 등록한다. 구현한 각 콜백은 surface의 변화가 있을 때마다 호출된다. 서피스뷰를 가진 액티비티가 화면에 보일 때
+         * created(), changed() 호출 화면에서 보이지 않을 때 destroyed() 호출 가로, 세로 전환될 때도 changed() 호출 될거고...
+         */
+        mHolder = super.getHolder(); // 인게임 스레드에서 필요할 수도 있어서 똑같은 이름의 함수를 구현했기 때문에 super를 사용하게 됐음
+        mHolder.addCallback(this); // SurfaceHolder.Callback 구현한 메소드를 등록하는 것
     }
-  }
 
-  /* 필요하다고 해서 했음 */
-  @Override
-  public boolean performClick() {
-    AppManager.printSimpleLogInfo();
-    return super.performClick();
-  }
-
-  /* 실제로 그리기를 처리할 부분이다 */
-  @Override
-  public void run() {
-    Canvas canvas; // lockCanvas()로 얻어온 캔버스를 가리킬 변수
-    Bitmap face; // 게임 개체들의 이미지를 가리킬 변수
-
-    /* fps 계산을 위한 변수 */
-    long fpsStartTime;
-    long fpsElapsedTime = 0L;
-    int fps = 0;
+    /* SurfaceHolder.Callback 구현 */
+    @Override
+    public void surfaceCreated(SurfaceHolder holder)
+    {
+        AppManager.printSimpleLogInfo();
+        /*
+         * 표면이 생성될 때 그리기 스레드를 시작한다. 표면은 아마 화면상에 실제로 보이는 그림을 말하는 것 같다. lockCanvas() 할 때 뱉어내는 캔버스가 더블버퍼링을
+         * 위한 메모리 상의 캔버스인 것 같고
+         */
+        mThreadPainter = new Thread(this);
+        mIsRunning = true;
+        mThreadPainter.start();
+    }
 
     /*
-     * Bitmap scaledBg = mImgBackground; int oldWidth = GameCamera.mLogicalWidth; int oldX = 0, oldY
-     * = 0;
+     * ☆★☆★☆★중요☆★☆★☆★☆★ 게임 화면을 띄운채로 핸드폰 잠궜다가 켜면, 게임 화면도 세로로 돌아가는 일이 생긴다. 그 때 에러남 나중에 액티비티 생명주기에 따른
+     * 처리(전화왔을 때 내려가는 경우 등등) 화면이 180도 돌아가거나 하는 경우도 처리해줘야겠다.
      */
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+    {
+        Log.i(tag, AppManager.getMethodName() + "() (width: " + width + ", height: " + height + ")");
+        // 표면의 크기가 바뀔 때 그 크기를 기록한다.
+        camera.setCamSize(width, height);
+    }
 
-    while (mIsRunning) {
-      // 프레임 시작 시간을 구한다.
-      fpsStartTime = System.currentTimeMillis();
-
-      // 전체 그리기 수행
-      synchronized (mHolder) {
-        // 캔버스를 잠그는 듯
-        canvas = mHolder.lockCanvas();
-        if (canvas == null) {
-          break;
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder)
+    {
+        AppManager.printSimpleLogInfo();
+        /*
+         * 표면이 파괴되기 직전에 그리기를 중지한다. 이 콜백이 끝나면 완전히 파괴된다. 파괴된 후에도 스레드가 죽지않으면 canvas에 그리기를 시도할 경우 에러가 난다.
+         * 조건문 false를 한다고 스레드가 바로 멈추는 건 아님 그래서 join을 통해 그리기 스레드가 끝날 때까지 표면 파괴를 늦춘다.
+         */
+        mIsRunning = false;
+        try
+        {
+            mThreadPainter.join();
         }
+        catch (Exception e)
+        {
+        }
+    }
 
-        GameCamera.getInstance().autoScroll();
+    /**
+     * 지금은 터치이벤트를 카메라에 짬때린다.
+     */
+    @Override
+    public boolean onTouchEvent(MotionEvent event)
+    {
+        boolean isCameraEvent = camera.touchHandler(event);
 
-        // 카메라가 벗어난 배경 바깥을 메꾼다.
-        canvas.drawColor(Color.DKGRAY);
-
-        // 현재 카메라 배율에 맞게 캔버스를 확대/축소함
-        canvas.save();
-        canvas.scale(GameCamera.getInstance().scale(), GameCamera.getInstance().scale(), 0, 0);
-        // 맵 배경을 그린다.
-        canvas.drawBitmap(manager.getBitmap("background"), 0 - camera.x(), 0 - camera.y(), null);
-
-        /* 기타 그리기 수행 */
-        // game 오브젝트를 그린다
-        synchronized (mState) {
-          // 게임의 유닛들을 그린다.
-          for (Unit unit : mState.getUnits()) {
-            // 1. 보이는지 검사
-            // if (camera.showInCamera(unit)) {
-            // 보이므로 그린다
-            face = AppManager.getInstance().getBitmap(unit.getBitmapKey());
-            // canvas.drawBitmap(face, unit.left() - camera.x(), unit.top() - camera.y(), null);
-            // }
-
+        if (event.getAction() == MotionEvent.ACTION_UP)
+        {
             /*
-             * 스레드 종료가 필요한 경우 최대한 빨리 끝내기 위해 그림을 그리는 도중에도 스레드 종료 조건을 검사한다.
+             * 터치 이벤트 처리에서 ACTION_UP의 경우에 무조건 performClick을 호출해줘야한다고 함. 안 하면 경고 뜸. performClick() 자체도
+             * 오버라이드 해줘야함
              */
-            if (mIsRunning == false) {
-              break;
-            }
-          }
-
-          // 테스트용 움직이는 성냥 그리기
-          // Rect rect = new Rect();
-          // camera.getPhysicalBound(rect, mState.x, mState.y, 64, 64);
-          // canvas.drawBitmap(mState.mImgElement, rect.left, rect.top, null);
+            performClick();
         }
+
+        if (isCameraEvent == false)
+        {
+            return super.onTouchEvent(event); // 내가 사용할 이벤트와 전혀 상관없으면 슈퍼클래스에서 처리
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    /* 필요하다고 해서 했음 */
+    @Override
+    public boolean performClick()
+    {
+        AppManager.printSimpleLogInfo();
+        return super.performClick();
+    }
+
+    /* 실제로 그리기를 처리할 부분이다 */
+    @Override
+    public void run()
+    {
+        Canvas canvas; // lockCanvas()로 얻어온 캔버스를 가리킬 변수
+        Bitmap face; // 게임 개체들의 이미지를 가리킬 변수
+
+        /* fps 계산을 위한 변수 */
+        long fpsStartTime;
+        long fpsElapsedTime = 0L;
+        int fps = 0;
+
+        /*
+         * Bitmap scaledBg = mImgBackground; int oldWidth = GameCamera.mLogicalWidth; int oldX = 0, oldY
+         * = 0;
+         */
+
+        while (mIsRunning)
+        {
+            // 프레임 시작 시간을 구한다.
+            fpsStartTime = System.currentTimeMillis();
+
+            // 전체 그리기 수행
+            synchronized (mHolder)
+            {
+                // 캔버스를 잠그는 듯
+                canvas = mHolder.lockCanvas();
+                if (canvas == null)
+                {
+                    break;
+                }
+
+                GameCamera.getInstance().autoScroll();
+
+                // 카메라가 벗어난 배경 바깥을 메꾼다.
+                canvas.drawColor(Color.DKGRAY);
+
+                // 현재 카메라 배율에 맞게 캔버스를 확대/축소함
+                canvas.save();
+                canvas.scale(GameCamera.getInstance().scale(), GameCamera.getInstance().scale(), 0, 0);
+                // 맵 배경을 그린다.
+                canvas.drawBitmap(manager.getBitmap("background"), 0 - camera.x(), 0 - camera.y(), null);
+
+                /* 기타 그리기 수행 */
+                // game 오브젝트를 그린다
+                synchronized (mState)
+                {
+                    // 게임의 유닛들을 그린다.
+                    for (Mob mob : mState.getMobs())
+                    {
+                        // 1. 보이는지 검사
+                        // 보이므로 그린다
+
+                        face = mState.mImgElement;
+                        mob.draw(canvas, face);
+
+                        /*
+                         * 스레드 종료가 필요한 경우 최대한 빨리 끝내기 위해 그림을 그리는 도중에도 스레드 종료 조건을 검사한다.
+                         */
+                        if (mIsRunning == false)
+                        {
+                            break;
+                        }
+                    }
+
+                    // 테스트용 움직이는 성냥 그리기
+                    // Rect rect = new Rect();
+                    // camera.getPhysicalBound(rect, mState.x, mState.y, 64, 64);
+                    // canvas.drawBitmap(mState.mImgElement, rect.left, rect.top, null);
+                }
+                canvas.restore();
+
+                // 테스트 정보 표시
+                displayInformation(canvas);
+
+                // 캔버스의 락을 풀고 실제 화면을 갱신한다.
+                mHolder.unlockCanvasAndPost(canvas);
+            }
+
+            // 프레임을 구한다.
+            fps++;
+            fpsElapsedTime += System.currentTimeMillis() - fpsStartTime;
+            if (fpsElapsedTime >= 1000) // 프레임율 표시는 1초마다 갱신함
+            {
+                mFps = fps;
+                fps = 0;
+                fpsElapsedTime = 0L;
+            }
+        }
+
+        Log.i(tag, AppManager.getMethodName() + "() is end.");
+    }
+
+    /* 개발 참고용 정보 표시 */
+    private void displayInformation(Canvas canvas)
+    {
+        // 현재 메모리 정보 출력용
+        Long totMem = 0L;
+        Long freeMem;
+
+        if (mPaintInfo == null)
+        {
+            mPaintInfo = new Paint();
+            mPaintInfo.setAntiAlias(true);
+            mPaintInfo.setTextSize(50);
+            totMem = Runtime.getRuntime().totalMemory();
+        }
+
+        freeMem = Runtime.getRuntime().freeMemory();
+
+        // 그리기 fps, 게임 로직 fps
+        canvas.save();
+        canvas.drawText(mFps + " fps (" + AppManager.getInstance().getLogicFps() + " fps)", 120, 60, mPaintInfo);
+        canvas.translate(0, 60);
+        // 카메라 좌상단 좌표 (논리적인 기준점)
+        canvas.drawText("CAM left: " + camera.x() + " / top: " + camera.y() + " / scale: " + (int) (camera.scale() * 100 + 0.5) + "%", 120, 60, mPaintInfo);
+        canvas.translate(0, 60);
+        // 메모리 정보 표시
+        canvas.drawText("Used Memory: " + (totMem - freeMem) / (1024 * 1024) + " / " + totMem / (1024 * 1024) + "M", 120, 60, mPaintInfo);
         canvas.restore();
-
-        // 테스트 정보 표시
-        displayInformation(canvas);
-
-        // 캔버스의 락을 풀고 실제 화면을 갱신한다.
-        mHolder.unlockCanvasAndPost(canvas);
-      }
-
-      // 프레임을 구한다.
-      fps++;
-      fpsElapsedTime += System.currentTimeMillis() - fpsStartTime;
-      if (fpsElapsedTime >= 1000) // 프레임율 표시는 1초마다 갱신함
-      {
-        mFps = fps;
-        fps = 0;
-        fpsElapsedTime = 0L;
-      }
     }
-
-    Log.i(tag, AppManager.getMethodName() + "() is end.");
-  }
-
-  /* 개발 참고용 정보 표시 */
-  private void displayInformation(Canvas canvas) {
-    // 현재 메모리 정보 출력용
-    Long totMem = 0L;
-    Long freeMem;
-
-    if (mPaintInfo == null) {
-      mPaintInfo = new Paint();
-      mPaintInfo.setAntiAlias(true);
-      mPaintInfo.setTextSize(50);
-      totMem = Runtime.getRuntime().totalMemory();
-    }
-
-    freeMem = Runtime.getRuntime().freeMemory();
-
-    // 그리기 fps, 게임 로직 fps
-    canvas.save();
-    canvas.drawText(mFps + " fps (" + AppManager.getInstance().getLogicFps() + " fps)", 120, 60,
-        mPaintInfo);
-    canvas.translate(0, 60);
-    // 카메라 좌상단 좌표 (논리적인 기준점)
-    canvas.drawText("CAM left: " + camera.x() + " / top: " + camera.y() + " / scale: "
-        + (int) (camera.scale() * 100 + 0.5) + "%", 120, 60, mPaintInfo);
-    canvas.translate(0, 60);
-    // 메모리 정보 표시
-    canvas.drawText("Used Memory: " + (totMem - freeMem) / (1024 * 1024) + " / " + totMem
-        / (1024 * 1024) + "M", 120, 60, mPaintInfo);
-    canvas.restore();
-  }
 }
