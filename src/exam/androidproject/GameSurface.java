@@ -1,5 +1,7 @@
 package exam.androidproject;
 
+import hjsi.timer.TimeManager;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -222,10 +224,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   }
 
   /* 개발 참고용 정보 표시 */
+  @SuppressLint("DefaultLocale")
   private void displayInformation(Canvas canvas) {
     // 현재 메모리 정보 출력용
-    Long totMem = 0L;
-    Long freeMem;
+    long totMem = 0L;
+    long freeMem;
 
     if (mPaintInfo == null) {
       mPaintInfo = new Paint();
@@ -248,6 +251,12 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     // 메모리 정보 표시
     canvas.drawText("Used Memory: " + (totMem - freeMem) / (1024 * 1024) + " / " + totMem
         / (1024 * 1024) + "M", 120, 60, mPaintInfo);
+    canvas.translate(0, 60);
+    String min =
+        String.format("%02d", (int) (TimeManager.getInstance().getWorldTime() / 1000 / 60));
+    String sec =
+        String.format("%02d", (int) (TimeManager.getInstance().getWorldTime() / 1000 % 60));
+    canvas.drawText("World Time: " + min + ":" + sec, 120, 60, mPaintInfo);
     canvas.restore();
   }
 }

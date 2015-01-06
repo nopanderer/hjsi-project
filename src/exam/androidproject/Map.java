@@ -1,5 +1,6 @@
 ﻿package exam.androidproject;
 
+import hjsi.timer.TimeManager;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
@@ -12,7 +13,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ToggleButton;
 import exam.game.AppManager;
 import exam.game.GameMaster;
@@ -47,8 +47,9 @@ public class Map extends BaseActivity implements OnClickListener {
 
     LayoutInflater inflater = getLayoutInflater();
     View layout = inflater.inflate(R.layout.activity_map, null);
-    addContentView(layout, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-        LayoutParams.MATCH_PARENT));
+    addContentView(layout, new LinearLayout.LayoutParams(
+        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+        android.view.ViewGroup.LayoutParams.MATCH_PARENT));
 
     drawableBtnPlay_Pause = getResources().getDrawable(R.drawable.btn_pause);
     drawableBtnPlay_Play = getResources().getDrawable(R.drawable.btn_play);
@@ -74,9 +75,9 @@ public class Map extends BaseActivity implements OnClickListener {
     btnPlay.setOnClickListener(this);
     btnStore.setOnClickListener(this);
 
-    music = MediaPlayer.create(this, R.raw.bgm);
-    music.setLooping(true);
-    music.start();
+    Map.music = MediaPlayer.create(this, R.raw.bgm);
+    Map.music.setLooping(true);
+    Map.music.start();
 
     /* GameMaster 생성 */
     gameMaster = new GameMaster(gameView.getHolder(), gameState);
@@ -89,11 +90,12 @@ public class Map extends BaseActivity implements OnClickListener {
 
     if (gameMaster != null) {
       gameMaster.pauseGame();
+      TimeManager.getInstance().stop();
       btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
     }
 
-    if (music != null) {
-      music.pause();
+    if (Map.music != null) {
+      Map.music.pause();
     }
   }
 
@@ -102,8 +104,8 @@ public class Map extends BaseActivity implements OnClickListener {
     AppManager.printSimpleLogInfo();
     super.onResume();
 
-    if (music != null) {
-      music.start();
+    if (Map.music != null) {
+      Map.music.start();
     }
   }
 
@@ -114,11 +116,12 @@ public class Map extends BaseActivity implements OnClickListener {
 
     if (gameMaster != null) {
       gameMaster.quitGame();
+      TimeManager.getInstance().stop();
     }
 
-    if (music != null) {
-      music.stop();
-      music.release();
+    if (Map.music != null) {
+      Map.music.stop();
+      Map.music.release();
     }
 
     if (explicitQuit) {
@@ -149,9 +152,11 @@ public class Map extends BaseActivity implements OnClickListener {
       if (btnPlay.isChecked()) {
         btnPlay.setBackgroundDrawable(drawableBtnPlay_Pause);
         gameMaster.playGame();
+        TimeManager.getInstance().start();
       } else {
         btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
         gameMaster.pauseGame();
+        TimeManager.getInstance().stop();
       }
     } else if (v == btnStore) {
       Intent Store = new Intent(Map.this, Store.class);
@@ -171,6 +176,7 @@ public class Map extends BaseActivity implements OnClickListener {
     if (btnPlay.isChecked()) {
       btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
       gameMaster.pauseGame();
+      TimeManager.getInstance().stop();
     }
   }
 }
