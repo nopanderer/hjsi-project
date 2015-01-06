@@ -10,7 +10,7 @@ public class GameMaster implements Runnable {
   private final String tag = getClass().getSimpleName();
 
   /* 안드로이드 시스템 필요 멤버 변수 */
-  Thread mThreadMaster; // 게임 진행 스레드
+  private Thread mThreadMaster; // 게임 진행 스레드
   private boolean mIsRunning = true; // 진행 스레드 동작 상태
   private boolean mIsPlaying = false; // 게임 플레이 상태 (게임 중 or 일시정지)
 
