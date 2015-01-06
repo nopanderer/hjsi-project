@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="help_text">
+        <item>로딩 중에는 아무것도 할 수 없다.</item>
+        <item>1+1=1이다.</item>
+        <item></item>
+    </string-array>
+
+</resources>
