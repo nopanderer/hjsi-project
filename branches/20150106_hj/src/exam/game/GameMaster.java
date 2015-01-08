@@ -41,6 +41,7 @@ public class GameMaster implements Runnable
         long fpsRealTime; // 프레임당 실제 소요 시간
         long fpsDelayTime; // 목표 소요시간 - 실제 소요시간만큼 스레드 sleep
         long fpsElapsedTime = 0L; // 1초 측정을 위한 변수
+        int wave = 0;
 
         while (mIsRunning)
         {

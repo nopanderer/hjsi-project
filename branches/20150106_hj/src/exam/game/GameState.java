@@ -11,25 +11,26 @@ import android.graphics.BitmapFactory;
  */
 public class GameState
 {
-    ArrayList<Mob> arTestUnits = new ArrayList<Mob>();
+    ArrayList<Mob>    arTestUnits = new ArrayList<Mob>();
 
-    public Bitmap  mImgElement;
+    public Bitmap     mImgMob;                           // 몹 비트맵
+    public int        wave        = 1;                   // 현재 웨이브
+    private final int FINAL_WAVE  = 2;                   // 끝판 라운드
 
     public GameState(Resources res)
     {
-        EDElement mElement = new EDElement();
-
-        int drawableId = res.getIdentifier(mElement.imgName, "drawable", "exam.androidproject");
-        mImgElement = BitmapFactory.decodeResource(res, drawableId);
-        // AppManager.getInstance().addBitmap(mElement.imgName, mImgElement);
-
-        if ((mImgElement.getWidth() != 64) || (mImgElement.getHeight() != 64))
+        for (; wave <= FINAL_WAVE; wave++)
         {
-            mImgElement = Bitmap.createScaledBitmap(mImgElement, 64, 64, true);
+            int drawableId = res.getIdentifier("mob" + wave, "drawable", "exam.androidproject");
+            mImgMob = BitmapFactory.decodeResource(res, drawableId);
+
+            if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64))
+            {
+                mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
+            }
+
+            arTestUnits.add(new Mob(90, 90, 64, 64, mImgMob));
         }
-
-        arTestUnits.add(new Mob(15, 15, 64, 64));
-
     }
 
     public ArrayList<Mob> getMobs()

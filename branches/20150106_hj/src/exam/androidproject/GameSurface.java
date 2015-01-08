@@ -201,9 +201,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
                     {
                         // 1. 보이는지 검사
                         // 보이므로 그린다
-
-                        face = mState.mImgElement;
-                        mob.draw(canvas, face);
+                        mob.draw(canvas);
 
                         /*
                          * 스레드 종료가 필요한 경우 최대한 빨리 끝내기 위해 그림을 그리는 도중에도 스레드 종료 조건을 검사한다.
