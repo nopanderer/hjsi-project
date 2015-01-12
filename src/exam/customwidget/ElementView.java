@@ -1,4 +1,4 @@
-﻿package exam.customwidget;
+package exam.customwidget;
 
 import java.util.HashMap;
 
@@ -8,17 +8,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import exam.game.EDElement;
 
 /**
- * 원소의 정보를 보여주는 뷰<br/>
- * <br/>
- * <<<할 일>>><br/>
+ * 원소의 정보를 보여주는 뷰<br>
  * 클릭 가능 여부 구현해야함.
- * 
+ *
  * @author 이상인
  */
 public class ElementView extends RelativeLayout {
@@ -61,25 +60,26 @@ public class ElementView extends RelativeLayout {
 
     @SuppressWarnings("unused")
     public int getIndex() {
-      return this.ordinal();
+      return ordinal();
     }
 
     public int getId() {
-      return this.ordinal() + 1;
+      return ordinal() + 1;
     }
   }
 
   /* static 초기화 */
   static {
-    arDrawable = new HashMap<String, RoundedDrawable>();
+    ElementView.arDrawable = new HashMap<String, RoundedDrawable>();
   }
 
   private void init(EDElement element) {
     // element가 null이면 기본값 Element를 할당한다. 게임 다 만들면 기본값 Element 쓸 일은 없음.
-    if (element != null)
+    if (element != null) {
       mElement = element;
-    else
+    } else {
       mElement = new EDElement();
+    }
 
     // 내부에 들어가는 뷰를 생성하고 id 값도 할당해줌
     mElementIcon = new ImageView(getContext());
@@ -124,9 +124,15 @@ public class ElementView extends RelativeLayout {
     lpIcon.addRule(RelativeLayout.ALIGN_PARENT_TOP);
     addView(mElementIcon, lpIcon);
 
-    LayoutParams lpName = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-    LayoutParams lpDmg = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-    LayoutParams lpRate = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    LayoutParams lpName =
+        new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+    LayoutParams lpDmg =
+        new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+    LayoutParams lpRate =
+        new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 
     // 이름, 등급 표시부분 레이아웃
     // 아이콘의 밑에 붙여서 표시
@@ -154,21 +160,22 @@ public class ElementView extends RelativeLayout {
 
   /**
    * ElementView에 보여질 EDElement를 할당하여 이 뷰를 구성하는 위젯들에게 데이터를 설정함.
-   * 
+   *
    * @param element 이 뷰에 보여줄 원소
    */
   public void setElement(EDElement element) {
-    if (element == null)
+    if (element == null) {
       Log.e("null error", "EDElement 요소가 null 값임!");
-    else
+    } else {
       mElement = element;
+    }
 
     RoundedDrawable roundIcon;
 
     // drawable을 생성한 적이 있으면 새로 만들지 않고 가져다 쓴다.
     // 안하면 리스트뷰에서 렉걸림..
-    if (arDrawable.containsKey(mElement.imgName)) {
-      roundIcon = arDrawable.get(mElement.imgName);
+    if (ElementView.arDrawable.containsKey(mElement.imgName)) {
+      roundIcon = ElementView.arDrawable.get(mElement.imgName);
     } else {
       // 파일 이름으로 리소스 ID 구해서 비트맵 파일을 만든다
       int drawableId =
@@ -176,12 +183,13 @@ public class ElementView extends RelativeLayout {
       Bitmap bm = BitmapFactory.decodeResource(getResources(), drawableId);
 
       // 테스트용으로 사이즈 다른 이미지 대충 쓰니까 크기 조절해야함.
-      if (bm.getWidth() != elementIconSize || bm.getHeight() != elementIconSize)
+      if (bm.getWidth() != elementIconSize || bm.getHeight() != elementIconSize) {
         bm = Bitmap.createScaledBitmap(bm, elementIconSize, elementIconSize, true);
+      }
 
       roundIcon = new RoundedDrawable(bm);
       // 한 번 생성한 드로블 객체는 맵 구조에 넣어서 보관함. 재활용을 위한 조치
-      arDrawable.put(mElement.imgName, roundIcon);
+      ElementView.arDrawable.put(mElement.imgName, roundIcon);
     }
 
     mElementIcon.setImageDrawable(roundIcon);
@@ -192,9 +200,9 @@ public class ElementView extends RelativeLayout {
   }
 
   /**
-   * Element의 속성을 보여주는 정도를 바꾼다.<br/>
+   * Element의 속성을 보여주는 정도를 바꾼다.<br>
    * 보여주는 양이 바뀌므로 뷰의 크기도 바뀐다.
-   * 
+   *
    * @param detailLevel 0~2 사이의 값을 설정한다.
    *        <ul>
    *        <li>0: 그림만 보여준다.</li>
@@ -206,21 +214,21 @@ public class ElementView extends RelativeLayout {
     this.detailLevel = detailLevel;
     switch (detailLevel) {
       case 0:
-        mName.setVisibility(GONE);
-        mDmg.setVisibility(GONE);
-        mRate.setVisibility(GONE);
+        mName.setVisibility(View.GONE);
+        mDmg.setVisibility(View.GONE);
+        mRate.setVisibility(View.GONE);
         break;
 
       case 1:
-        mName.setVisibility(VISIBLE);
-        mDmg.setVisibility(GONE);
-        mRate.setVisibility(GONE);
+        mName.setVisibility(View.VISIBLE);
+        mDmg.setVisibility(View.GONE);
+        mRate.setVisibility(View.GONE);
         break;
 
       case 2:
-        mName.setVisibility(VISIBLE);
-        mDmg.setVisibility(VISIBLE);
-        mRate.setVisibility(VISIBLE);
+        mName.setVisibility(View.VISIBLE);
+        mDmg.setVisibility(View.VISIBLE);
+        mRate.setVisibility(View.VISIBLE);
         break;
     }
 

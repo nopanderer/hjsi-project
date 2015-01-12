@@ -1,8 +1,8 @@
-﻿package exam.game;
+package exam.game;
 
 /**
  * ElementView 테스트용으로 하나 만듦
- * 
+ *
  * @author 이상인
  */
 public class EDElement {

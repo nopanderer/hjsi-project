@@ -1,4 +1,4 @@
-﻿package exam.androidproject;
+package exam.androidproject;
 
 import hjsi.timer.TimeManager;
 import android.content.DialogInterface;
@@ -28,8 +28,6 @@ public class Map extends BaseActivity implements OnClickListener {
   Setting setting;
   public static MediaPlayer music;
 
-  /* 게임 정보를 갖고있는 개체 */
-  private GameState gameState;
   /* 게임을 진행하는 인게임 스레드를 가진 개체 */
   private GameMaster gameMaster;
 
@@ -38,11 +36,8 @@ public class Map extends BaseActivity implements OnClickListener {
     AppManager.printSimpleLogInfo();
     super.onCreate(savedInstanceState);
 
-    // GameState 생성
-    gameState = new GameState(getResources());
-
     // surfaceview 등록
-    GameSurface gameView = new GameSurface(this, gameState);
+    GameSurface gameView = new GameSurface(this);
     setContentView(gameView);
 
     LayoutInflater inflater = getLayoutInflater();
@@ -79,8 +74,11 @@ public class Map extends BaseActivity implements OnClickListener {
     Map.music.setLooping(true);
     Map.music.start();
 
+
     /* GameMaster 생성 */
-    gameMaster = new GameMaster(gameView.getHolder(), gameState);
+    gameMaster = new GameMaster();
+
+    Log.d(getClass().getSimpleName(), AppManager.getMethodName() + " is finished.");
   }
 
   @Override
@@ -90,7 +88,7 @@ public class Map extends BaseActivity implements OnClickListener {
 
     if (gameMaster != null) {
       gameMaster.pauseGame();
-      TimeManager.getInstance().stop();
+      TimeManager.getInstance().pauseTime();
       btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
     }
 
@@ -116,7 +114,7 @@ public class Map extends BaseActivity implements OnClickListener {
 
     if (gameMaster != null) {
       gameMaster.quitGame();
-      TimeManager.getInstance().stop();
+      TimeManager.getInstance().stopTime();
     }
 
     if (Map.music != null) {
@@ -127,6 +125,7 @@ public class Map extends BaseActivity implements OnClickListener {
     if (explicitQuit) {
       /* 사용했던 리소스를 해제한다. */
       AppManager.getInstance().allRecycle();
+      GameState.getInstance().purgeGameState(); // 게임 상태정보를 없앤다.
     }
   }
 
@@ -152,11 +151,11 @@ public class Map extends BaseActivity implements OnClickListener {
       if (btnPlay.isChecked()) {
         btnPlay.setBackgroundDrawable(drawableBtnPlay_Pause);
         gameMaster.playGame();
-        TimeManager.getInstance().start();
+        TimeManager.getInstance().startTime();
       } else {
         btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
         gameMaster.pauseGame();
-        TimeManager.getInstance().stop();
+        TimeManager.getInstance().pauseTime();
       }
     } else if (v == btnStore) {
       Intent Store = new Intent(Map.this, Store.class);
@@ -176,7 +175,7 @@ public class Map extends BaseActivity implements OnClickListener {
     if (btnPlay.isChecked()) {
       btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
       gameMaster.pauseGame();
-      TimeManager.getInstance().stop();
+      TimeManager.getInstance().pauseTime();
     }
   }
 }
