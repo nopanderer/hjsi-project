@@ -1,4 +1,4 @@
-﻿package exam.androidproject;
+package exam.androidproject;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

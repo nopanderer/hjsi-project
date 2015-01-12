@@ -1,5 +1,6 @@
-﻿package exam.androidproject;
+package exam.androidproject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,36 +27,35 @@ public class MainActivity extends BaseActivity {
     switch (v.getId()) {
       case R.id.btn_gamestart:
         Intent intentForNewGame = new Intent(MainActivity.this, Picturebook.class);
-        startActivityForResult(intentForNewGame, ACT_NEWGAME);
+        startActivityForResult(intentForNewGame, MainActivity.ACT_NEWGAME);
         break;
       case R.id.btn_continue:
         Intent intentForContGame = new Intent(MainActivity.this, Continue.class);
-        startActivityForResult(intentForContGame, ACT_CONTINUE);
+        startActivityForResult(intentForContGame, MainActivity.ACT_CONTINUE);
         break;
 
       case R.id.btn_exit:
         // view가 alert 이면 팝업실행 즉 버튼을 누르면 팝업창이 뜨는 조건
         new AlertDialog.Builder(MainActivity.this).setTitle("게임종료") // 팝업창 타이틀바
-            .setMessage("종료하시겠습니까?") // 팝업창 내용
-            .setPositiveButton("게임종료", new DialogInterface.OnClickListener() {
-              @Override
-              public void onClick(DialogInterface dialog, int which) {
-                // TODO Auto-generated method stub
-                finish();
-              }
-            }).setNeutralButton("닫기", new DialogInterface.OnClickListener() {
-              @Override
-              public void onClick(DialogInterface dlg, int sumthin) {
-                // 닫기 버튼을 누르면 아무것도 안하고 닫기 때문에 그냥 비움
-              }
-            }).show(); // 팝업창 보여줌
+        .setMessage("종료하시겠습니까?") // 팝업창 내용
+        .setPositiveButton("게임종료", new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            finish();
+          }
+        }).setNeutralButton("닫기", new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dlg, int sumthin) {
+            // 닫기 버튼을 누르면 아무것도 안하고 닫기 때문에 그냥 비움
+          }
+        }).show(); // 팝업창 보여줌
         break;
     }
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
    */
   @Override
@@ -64,7 +64,7 @@ public class MainActivity extends BaseActivity {
     switch (requestCode) {
       case ACT_NEWGAME:
       case ACT_CONTINUE:
-        if (resultCode == RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
           Intent intentForActMap = new Intent(getApplicationContext(), Map.class);
           startActivity(intentForActMap);
         }

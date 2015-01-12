@@ -21,7 +21,7 @@ public class AppManager {
   private volatile int logicFps;
 
   private AppManager() {
-    tag = getClass().getSimpleName();
+    AppManager.tag = getClass().getSimpleName();
 
     arAct = new ArrayList<BaseActivity>();
     arBitmap = new HashMap<String, Bitmap>();
@@ -31,15 +31,15 @@ public class AppManager {
    * @return 유일한 인스턴스를 반환함
    */
   public static AppManager getInstance() {
-    if (uniqueInstance == null) {
+    if (AppManager.uniqueInstance == null) {
       synchronized (AppManager.class) {
-        if (uniqueInstance == null) {
-          uniqueInstance = new AppManager();
+        if (AppManager.uniqueInstance == null) {
+          AppManager.uniqueInstance = new AppManager();
         }
       }
     }
 
-    return uniqueInstance;
+    return AppManager.uniqueInstance;
   }
 
   /**
@@ -91,7 +91,7 @@ public class AppManager {
       }
     }
 
-    Log.d(tag, AppManager.getMethodName() + "() " + act.toString());
+    Log.d(AppManager.tag, AppManager.getMethodName() + "() " + act.toString());
   }
 
   public void removeActivity(BaseActivity act) {
@@ -99,7 +99,7 @@ public class AppManager {
       arAct.remove(act);
     }
 
-    Log.d(tag, AppManager.getMethodName() + "() " + act.toString());
+    Log.d(AppManager.tag, AppManager.getMethodName() + "() " + act.toString());
   }
 
   /**
@@ -108,7 +108,7 @@ public class AppManager {
   public void quitApp() {
     for (Activity act : arAct) {
       act.finish();
-      Log.i(tag, act.toString() + ".finish();");
+      Log.i(AppManager.tag, act.toString() + ".finish();");
     }
   }
 
@@ -127,14 +127,14 @@ public class AppManager {
     } else {
       msg += " already exists.";
     }
-    Log.d(tag, msg);
+    Log.d(AppManager.tag, msg);
   }
 
   public Bitmap getBitmap(String key) throws NullPointerException {
     if (arBitmap.containsKey(key) == false) {
       String msg = AppManager.getMethodName() + "(";
       msg += "\"" + key + "\") returned null";
-      Log.d(tag, msg);
+      Log.d(AppManager.tag, msg);
 
       throw new NullPointerException("이 메소드는 반드시 제대로된 객체를 반환해야함.");
     }
@@ -158,7 +158,7 @@ public class AppManager {
     msg = msg.substring(0, msg.length() - 1);
     msg += " cleared";
 
-    Log.d(tag, msg);
+    Log.d(AppManager.tag, msg);
   }
 
   public int getLogicFps() {

@@ -1,4 +1,4 @@
-﻿package exam.androidproject;
+package exam.androidproject;
 
 import java.util.ArrayList;
 
@@ -20,7 +20,7 @@ import exam.game.EDElement;
 
 /**
  * 조합도감 액티비티
- * 
+ *
  * @author 이상인
  */
 public class Picturebook extends BaseActivity {
@@ -137,11 +137,15 @@ class RecipeExpandibleAdapter extends BaseExpandableListAdapter {
       textNum.setId(2);
       textNum.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
 
-      LayoutParams lpName = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+      LayoutParams lpName =
+          new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+              android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
       lpName.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
       layout.addView(textName, lpName);
 
-      LayoutParams lpNum = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+      LayoutParams lpNum =
+          new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+              android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
       lpNum.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
       layout.addView(textNum, lpNum);
     } else {

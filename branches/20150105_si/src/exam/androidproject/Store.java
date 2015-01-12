@@ -1,4 +1,4 @@
-﻿package exam.androidproject;
+package exam.androidproject;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -23,9 +23,9 @@ public class Store extends BaseActivity implements View.OnClickListener {
   private static final int SPECIAL = 3;
   private static final int LEGEND = 4;
   // 타워 관련 아이템
-  private static final int REPAIR = LEGEND + 1; // 체력 회복
-  private static final int UPGRADE = REPAIR + 1; // 최대 체력 상승
-  private static final int REBUILD = UPGRADE + 1; // 재건설
+  private static final int REPAIR = Store.LEGEND + 1; // 체력 회복
+  private static final int UPGRADE = Store.REPAIR + 1; // 최대 체력 상승
+  private static final int REBUILD = Store.UPGRADE + 1; // 재건설
 
   DlgStore dlgStore; // 상점 내 아이템 클릭시 뜰 팝업창
 
@@ -56,20 +56,22 @@ public class Store extends BaseActivity implements View.OnClickListener {
   private void initTabTower() {
     LinearLayout vg = (LinearLayout) findViewById(R.id.store_tab2_layout);
 
-    LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    LayoutParams lp =
+        new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
     lp.rightMargin = 30;
 
-    GoodsView gv = new GoodsView(this, this, REPAIR);
+    GoodsView gv = new GoodsView(this, this, Store.REPAIR);
     gv.setProperties("타워 체력 회복", "원", 3000);
     gv.txtCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, UPGRADE);
+    gv = new GoodsView(this, this, Store.UPGRADE);
     gv.setProperties("최대 체력 증가", "원", 10000);
     gv.txtCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, REBUILD);
+    gv = new GoodsView(this, this, Store.REBUILD);
     gv.setProperties("타워 재건설", "원", 20000);
     gv.txtCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
     vg.addView(gv, lp);
@@ -78,32 +80,36 @@ public class Store extends BaseActivity implements View.OnClickListener {
   private void initTabElement() {
     LinearLayout vg = (LinearLayout) findViewById(R.id.store_tab1_layout);
 
-    LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    LayoutParams lp =
+        new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
     lp.rightMargin = 30;
 
-    GoodsView gv = new GoodsView(this, this, LOW);
+    GoodsView gv = new GoodsView(this, this, Store.LOW);
     gv.setProperties("하급", "G", 1000);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, MIDDLE);
+    gv = new GoodsView(this, this, Store.MIDDLE);
     gv.setProperties("중급", "G", 2500);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, HIGH);
+    gv = new GoodsView(this, this, Store.HIGH);
     gv.setProperties("상급", "G", 5000);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, SPECIAL);
+    gv = new GoodsView(this, this, Store.SPECIAL);
     gv.setProperties("특별", "G", 10000);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, LEGEND);
+    gv = new GoodsView(this, this, Store.LEGEND);
     gv.setProperties("전설", "G", 20000);
     vg.addView(gv, lp);
   }
 
   /**
    * 상점의 탭을 바꾸는 메소드
+   *
+   * @param v 사용자가 누른 탭을 나타내는 View 객체
    */
   public void switchTab(View v) {
     AppManager.printSimpleLogInfo();
