@@ -53,7 +53,14 @@ public class GameMaster implements Runnable
                 // 다른 스레드와 공통적으로 사용하는 mState를 동기화한다.
                 synchronized (mState)
                 {
-                    mState.getMobs().get(0).move();
+                    if (mState.usedMob < 10)
+                        mState.addMob();
+
+                    for (Mob mob : mState.getMobs())
+                    {
+                        if (mob.created == true)
+                            mob.move();
+                    }
                     // 게임 로직 실행
                 }
 

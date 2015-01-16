@@ -11,30 +11,51 @@ import android.graphics.BitmapFactory;
  */
 public class GameState
 {
-    ArrayList<Mob>    arTestUnits = new ArrayList<Mob>();
+    ArrayList<Mob> arTestUnits = new ArrayList<Mob>();
 
-    public Bitmap     mImgMob;                           // 몹 비트맵
-    public int        wave        = 1;                   // 현재 웨이브
-    private final int FINAL_WAVE  = 2;                   // 끝판 라운드
+    public Bitmap  mImgMob;                                 // 몹 비트맵
+    public long    beforeRegen = System.currentTimeMillis();
+    public long    regen       = 1000;                      // create mob per 1 sec
+    public int     usedMob     = 0;                         // 몹이 실제로 생성된 수
 
     public GameState(Resources res)
     {
-        for (; wave <= FINAL_WAVE; wave++)
+        makeFace(res);
+        createMobs();
+    }
+
+    public void makeFace(Resources res)
+    {
+        int drawableId = res.getIdentifier("mob1", "drawable", "exam.androidproject");
+        mImgMob = BitmapFactory.decodeResource(res, drawableId);
+
+        if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64))
         {
-            int drawableId = res.getIdentifier("mob" + wave, "drawable", "exam.androidproject");
-            mImgMob = BitmapFactory.decodeResource(res, drawableId);
-
-            if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64))
-            {
-                mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
-            }
-
-            arTestUnits.add(new Mob(90, 90, 64, 64, mImgMob));
+            mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
         }
+    }
+
+    public void createMobs()
+    {
+        for (int i = 0; i < 10; i++)
+            // 여기서는 20마리까지지만 실제로는 파일입력을 통해서
+            arTestUnits.add(new Mob(90, 90, 64, 64, mImgMob));
+    }
+
+    public void addMob()
+    {
+        if (System.currentTimeMillis() - beforeRegen > regen)
+            beforeRegen = System.currentTimeMillis();
+        else
+            return;
+
+        arTestUnits.get(usedMob).created = true;
+        usedMob++;
     }
 
     public ArrayList<Mob> getMobs()
     {
         return arTestUnits;
     }
+
 }

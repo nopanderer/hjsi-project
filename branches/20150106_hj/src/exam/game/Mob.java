@@ -16,13 +16,20 @@ import android.graphics.Paint;
 public class Mob
 {
     /* 게임 속성 */
-    private int    hp;         // 몹 체력
-    private int    x, y;       // 위치
-    private int    width, height; // 크기
-    private int    step  = 5;    // 몹 이동 속도(타이머 만들어지면 초당 속도로 바꿔야함)
+    private int    hp;        // 몹 체력
+    private int    x, y;      // 위치
+    private int    width, height;                          // 크기
+    private int    step  = 5;    // 5픽셀씩
+    private int    sleep = 10;   // 10milsec
     private int    range = 400;  // 타격 범위
     private int    oldX, oldY;   // 초기 생성 위치
-    private Bitmap face;         //
+
+    private long   beforeTime;   // 움직이기 전 시간
+
+    private Bitmap face;
+
+    public boolean created;      // 몹이 생성 되었는가
+    public boolean dead;         // 몹이 죽었는가
 
     public Mob(int x, int y, int width, int height, Bitmap face)
     {
@@ -31,6 +38,10 @@ public class Mob
         this.width = width;
         this.height = height;
         this.face = face;
+        created = false;
+        dead = false;
+
+        beforeTime = System.currentTimeMillis();
         // 몹이 초기에 생성되는 위치
         oldX = x;
         oldY = y;
@@ -51,9 +62,11 @@ public class Mob
 
     public void move()
     {
-
-        System.out.println("x: " + x + " oldX: " + oldX);
-        System.out.println("y: " + y + " oldY: " + oldY);
+        // 10밀리세컨드 마다 5 픽셀씩 이동
+        if (System.currentTimeMillis() - beforeTime > sleep)
+            beforeTime = System.currentTimeMillis();
+        else
+            return;
 
         if (x == oldX && y + step <= GameCamera.getInstance().worldHeight() - 900)
         {
