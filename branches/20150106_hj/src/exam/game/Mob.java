@@ -26,10 +26,11 @@ public class Mob
 
     private long   beforeTime;   // 움직이기 전 시간
 
-    private Bitmap face;
+    public Bitmap  face;
 
     public boolean created;      // 몹이 생성 되었는가
     public boolean dead;         // 몹이 죽었는가
+    public int     lap;          // 몇 바퀴 돌았나(2바퀴 돌면 몹 자체 파괴)
 
     public Mob(int x, int y, int width, int height, Bitmap face)
     {
@@ -40,6 +41,7 @@ public class Mob
         this.face = face;
         created = false;
         dead = false;
+        lap = 0;
 
         beforeTime = System.currentTimeMillis();
         // 몹이 초기에 생성되는 위치
@@ -68,25 +70,30 @@ public class Mob
         else
             return;
 
+        if (x == oldX && y == oldY)
+            lap++;
+
+        // 아래로
         if (x == oldX && y + step <= GameCamera.getInstance().worldHeight() - 900)
         {
             y += step;
         }
-
+        // 오른쪽
         else if (x + step <= GameCamera.getInstance().worldWidth() - 1500 && y == GameCamera.getInstance().worldHeight() - 900)
         {
             x += step;
         }
-
+        // 위로
         else if (x == GameCamera.getInstance().worldWidth() - 1500 && y - step >= oldY)
         {
             y -= step;
         }
-
+        // 왼쪽
         else if (x - step >= oldX && y == oldY)
         {
             x -= step;
         }
+
     }
 
 }

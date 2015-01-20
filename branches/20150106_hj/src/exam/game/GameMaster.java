@@ -26,7 +26,6 @@ public class GameMaster implements Runnable
         mThreadMaster = new Thread(this);
         mThreadMaster.start();
         mHolder = holder; // 단순히 동기화용
-
         mState = state;
     }
 
@@ -41,7 +40,6 @@ public class GameMaster implements Runnable
         long fpsRealTime; // 프레임당 실제 소요 시간
         long fpsDelayTime; // 목표 소요시간 - 실제 소요시간만큼 스레드 sleep
         long fpsElapsedTime = 0L; // 1초 측정을 위한 변수
-        int wave = 0;
 
         while (mIsRunning)
         {
@@ -58,9 +56,29 @@ public class GameMaster implements Runnable
 
                     for (Mob mob : mState.getMobs())
                     {
-                        if (mob.created == true)
+                        // 몹이 다 죽으면 게임 정지 및 새로운 웨이브 시작
+                        if (mState.deadMob == 10)
+                        {
+                            mState.destroyMob();
+                            nextWave();
+                            pauseGame();
+                            break;
+                        }
+
+                        // 몹이 죽지 않았고 2바퀴 돌았으면
+                        else if (mob.lap == 2 && mob.dead == false)
+                        {
+                            mob.dead = true;
+                            mState.curMob--;
+                            mState.deadMob++;
+                            continue;
+                        }
+
+                        // 몹이 생성되어 있다면 이동
+                        else if (mob.created)
                             mob.move();
                     }
+
                     // 게임 로직 실행
                 }
 
@@ -139,5 +157,15 @@ public class GameMaster implements Runnable
     {
         AppManager.printSimpleLogInfo();
         mIsPlaying = false;
+    }
+
+    public void nextWave()
+    {
+        mState.makeFace(++mState.wave);
+        mState.createMobs();
+        mState.curMob = 0;
+        mState.usedMob = 0;
+        mState.deadMob = 0;
+
     }
 }

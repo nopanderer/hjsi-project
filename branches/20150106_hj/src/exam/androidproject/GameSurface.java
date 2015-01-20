@@ -200,8 +200,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
                     for (Mob mob : mState.getMobs())
                     {
                         // 1. 보이는지 검사
+                        if (mob.dead)
+                            continue;
+
                         // 보이므로 그린다
-                        if (mob.created == true)
+                        else if (mob.created)
                             mob.draw(canvas);
 
                         /*
@@ -267,6 +270,16 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         canvas.translate(0, 60);
         // 메모리 정보 표시
         canvas.drawText("Used Memory: " + (totMem - freeMem) / (1024 * 1024) + " / " + totMem / (1024 * 1024) + "M", 120, 60, mPaintInfo);
+        canvas.translate(0, 60);
+        // 현재 생성된 몹수
+        canvas.drawText("Mob: " + mState.curMob, 120, 60, mPaintInfo);
+        canvas.translate(0, 60);
+        // 현재 죽은 몹수
+        canvas.drawText("Dead Mob: " + mState.deadMob, 120, 60, mPaintInfo);
+        canvas.translate(0, 60);
+        // 현재 웨이브
+        canvas.drawText("Wave: " + mState.wave, 120, 60, mPaintInfo);
         canvas.restore();
+
     }
 }

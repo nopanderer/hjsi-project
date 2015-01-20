@@ -1,6 +1,6 @@
 package exam.game;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -11,23 +11,40 @@ import android.graphics.BitmapFactory;
  */
 public class GameState
 {
-    ArrayList<Mob> arTestUnits = new ArrayList<Mob>();
+    LinkedList<Mob>  Mobs        = new LinkedList<Mob>();
 
-    public Bitmap  mImgMob;                                 // 몹 비트맵
-    public long    beforeRegen = System.currentTimeMillis();
-    public long    regen       = 1000;                      // create mob per 1 sec
-    public int     usedMob     = 0;                         // 몹이 실제로 생성된 수
+    public Resources res;
+    public Bitmap    mImgMob;                                 // 몹 비트맵
+    public long      beforeRegen = System.currentTimeMillis();
+    public long      regen       = 1000;                      // create mob per 1 sec
+    public int       usedMob     = 0;                         // 몹이 실제로 생성된 수
+    public int       deadMob     = 0;
+    public int       curMob      = 0;
+    public int       wave        = 1;
+
+    public final int MAX_MOP     = 10;
 
     public GameState(Resources res)
     {
-        makeFace(res);
+        this.res = res;
+        makeFace(wave);
         createMobs();
     }
 
-    public void makeFace(Resources res)
+    /**
+     * 몹 비트맵 저장
+     * 
+     * @param res
+     *            몹 비트맵
+     */
+    public void makeFace(int wave)
     {
-        int drawableId = res.getIdentifier("mob1", "drawable", "exam.androidproject");
-        mImgMob = BitmapFactory.decodeResource(res, drawableId);
+        int drawableId = res.getIdentifier("mob" + wave, "drawable", "exam.androidproject");
+        BitmapFactory.Options option = new BitmapFactory.Options();
+
+        option.inSampleSize = 4;
+
+        mImgMob = BitmapFactory.decodeResource(res, drawableId, option);
 
         if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64))
         {
@@ -37,9 +54,9 @@ public class GameState
 
     public void createMobs()
     {
-        for (int i = 0; i < 10; i++)
-            // 여기서는 20마리까지지만 실제로는 파일입력을 통해서
-            arTestUnits.add(new Mob(90, 90, 64, 64, mImgMob));
+        for (int i = 0; i < MAX_MOP; i++)
+            // 여기서는 10마리까지지만 실제로는 파일입력을 통해서
+            Mobs.add(new Mob(90, 90, 64, 64, mImgMob));
     }
 
     public void addMob()
@@ -49,13 +66,24 @@ public class GameState
         else
             return;
 
-        arTestUnits.get(usedMob).created = true;
+        Mobs.get(usedMob).created = true;
         usedMob++;
+        curMob++;
     }
 
-    public ArrayList<Mob> getMobs()
+    public void destroyMob()
     {
-        return arTestUnits;
+        for (Mob mob : getMobs())
+        {
+            mob.face.recycle();
+            mob.face = null;
+        }
+        Mobs.clear();
+    }
+
+    public LinkedList<Mob> getMobs()
+    {
+        return Mobs;
     }
 
 }
