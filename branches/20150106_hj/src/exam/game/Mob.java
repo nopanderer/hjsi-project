@@ -25,6 +25,7 @@ public class Mob
     private int    oldX, oldY;   // 초기 생성 위치
 
     private long   beforeTime;   // 움직이기 전 시간
+    private int    wave;
 
     public Bitmap  face;
 
@@ -32,16 +33,16 @@ public class Mob
     public boolean dead;         // 몹이 죽었는가
     public int     lap;          // 몇 바퀴 돌았나(2바퀴 돌면 몹 자체 파괴)
 
-    public Mob(int x, int y, int width, int height, Bitmap face)
+    public Mob(int x, int y, int width, int height, int wave)
     {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.face = face;
         created = false;
         dead = false;
         lap = 0;
+        this.wave = wave;
 
         beforeTime = System.currentTimeMillis();
         // 몹이 초기에 생성되는 위치
@@ -59,7 +60,7 @@ public class Mob
         showRange.setAlpha(0x00);  // 원 안을 투명하게
         showRange.setColor(Color.GREEN);   // 윤곽선은 초록색
         canvas.drawCircle(x - GameCamera.getInstance().x() + 32, y - GameCamera.getInstance().y() + 32, range, showRange);
-        canvas.drawBitmap(face, x - GameCamera.getInstance().x(), y - GameCamera.getInstance().y(), null);
+        canvas.drawBitmap(AppManager.getInstance().getBitmap("mob" + wave), x - GameCamera.getInstance().x(), y - GameCamera.getInstance().y(), null);
     }
 
     public void move()

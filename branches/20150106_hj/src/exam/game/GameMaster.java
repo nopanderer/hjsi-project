@@ -56,16 +56,15 @@ public class GameMaster implements Runnable
 
                     for (Mob mob : mState.getMobs())
                     {
-                        // 몹이 다 죽으면 게임 정지 및 새로운 웨이브 시작
+                        // 몹이 다 죽으면 새로운 웨이브 시작 및 정지
                         if (mState.deadMob == 10)
                         {
-                            mState.destroyMob();
                             nextWave();
                             pauseGame();
                             break;
                         }
 
-                        // 몹이 죽지 않았고 2바퀴 돌았으면
+                        // 몹이 죽지 않았고 1바퀴 돌았으면
                         else if (mob.lap == 2 && mob.dead == false)
                         {
                             mob.dead = true;
@@ -161,8 +160,13 @@ public class GameMaster implements Runnable
 
     public void nextWave()
     {
-        mState.makeFace(++mState.wave);
+        mState.destroyMob();
+        mState.wave++;
+        // 새로운 비트맵 추가
+        mState.makeFace();
+        // 새로운 몹 생성
         mState.createMobs();
+        // init(임시)
         mState.curMob = 0;
         mState.usedMob = 0;
         mState.deadMob = 0;

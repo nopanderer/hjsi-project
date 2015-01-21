@@ -15,11 +15,11 @@ public class GameState
 
     public Resources res;
     public Bitmap    mImgMob;                                 // 몹 비트맵
-    public long      beforeRegen = System.currentTimeMillis();
+    public long      beforeRegen = System.currentTimeMillis();                  // 리젠하기 전 시간
     public long      regen       = 1000;                      // create mob per 1 sec
-    public int       usedMob     = 0;                         // 몹이 실제로 생성된 수
-    public int       deadMob     = 0;
-    public int       curMob      = 0;
+    public int       usedMob     = 0;                         // 몹이 실제로 생성된(내부적 카운터 위해)
+    public int       deadMob     = 0;                         // 죽은 몹
+    public int       curMob      = 0;                         // 현재 몹
     public int       wave        = 1;
 
     public final int MAX_MOP     = 10;
@@ -27,18 +27,13 @@ public class GameState
     public GameState(Resources res)
     {
         this.res = res;
-        makeFace(wave);
+        makeFace();
         createMobs();
     }
 
-    /**
-     * 몹 비트맵 저장
-     * 
-     * @param res
-     *            몹 비트맵
-     */
-    public void makeFace(int wave)
+    public void makeFace()
     {
+
         int drawableId = res.getIdentifier("mob" + wave, "drawable", "exam.androidproject");
         BitmapFactory.Options option = new BitmapFactory.Options();
 
@@ -50,13 +45,16 @@ public class GameState
         {
             mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
         }
+
+        AppManager.getInstance().addBitmap("mob" + wave, mImgMob);
+
     }
 
     public void createMobs()
     {
         for (int i = 0; i < MAX_MOP; i++)
             // 여기서는 10마리까지지만 실제로는 파일입력을 통해서
-            Mobs.add(new Mob(90, 90, 64, 64, mImgMob));
+            Mobs.add(new Mob(90, 90, 64, 64, wave));
     }
 
     public void addMob()
@@ -73,11 +71,7 @@ public class GameState
 
     public void destroyMob()
     {
-        for (Mob mob : getMobs())
-        {
-            mob.face.recycle();
-            mob.face = null;
-        }
+        AppManager.getInstance().recycleBitmap("mob" + wave);
         Mobs.clear();
     }
 
