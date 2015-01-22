@@ -1,5 +1,6 @@
 package exam.androidproject;
 
+import hjsi.common.AppManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
@@ -11,7 +12,6 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ToggleButton;
-import exam.game.AppManager;
 
 public class Setting extends Dialog implements OnClickListener {
   private Button resume, help, credits, quit;
@@ -23,7 +23,7 @@ public class Setting extends Dialog implements OnClickListener {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
 
     this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -67,7 +67,7 @@ public class Setting extends Dialog implements OnClickListener {
 
   @Override
   public void onBackPressed() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     hide();
   }
 }

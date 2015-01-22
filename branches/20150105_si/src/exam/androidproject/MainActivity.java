@@ -1,5 +1,6 @@
 package exam.androidproject;
 
+import hjsi.common.AppManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -7,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import exam.game.AppManager;
 
 public class MainActivity extends BaseActivity {
   // 액티비티 간 통신을 위한 요청코드 상수
@@ -16,7 +16,7 @@ public class MainActivity extends BaseActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
   }
@@ -60,7 +60,7 @@ public class MainActivity extends BaseActivity {
    */
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     switch (requestCode) {
       case ACT_NEWGAME:
       case ACT_CONTINUE:
@@ -75,7 +75,7 @@ public class MainActivity extends BaseActivity {
 
   @Override
   protected void onDestroy() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onDestroy();
   }
 }
