@@ -1,7 +1,7 @@
-package exam.game;
+package hjsi.common;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Set;
 
 import android.app.Activity;
@@ -16,14 +16,14 @@ public class AppManager {
   private static String tag; // 로그 출력용 클래스 이름을 갖고 있음
   private static AppManager uniqueInstance; // 자신의 유일한 인스턴스를 가지고 있는다.
 
-  private ArrayList<BaseActivity> arAct; // 실행 중인 액티비티 리스트
+  private LinkedList<BaseActivity> arAct; // 실행 중인 액티비티 리스트
   private HashMap<String, Bitmap> arBitmap; // 게임에 로드된 비트맵 목록
   private volatile int logicFps;
 
   private AppManager() {
-    tag = getClass().getSimpleName();
+    AppManager.tag = getClass().getSimpleName();
 
-    arAct = new ArrayList<BaseActivity>();
+    arAct = new LinkedList<BaseActivity>();
     arBitmap = new HashMap<String, Bitmap>();
   }
 
@@ -31,15 +31,15 @@ public class AppManager {
    * @return 유일한 인스턴스를 반환함
    */
   public static AppManager getInstance() {
-    if (uniqueInstance == null) {
+    if (AppManager.uniqueInstance == null) {
       synchronized (AppManager.class) {
-        if (uniqueInstance == null) {
-          uniqueInstance = new AppManager();
+        if (AppManager.uniqueInstance == null) {
+          AppManager.uniqueInstance = new AppManager();
         }
       }
     }
 
-    return uniqueInstance;
+    return AppManager.uniqueInstance;
   }
 
   /**
@@ -64,7 +64,7 @@ public class AppManager {
   /**
    * 간단하게 클래스 이름을 tag로 하고 메소드 이름을 메시지로 하는 로그를 출력한다. (메소드가 제대로 호출되는지 판단하려고)
    */
-  public static void printSimpleLogInfo() {
+  public static void printSimpleLog() {
     StackTraceElement[] elements = null;
 
     try {
@@ -81,17 +81,17 @@ public class AppManager {
     String className = elements[1].getClassName();
     className = className.substring(className.lastIndexOf(".") + 1);
 
-    Log.i(className, methodName);
+    Log.d(className, methodName);
   }
 
   public void addActivity(BaseActivity act) {
     if (act != null) {
       if (arAct.contains(act) == false) {
-        arAct.add(act);
+        arAct.addFirst(act);
       }
     }
 
-    Log.d(tag, AppManager.getMethodName() + "() " + act.toString());
+    Log.d(AppManager.tag, AppManager.getMethodName() + "() " + act.toString());
   }
 
   public void removeActivity(BaseActivity act) {
@@ -99,7 +99,7 @@ public class AppManager {
       arAct.remove(act);
     }
 
-    Log.d(tag, AppManager.getMethodName() + "() " + act.toString());
+    Log.d(AppManager.tag, AppManager.getMethodName() + "() " + act.toString());
   }
 
   /**
@@ -108,7 +108,7 @@ public class AppManager {
   public void quitApp() {
     for (Activity act : arAct) {
       act.finish();
-      Log.i(tag, act.toString() + ".finish();");
+      Log.d(AppManager.tag, act.toString() + ".finish();");
     }
   }
 
@@ -127,14 +127,14 @@ public class AppManager {
     } else {
       msg += " already exists.";
     }
-    Log.d(tag, msg);
+    Log.d(AppManager.tag, msg);
   }
 
   public Bitmap getBitmap(String key) throws NullPointerException {
     if (arBitmap.containsKey(key) == false) {
       String msg = AppManager.getMethodName() + "(";
       msg += "\"" + key + "\") returned null";
-      Log.d(tag, msg);
+      Log.d(AppManager.tag, msg);
 
       throw new NullPointerException("이 메소드는 반드시 제대로된 객체를 반환해야함.");
     }
@@ -158,7 +158,7 @@ public class AppManager {
     msg = msg.substring(0, msg.length() - 1);
     msg += " cleared";
 
-    Log.d(tag, msg);
+    Log.d(AppManager.tag, msg);
   }
 
   public int getLogicFps() {

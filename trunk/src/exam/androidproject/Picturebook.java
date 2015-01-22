@@ -1,4 +1,6 @@
-﻿package exam.androidproject;
+package exam.androidproject;
+
+import hjsi.common.AppManager;
 
 import java.util.ArrayList;
 
@@ -15,18 +17,17 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import exam.customwidget.RecipeView;
-import exam.game.AppManager;
 import exam.game.EDElement;
 
 /**
  * 조합도감 액티비티
- * 
+ *
  * @author 이상인
  */
 public class Picturebook extends BaseActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_picturebook);
 
@@ -75,7 +76,7 @@ public class Picturebook extends BaseActivity {
    * 지금은 테스트용으로 대충 5개의 레시피를 갖는 리스트를 반환한다
    */
   private ArrayList<Recipe> makeRecipeList() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     ArrayList<Recipe> ar = new ArrayList<Recipe>(5);
 
     ar.add(new Recipe());
@@ -137,11 +138,15 @@ class RecipeExpandibleAdapter extends BaseExpandableListAdapter {
       textNum.setId(2);
       textNum.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
 
-      LayoutParams lpName = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+      LayoutParams lpName =
+          new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+              android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
       lpName.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
       layout.addView(textName, lpName);
 
-      LayoutParams lpNum = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+      LayoutParams lpNum =
+          new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+              android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
       lpNum.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
       layout.addView(textNum, lpNum);
     } else {

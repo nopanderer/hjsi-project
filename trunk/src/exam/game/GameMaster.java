@@ -1,31 +1,32 @@
 package exam.game;
 
+import hjsi.common.AppManager;
 import android.util.Log;
-import android.view.SurfaceHolder;
 
-/*
+/**
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
  */
 public class GameMaster implements Runnable {
   private final String tag = getClass().getSimpleName();
 
-  /* 안드로이드 시스템 필요 멤버 변수 */
-  Thread mThreadMaster; // 게임 진행 스레드
-  private boolean mIsRunning = true; // 진행 스레드 동작 상태
-  private boolean mIsPlaying = false; // 게임 플레이 상태 (게임 중 or 일시정지)
+  /**
+   * 게임을 진행시키는 스레드
+   */
+  private Thread workerThread;
 
-  @SuppressWarnings("unused")
-  private SurfaceHolder mHolder; // 동기화를 위해서 홀더를 갖는다.
+  /**
+   * GameMaster의 스레드를 완전히 종료하려면 값을 true로 바꾼다.
+   */
+  private boolean termination = false;
 
-  /* 게임 관련 변수 */
-  GameState mState; // 현재 게임 정보
+  /**
+   * GameMaster의 스레드를 재생하려면 true로 설정하고, 일시적으로 멈추려면 false로 설정한다.
+   */
+  private boolean running = false;
 
-  public GameMaster(SurfaceHolder holder, GameState state) {
-    mThreadMaster = new Thread(this);
-    mThreadMaster.start();
-    mHolder = holder; // 단순히 동기화용
-
-    mState = state;
+  public GameMaster() {
+    workerThread = new Thread(this);
+    workerThread.start();
   }
 
   @Override
@@ -39,14 +40,24 @@ public class GameMaster implements Runnable {
     long fpsDelayTime; // 목표 소요시간 - 실제 소요시간만큼 스레드 sleep
     long fpsElapsedTime = 0L; // 1초 측정을 위한 변수
 
-    while (mIsRunning) {
-      while (mIsPlaying) {
+    while (!termination) {
+      while (running) {
         // 프레임 시작 시간을 구한다.
         fpsStartTime = System.currentTimeMillis();
 
-        // 다른 스레드와 공통적으로 사용하는 mState를 동기화한다.
-        synchronized (mState) {
-          // 게임 로직 실행
+        /**
+         *
+         *
+         *
+         *
+         * 게임 로직 실행
+         *
+         *
+         *
+         *
+         */
+        for (Unit unit : GameState.getInstance().getUnits()) {
+          unit.action();
         }
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
@@ -86,11 +97,13 @@ public class GameMaster implements Runnable {
    * 게임을 종료할 때 호출한다. 게임 진행 스레드를 완전히 종료시킨다.
    */
   public void quitGame() {
-    AppManager.printSimpleLogInfo();
-    mIsRunning = false;
+    AppManager.printSimpleLog();
+    termination = true;
 
     try {
-      mThreadMaster.join();
+      if (workerThread != null) {
+        workerThread.join();
+      }
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
@@ -100,19 +113,19 @@ public class GameMaster implements Runnable {
    * 게임을 시작한다.
    */
   public void playGame() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     /*
      * 일시정지했다가 다시 시작하는건지, 한 웨이브가 끝난 후 새로운 웨이브를 시작하는건지 구별할 필요가 있다. (새로운 정보를 세팅하는 과정이 필요하니까)
      */
-    mIsPlaying = true;
-    // mThreadMaster.interrupt(); // 대기 중인 스레드 바로 깨우기 (되는지 모르겠음)
+    running = true;
+    // workerThread.interrupt(); // 대기 중인 스레드 바로 깨우기 (되는지 모르겠음)
   }
 
   /**
    * 게임을 일시정지한다.
    */
   public void pauseGame() {
-    AppManager.printSimpleLogInfo();
-    mIsPlaying = false;
+    AppManager.printSimpleLog();
+    running = false;
   }
 }
