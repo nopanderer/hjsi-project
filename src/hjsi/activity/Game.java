@@ -19,14 +19,14 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
 
-public class Map extends Base implements OnClickListener {
+public class Game extends Base implements OnClickListener {
   private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
 
   Button settingBtn, btnBook, btnStore;
   ToggleButton btnPlay;
   Drawable drawableBtnPlay_Pause;
   Drawable drawableBtnPlay_Play;
-  Setting setting;
+  DlgSetting dlgSetting;
   public static MediaPlayer music;
 
   /* 게임을 진행하는 인게임 스레드를 가진 개체 */
@@ -57,13 +57,13 @@ public class Map extends Base implements OnClickListener {
     btnPlay = (ToggleButton) findViewById(R.id.btn_play);
     btnStore = (Button) findViewById(R.id.btn_store);
 
-    setting = new Setting(Map.this);
-    setting.setCanceledOnTouchOutside(false);
-    setting.setOnDismissListener(new OnDismissListener() {
+    dlgSetting = new DlgSetting(Game.this);
+    dlgSetting.setCanceledOnTouchOutside(false);
+    dlgSetting.setOnDismissListener(new OnDismissListener() {
       @Override
       public void onDismiss(DialogInterface arg0) {
         AppManager.printSimpleLog();
-        quitExplicitly(); // 이번에 Map.onDestroy() 될 때 리소스 해제하라고 알림
+        quitExplicitly(); // 이번에 Game.onDestroy() 될 때 리소스 해제하라고 알림
         AppManager.getInstance().quitApp();
       }
     });
@@ -73,9 +73,9 @@ public class Map extends Base implements OnClickListener {
     btnPlay.setOnClickListener(this);
     btnStore.setOnClickListener(this);
 
-    Map.music = MediaPlayer.create(this, R.raw.bgm);
-    Map.music.setLooping(true);
-    Map.music.start();
+    Game.music = MediaPlayer.create(this, R.raw.bgm);
+    Game.music.setLooping(true);
+    Game.music.start();
 
 
     /* GameMaster 생성 */
@@ -95,8 +95,8 @@ public class Map extends Base implements OnClickListener {
       btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
     }
 
-    if (Map.music != null) {
-      Map.music.pause();
+    if (Game.music != null) {
+      Game.music.pause();
     }
   }
 
@@ -105,8 +105,8 @@ public class Map extends Base implements OnClickListener {
     AppManager.printSimpleLog();
     super.onResume();
 
-    if (Map.music != null) {
-      Map.music.start();
+    if (Game.music != null) {
+      Game.music.start();
     }
   }
 
@@ -148,7 +148,7 @@ public class Map extends Base implements OnClickListener {
     if (v == settingBtn) {
       showSettingMenu();
     } else if (v == btnBook) {
-      Intent Book = new Intent(Map.this, Picturebook.class);
+      Intent Book = new Intent(Game.this, RecipeBook.class);
       startActivity(Book);
     }
     /*
@@ -165,7 +165,7 @@ public class Map extends Base implements OnClickListener {
         TimeManager.pauseTime();
       }
     } else if (v == btnStore) {
-      Intent Store = new Intent(Map.this, Store.class);
+      Intent Store = new Intent(Game.this, Store.class);
       startActivity(Store);
     }
   }
@@ -177,7 +177,7 @@ public class Map extends Base implements OnClickListener {
 
   private void showSettingMenu() {
     AppManager.printSimpleLog();
-    setting.show();
+    dlgSetting.show();
 
     if (btnPlay.isChecked()) {
       btnPlay.setChecked(false);

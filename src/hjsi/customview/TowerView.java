@@ -1,6 +1,6 @@
-package hjsi.customwidget;
+package hjsi.customview;
 
-import hjsi.game.EDElement;
+import hjsi.game.Tower;
 
 import java.util.HashMap;
 
@@ -21,19 +21,19 @@ import android.widget.TextView;
  *
  * @author 이상인
  */
-public class ElementView extends RelativeLayout {
+public class TowerView extends RelativeLayout {
   /* 생성자 (별도의 초기화는 반드시 init()을 통해서 해야한다!) */
-  public ElementView(Context context, AttributeSet attrs, int defStyle) {
+  public TowerView(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
     init(null);
   }
 
-  public ElementView(Context context, AttributeSet attrs) {
+  public TowerView(Context context, AttributeSet attrs) {
     super(context, attrs);
     init(null);
   }
 
-  public ElementView(Context context) {
+  public TowerView(Context context) {
     super(context);
     init(null);
   }
@@ -42,7 +42,7 @@ public class ElementView extends RelativeLayout {
   static private HashMap<String, RoundedDrawable> arDrawable; // 리소스 보관용
 
   /* 기타 멤버 변수 */
-  private EDElement mElement; // 엘리먼트 자체
+  private Tower mElement; // 엘리먼트 자체
   private int viewWidth; // 뷰 자체의 가로 크기
   private int viewHeight; // 뷰 자체의 세로 크기
   private int elementIconSize; // 화면 해상도, 사용하는 상황에 맞게 크기를 정해야함.
@@ -71,15 +71,15 @@ public class ElementView extends RelativeLayout {
 
   /* static 초기화 */
   static {
-    ElementView.arDrawable = new HashMap<String, RoundedDrawable>();
+    TowerView.arDrawable = new HashMap<String, RoundedDrawable>();
   }
 
-  private void init(EDElement element) {
-    // element가 null이면 기본값 Element를 할당한다. 게임 다 만들면 기본값 Element 쓸 일은 없음.
+  private void init(Tower element) {
+    // element가 null이면 기본값 Element를 할당한다. 게임 다 만들면 기본값 TowerView 쓸 일은 없음.
     if (element != null) {
       mElement = element;
     } else {
-      mElement = new EDElement();
+      mElement = new Tower();
     }
 
     // 내부에 들어가는 뷰를 생성하고 id 값도 할당해줌
@@ -98,7 +98,7 @@ public class ElementView extends RelativeLayout {
     elementIconSize = 180;
     detailLevel = 0;
 
-    // ElementView 자체의 레이아웃 속성을 설정한다. (크기)
+    // TowerView 자체의 레이아웃 속성을 설정한다. (크기)
     mParam =
         new LayoutParams(Math.max(viewWidth, elementIconSize),
             Math.max(viewHeight, elementIconSize));
@@ -116,7 +116,7 @@ public class ElementView extends RelativeLayout {
   }
 
   /**
-   * ElementView 내부의 레이아웃을 디자인한다.
+   * TowerView 내부의 레이아웃을 디자인한다.
    */
   private void designInnerLayout() {
     // 아이콘 표시부분 레이아웃
@@ -164,9 +164,9 @@ public class ElementView extends RelativeLayout {
    *
    * @param element 이 뷰에 보여줄 원소
    */
-  public void setElement(EDElement element) {
+  public void setElement(Tower element) {
     if (element == null) {
-      Log.e("null error", "EDElement 요소가 null 값임!");
+      Log.e("null error", "Tower 요소가 null 값임!");
     } else {
       mElement = element;
     }
@@ -175,8 +175,8 @@ public class ElementView extends RelativeLayout {
 
     // drawable을 생성한 적이 있으면 새로 만들지 않고 가져다 쓴다.
     // 안하면 리스트뷰에서 렉걸림..
-    if (ElementView.arDrawable.containsKey(mElement.imgName)) {
-      roundIcon = ElementView.arDrawable.get(mElement.imgName);
+    if (TowerView.arDrawable.containsKey(mElement.imgName)) {
+      roundIcon = TowerView.arDrawable.get(mElement.imgName);
     } else {
       // 파일 이름으로 리소스 ID 구해서 비트맵 파일을 만든다
       int drawableId =
@@ -190,7 +190,7 @@ public class ElementView extends RelativeLayout {
 
       roundIcon = new RoundedDrawable(bm);
       // 한 번 생성한 드로블 객체는 맵 구조에 넣어서 보관함. 재활용을 위한 조치
-      ElementView.arDrawable.put(mElement.imgName, roundIcon);
+      TowerView.arDrawable.put(mElement.imgName, roundIcon);
     }
 
     mElementIcon.setImageDrawable(roundIcon);

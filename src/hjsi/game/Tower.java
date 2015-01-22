@@ -1,11 +1,11 @@
 package hjsi.game;
 
 /**
- * ElementView 테스트용으로 하나 만듦
+ * TowerView 테스트용으로 하나 만듦
  *
  * @author 이상인
  */
-public class EDElement {
+public class Tower {
   public String name;
   public int level;
   public int type;
@@ -13,7 +13,7 @@ public class EDElement {
   public float rate;
   public String imgName;
 
-  public EDElement() {
+  public Tower() {
     name = "불";
     level = 0;
     type = 0;

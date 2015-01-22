@@ -17,7 +17,7 @@ import android.view.SurfaceView;
 
 /**
  * 게임 내용(맵, 타워, 투사체 등)을 그려줄 서피스뷰 클래스이다. 쓰레드 사용해서 canvas에 그림을 그릴 수 있는 유일한 방법이다. 때문에 게임에선 거의 서피스뷰를
- * 사용한다고 한다. 내부적으로 더블버퍼링을 사용한다. 시스템 UI는 Map 액티비티에서 처리하고(Button 등), 게임 자체를 위한 UI(타워 선택, 카메라 이동 등)
+ * 사용한다고 한다. 내부적으로 더블버퍼링을 사용한다. 시스템 UI는 Game 액티비티에서 처리하고(Button 등), 게임 자체를 위한 UI(타워 선택, 카메라 이동 등)
  * 이벤트는 이 클래스에서 처리한다.
  */
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, Runnable {
@@ -79,7 +79,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
     Log.i(tag, AppManager.getMethodName() + "() (width: " + width + ", height: " + height + ")");
     // 표면의 크기가 바뀔 때 그 크기를 기록한다.
-    CameraManager.getInstance().setCamSize(width, height);
+    Camera.getInstance().setCamSize(width, height);
   }
 
   @Override
@@ -101,7 +101,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
    */
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    boolean isCameraEvent = CameraManager.getInstance().touchHandler(event);
+    boolean isCameraEvent = Camera.getInstance().touchHandler(event);
 
     if (event.getAction() == MotionEvent.ACTION_UP) {
       /*
@@ -148,7 +148,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
           break;
         }
 
-        CameraManager.getInstance().autoScroll();
+        Camera.getInstance().autoScroll();
 
         canvas.drawColor(Color.DKGRAY); // 게임 배경 바깥 범위를 회색으로 채운다.
 
@@ -156,11 +156,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         canvas.save();
 
         /* 현재 카메라 위치에 맞게 캔버스를 이동시킴 */
-        canvas.translate(-CameraManager.getInstance().x(), -CameraManager.getInstance().y());
+        canvas.translate(-Camera.getInstance().x(), -Camera.getInstance().y());
 
         /* 현재 카메라 배율에 맞게 캔버스를 확대/축소함 */
         canvas
-            .scale(CameraManager.getInstance().scale(), CameraManager.getInstance().scale(), 0, 0);
+            .scale(Camera.getInstance().scale(), Camera.getInstance().scale(), 0, 0);
 
         /* 맵 배경을 그린다. */
         canvas.drawBitmap(AppManager.getInstance().getBitmap("background"), 0, 0, null);
@@ -257,9 +257,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 카메라 좌상단 좌표 (논리적인 기준점) 출력
      */
     canvas.translate(0, yForText);
-    canvas.drawText("CAM left: " + CameraManager.getInstance().x() + " / top: "
-        + CameraManager.getInstance().y() + " / scale: "
-        + (int) (CameraManager.getInstance().scale() * 100 + 0.5) + "%", xForText, yForText,
+    canvas.drawText("CAM left: " + Camera.getInstance().x() + " / top: "
+        + Camera.getInstance().y() + " / scale: "
+        + (int) (Camera.getInstance().scale() * 100 + 0.5) + "%", xForText, yForText,
         mPaintInfo);
 
     /*
@@ -276,15 +276,24 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     String min = String.format("%02d", (int) (GameState.getInstance().getWorldTime() / 60));
     String sec = String.format("%02d", (int) (GameState.getInstance().getWorldTime() % 60));
     canvas.drawText("World Time: " + min + ":" + sec, xForText, yForText, mPaintInfo);
-    // 현재 생성된 몹수
+
+    /*
+     * 현재 생성된 몹수
+     */
     canvas.translate(0, yForText);
-    canvas.drawText("Mob: " + GameState.getInstance().curMob, 120, 60, mPaintInfo);
-    // 현재 죽은 몹수
+    canvas.drawText("Mob: " + GameState.getInstance().curMob, xForText, yForText, mPaintInfo);
+
+    /*
+     * 현재 죽은 몹수
+     */
     canvas.translate(0, yForText);
-    canvas.drawText("Dead Mob: " + GameState.getInstance().deadMob, 120, 60, mPaintInfo);
-    // 현재 웨이브
+    canvas.drawText("Dead Mob: " + GameState.getInstance().deadMob, xForText, yForText, mPaintInfo);
+
+    /*
+     * 현재 웨이브
+     */
     canvas.translate(0, yForText);
-    canvas.drawText("Wave: " + GameState.getInstance().wave, 120, 60, mPaintInfo);
+    canvas.drawText("Wave: " + GameState.getInstance().wave, xForText, yForText, mPaintInfo);
 
     canvas.restore();
   }

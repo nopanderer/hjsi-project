@@ -26,11 +26,11 @@ public class Main extends Base {
 
     switch (v.getId()) {
       case R.id.btn_gamestart:
-        Intent intentForNewGame = new Intent(Main.this, Picturebook.class);
+        Intent intentForNewGame = new Intent(Main.this, RecipeBook.class);
         startActivityForResult(intentForNewGame, Main.ACT_NEWGAME);
         break;
       case R.id.btn_continue:
-        Intent intentForContGame = new Intent(Main.this, Continue.class);
+        Intent intentForContGame = new Intent(Main.this, Loader.class);
         startActivityForResult(intentForContGame, Main.ACT_CONTINUE);
         break;
 
@@ -65,7 +65,7 @@ public class Main extends Base {
       case ACT_NEWGAME:
       case ACT_CONTINUE:
         if (resultCode == Activity.RESULT_OK) {
-          Intent intentForActMap = new Intent(getApplicationContext(), Map.class);
+          Intent intentForActMap = new Intent(getApplicationContext(), Game.class);
           startActivity(intentForActMap);
         }
 

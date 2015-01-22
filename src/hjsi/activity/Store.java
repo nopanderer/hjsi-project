@@ -1,7 +1,7 @@
 package hjsi.activity;
 
 import hjsi.common.AppManager;
-import hjsi.customwidget.GoodsView;
+import hjsi.customview.ItemView;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -61,17 +61,17 @@ public class Store extends Base implements View.OnClickListener {
             android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
     lp.rightMargin = 30;
 
-    GoodsView gv = new GoodsView(this, this, Store.REPAIR);
+    ItemView gv = new ItemView(this, this, Store.REPAIR);
     gv.setProperties("타워 체력 회복", "원", 3000);
     gv.txtCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, Store.UPGRADE);
+    gv = new ItemView(this, this, Store.UPGRADE);
     gv.setProperties("최대 체력 증가", "원", 10000);
     gv.txtCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, Store.REBUILD);
+    gv = new ItemView(this, this, Store.REBUILD);
     gv.setProperties("타워 재건설", "원", 20000);
     gv.txtCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
     vg.addView(gv, lp);
@@ -85,23 +85,23 @@ public class Store extends Base implements View.OnClickListener {
             android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
     lp.rightMargin = 30;
 
-    GoodsView gv = new GoodsView(this, this, Store.LOW);
+    ItemView gv = new ItemView(this, this, Store.LOW);
     gv.setProperties("하급", "G", 1000);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, Store.MIDDLE);
+    gv = new ItemView(this, this, Store.MIDDLE);
     gv.setProperties("중급", "G", 2500);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, Store.HIGH);
+    gv = new ItemView(this, this, Store.HIGH);
     gv.setProperties("상급", "G", 5000);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, Store.SPECIAL);
+    gv = new ItemView(this, this, Store.SPECIAL);
     gv.setProperties("특별", "G", 10000);
     vg.addView(gv, lp);
 
-    gv = new GoodsView(this, this, Store.LEGEND);
+    gv = new ItemView(this, this, Store.LEGEND);
     gv.setProperties("전설", "G", 20000);
     vg.addView(gv, lp);
   }
@@ -134,7 +134,7 @@ public class Store extends Base implements View.OnClickListener {
 
   @Override
   public void onClick(View v) {
-    GoodsView gv = (GoodsView) v;
+    ItemView gv = (ItemView) v;
 
     switch (gv.getGoodsId()) {
       case LOW:

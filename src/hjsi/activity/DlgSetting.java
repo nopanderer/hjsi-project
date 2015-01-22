@@ -13,11 +13,11 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ToggleButton;
 
-public class Setting extends Dialog implements OnClickListener {
+public class DlgSetting extends Dialog implements OnClickListener {
   private Button resume, help, credits, quit;
   private ToggleButton sound;
 
-  public Setting(Context context) {
+  public DlgSetting(Context context) {
     super(context);
   }
 
@@ -51,15 +51,15 @@ public class Setting extends Dialog implements OnClickListener {
     } else if (v == sound) {
       if (sound.isChecked()) {
         sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
-        Map.music.pause();
+        Game.music.pause();
       } else {
         sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundon));
-        Map.music.start();
+        Game.music.start();
       }
     } else if (v == quit) {
-      Map.music.stop();
-      Map.music.release();
-      Map.music = null;
+      Game.music.stop();
+      Game.music.release();
+      Game.music = null;
 
       dismiss();
     }

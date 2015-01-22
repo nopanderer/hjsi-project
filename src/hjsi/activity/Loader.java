@@ -12,7 +12,7 @@ import android.os.Message;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class Continue extends Base {
+public class Loader extends Base {
   AnimationDrawable mAni;
 
   Runnable loadingMethod = new Runnable() {

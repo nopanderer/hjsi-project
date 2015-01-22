@@ -5,6 +5,6 @@ package hjsi.timer;
  *
  * @author 이상인
  */
-public interface TimerAction {
-  public void doAction();
+public interface TimerRunnable {
+  public void run();
 }
