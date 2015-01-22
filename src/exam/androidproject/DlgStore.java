@@ -1,5 +1,6 @@
 package exam.androidproject;
 
+import hjsi.common.AppManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,7 +13,6 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.TextView;
 import exam.customwidget.ElementView;
-import exam.game.AppManager;
 import exam.game.EDElement;
 
 public class DlgStore extends Dialog implements OnClickListener {
@@ -34,7 +34,7 @@ public class DlgStore extends Dialog implements OnClickListener {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
 
     requestWindowFeature(Window.FEATURE_NO_TITLE); // 다이얼로그 제목 표시를 없앤다

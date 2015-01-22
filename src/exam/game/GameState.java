@@ -1,9 +1,10 @@
 package exam.game;
 
+import hjsi.common.AppManager;
 import hjsi.timer.TimeManager;
 import hjsi.timer.TimerAction;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * 게임에 필요한 정보를 저장한다.
@@ -16,17 +17,35 @@ public class GameState {
    * 현재 게임이 진행된 시간을 나타낸다.
    */
   private volatile long worldTime = 0L;
-  ArrayList<Unit> arTestUnits = new ArrayList<Unit>();
+
+  /**
+   * 현재 단계
+   */
+  private int waveLevel = 0;
+
+  /**
+   * 테스트용 유닛 리스트
+   */
+  LinkedList<Unit> arTestUnits = new LinkedList<Unit>();
 
   private GameState() {
+    AppManager.printSimpleLog();
+
+    /*
+     * 게임 진행 시간 측정을 위한 타이머를 생성해서 등록해둔다.
+     */
     TimerAction clock = new TimerAction() {
       @Override
       public void doAction() {
         worldTime++;
       }
     };
+    TimeManager.registerCallbackTimer(1000, clock, -1).start();
 
-    TimeManager.getInstance().registerCallbackTimer(1000, clock, -1).start();
+    /*
+     * 불러온 유저 데이터를 토대로 동상을 생성한다. (유저 데이터의 남아있는 동상의 갯수, 체력, 업그레이드 등을 참조) 생성한 동상은 유닛 목록에 추가한다.
+     */
+    arTestUnits.add(new Statue(180, 120, AppManager.getInstance().getBitmap("statue")));
   }
 
   public static GameState getInstance() {
@@ -53,7 +72,7 @@ public class GameState {
     return worldTime;
   }
 
-  public ArrayList<Unit> getUnits() {
+  public LinkedList<Unit> getUnits() {
     return arTestUnits;
   }
 }

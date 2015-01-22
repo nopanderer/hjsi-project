@@ -1,5 +1,6 @@
 package exam.androidproject;
 
+import hjsi.common.AppManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -9,7 +10,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import exam.customwidget.GoodsView;
-import exam.game.AppManager;
 
 /**
  * @author 이상인
@@ -31,7 +31,7 @@ public class Store extends BaseActivity implements View.OnClickListener {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
     setContentView(R.layout.acitivity_store);
 
@@ -112,7 +112,7 @@ public class Store extends BaseActivity implements View.OnClickListener {
    * @param v 사용자가 누른 탭을 나타내는 View 객체
    */
   public void switchTab(View v) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     // 일단 전부 안 보이게 한다
     findViewById(R.id.store_tab1).setVisibility(View.INVISIBLE);
     findViewById(R.id.store_tab2).setVisibility(View.INVISIBLE);

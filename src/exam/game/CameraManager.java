@@ -1,5 +1,6 @@
 package exam.game;
 
+import hjsi.common.AppManager;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;

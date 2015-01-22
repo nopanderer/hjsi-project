@@ -1,16 +1,16 @@
 package exam.androidproject;
 
+import hjsi.common.AppManager;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.widget.ImageView;
-import exam.game.AppManager;
 
 public class NewGame extends BaseActivity {
   AnimationDrawable mAni;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_newgame);
 

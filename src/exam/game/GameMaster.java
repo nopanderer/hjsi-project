@@ -1,5 +1,6 @@
 package exam.game;
 
+import hjsi.common.AppManager;
 import android.util.Log;
 
 /**
@@ -55,6 +56,9 @@ public class GameMaster implements Runnable {
          *
          *
          */
+        for (Unit unit : GameState.getInstance().getUnits()) {
+          unit.action();
+        }
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
 
@@ -93,7 +97,7 @@ public class GameMaster implements Runnable {
    * 게임을 종료할 때 호출한다. 게임 진행 스레드를 완전히 종료시킨다.
    */
   public void quitGame() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     termination = true;
 
     try {
@@ -109,7 +113,7 @@ public class GameMaster implements Runnable {
    * 게임을 시작한다.
    */
   public void playGame() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     /*
      * 일시정지했다가 다시 시작하는건지, 한 웨이브가 끝난 후 새로운 웨이브를 시작하는건지 구별할 필요가 있다. (새로운 정보를 세팅하는 과정이 필요하니까)
      */
@@ -121,7 +125,7 @@ public class GameMaster implements Runnable {
    * 게임을 일시정지한다.
    */
   public void pauseGame() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     running = false;
   }
 }

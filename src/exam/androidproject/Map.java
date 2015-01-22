@@ -1,5 +1,6 @@
 package exam.androidproject;
 
+import hjsi.common.AppManager;
 import hjsi.timer.TimeManager;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -14,7 +15,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
-import exam.game.AppManager;
 import exam.game.GameMaster;
 import exam.game.GameState;
 
@@ -33,7 +33,7 @@ public class Map extends BaseActivity implements OnClickListener {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
 
     // surfaceview 등록
@@ -59,7 +59,7 @@ public class Map extends BaseActivity implements OnClickListener {
     setting.setOnDismissListener(new OnDismissListener() {
       @Override
       public void onDismiss(DialogInterface arg0) {
-        AppManager.printSimpleLogInfo();
+        AppManager.printSimpleLog();
         quitExplicitly(); // 이번에 Map.onDestroy() 될 때 리소스 해제하라고 알림
         AppManager.getInstance().quitApp();
       }
@@ -83,12 +83,12 @@ public class Map extends BaseActivity implements OnClickListener {
 
   @Override
   protected void onPause() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onStop();
 
     if (gameMaster != null) {
       gameMaster.pauseGame();
-      TimeManager.getInstance().pauseTime();
+      TimeManager.pauseTime();
       btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
     }
 
@@ -99,7 +99,7 @@ public class Map extends BaseActivity implements OnClickListener {
 
   @Override
   protected void onResume() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onResume();
 
     if (Map.music != null) {
@@ -109,12 +109,12 @@ public class Map extends BaseActivity implements OnClickListener {
 
   @Override
   protected void onDestroy() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onDestroy();
 
     if (gameMaster != null) {
       gameMaster.quitGame();
-      TimeManager.getInstance().stopTime();
+      TimeManager.stopTime();
     }
 
     if (Map.music != null) {
@@ -134,7 +134,7 @@ public class Map extends BaseActivity implements OnClickListener {
    */
   @Override
   public void onBackPressed() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     showSettingMenu();
   }
 
@@ -147,15 +147,19 @@ public class Map extends BaseActivity implements OnClickListener {
     } else if (v == btnBook) {
       Intent Book = new Intent(Map.this, Picturebook.class);
       startActivity(Book);
-    } else if (v == btnPlay) {
+    }
+    /*
+     * play 버튼
+     */
+    else if (v == btnPlay) {
       if (btnPlay.isChecked()) {
         btnPlay.setBackgroundDrawable(drawableBtnPlay_Pause);
         gameMaster.playGame();
-        TimeManager.getInstance().startTime();
+        TimeManager.startTime();
       } else {
         btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
         gameMaster.pauseGame();
-        TimeManager.getInstance().pauseTime();
+        TimeManager.pauseTime();
       }
     } else if (v == btnStore) {
       Intent Store = new Intent(Map.this, Store.class);
@@ -164,18 +168,19 @@ public class Map extends BaseActivity implements OnClickListener {
   }
 
   public void quitExplicitly() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     explicitQuit = true;
   }
 
   private void showSettingMenu() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     setting.show();
 
     if (btnPlay.isChecked()) {
+      btnPlay.setChecked(false);
       btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
       gameMaster.pauseGame();
-      TimeManager.getInstance().pauseTime();
+      TimeManager.pauseTime();
     }
   }
 }

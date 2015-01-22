@@ -1,5 +1,7 @@
 package exam.androidproject;
 
+import hjsi.common.AppManager;
+
 import java.util.ArrayList;
 
 import android.content.Context;
@@ -15,7 +17,6 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import exam.customwidget.RecipeView;
-import exam.game.AppManager;
 import exam.game.EDElement;
 
 /**
@@ -26,7 +27,7 @@ import exam.game.EDElement;
 public class Picturebook extends BaseActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_picturebook);
 
@@ -75,7 +76,7 @@ public class Picturebook extends BaseActivity {
    * 지금은 테스트용으로 대충 5개의 레시피를 갖는 리스트를 반환한다
    */
   private ArrayList<Recipe> makeRecipeList() {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     ArrayList<Recipe> ar = new ArrayList<Recipe>(5);
 
     ar.add(new Recipe());
