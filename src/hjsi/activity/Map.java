@@ -1,6 +1,9 @@
-package exam.androidproject;
+package hjsi.activity;
 
 import hjsi.common.AppManager;
+import hjsi.common.GameSurface;
+import hjsi.game.GameMaster;
+import hjsi.game.GameState;
 import hjsi.timer.TimeManager;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -15,10 +18,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
-import exam.game.GameMaster;
-import exam.game.GameState;
 
-public class Map extends BaseActivity implements OnClickListener {
+public class Map extends Base implements OnClickListener {
   private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
 
   Button settingBtn, btnBook, btnStore;
@@ -35,7 +36,9 @@ public class Map extends BaseActivity implements OnClickListener {
   protected void onCreate(Bundle savedInstanceState) {
     AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
-
+    
+    GameState.getInstance().initState(getResources());
+    
     // surfaceview 등록
     GameSurface gameView = new GameSurface(this);
     setContentView(gameView);
@@ -117,9 +120,9 @@ public class Map extends BaseActivity implements OnClickListener {
       TimeManager.stopTime();
     }
 
-    if (Map.music != null) {
-      Map.music.stop();
-      Map.music.release();
+    if (music != null) {
+      music.stop();
+      music.release();
     }
 
     if (explicitQuit) {

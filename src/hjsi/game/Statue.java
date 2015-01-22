@@ -1,7 +1,7 @@
 /**
  *
  */
-package exam.game;
+package hjsi.game;
 
 import hjsi.timer.TimeManager;
 import hjsi.timer.Timer;
@@ -70,7 +70,7 @@ public class Statue extends Unit {
   /*
    * (non-Javadoc)
    * 
-   * @see exam.game.Unit#doAction()
+   * @see hjsi.game.Unit#doAction()
    */
   @Override
   public void action() {
@@ -83,7 +83,7 @@ public class Statue extends Unit {
   /*
    * (non-Javadoc)
    * 
-   * @see exam.game.Unit#draw(android.graphics.Canvas)
+   * @see hjsi.game.Unit#draw(android.graphics.Canvas)
    */
   @Override
   public void draw(Canvas canvas) {
@@ -99,7 +99,7 @@ public class Statue extends Unit {
   /*
    * (non-Javadoc)
    * 
-   * @see exam.game.Unit#touch()
+   * @see hjsi.game.Unit#touch()
    */
   @Override
   public void touch() {

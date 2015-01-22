@@ -1,6 +1,8 @@
-package exam.androidproject;
+package hjsi.common;
 
-import hjsi.common.AppManager;
+import hjsi.game.GameState;
+import hjsi.game.Mob;
+import hjsi.game.Unit;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,9 +14,6 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import exam.game.CameraManager;
-import exam.game.GameState;
-import exam.game.Unit;
 
 /**
  * 게임 내용(맵, 타워, 투사체 등)을 그려줄 서피스뷰 클래스이다. 쓰레드 사용해서 canvas에 그림을 그릴 수 있는 유일한 방법이다. 때문에 게임에선 거의 서피스뷰를
@@ -171,6 +170,17 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
          */
 
         // 게임의 유닛들을 그린다.
+        for (Mob mob : GameState.getInstance().getMobs()) {
+          // 1. 보이는지 검사
+          if (mob.dead)
+            continue;
+
+          // 보이므로 그린다
+          else if (mob.created)
+            mob.draw(canvas);
+        }
+
+        // 게임의 유닛들을 그린다.
         for (Unit unit : GameState.getInstance().getUnits()) {
           // 1. 보이는지 검사
           // if (camera.showInCamera(unit)) {
@@ -266,6 +276,15 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     String min = String.format("%02d", (int) (GameState.getInstance().getWorldTime() / 60));
     String sec = String.format("%02d", (int) (GameState.getInstance().getWorldTime() % 60));
     canvas.drawText("World Time: " + min + ":" + sec, xForText, yForText, mPaintInfo);
+    // 현재 생성된 몹수
+    canvas.translate(0, yForText);
+    canvas.drawText("Mob: " + GameState.getInstance().curMob, 120, 60, mPaintInfo);
+    // 현재 죽은 몹수
+    canvas.translate(0, yForText);
+    canvas.drawText("Dead Mob: " + GameState.getInstance().deadMob, 120, 60, mPaintInfo);
+    // 현재 웨이브
+    canvas.translate(0, yForText);
+    canvas.drawText("Wave: " + GameState.getInstance().wave, 120, 60, mPaintInfo);
 
     canvas.restore();
   }

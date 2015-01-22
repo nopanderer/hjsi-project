@@ -1,5 +1,7 @@
 package hjsi.common;
 
+import hjsi.activity.Base;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
@@ -7,7 +9,6 @@ import java.util.Set;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.util.Log;
-import exam.androidproject.BaseActivity;
 
 /**
  * 애플리케이션의 시스템적인 부분을 총괄하는 싱글턴 클래스
@@ -16,14 +17,14 @@ public class AppManager {
   private static String tag; // 로그 출력용 클래스 이름을 갖고 있음
   private static AppManager uniqueInstance; // 자신의 유일한 인스턴스를 가지고 있는다.
 
-  private LinkedList<BaseActivity> arAct; // 실행 중인 액티비티 리스트
+  private LinkedList<Base> arAct; // 실행 중인 액티비티 리스트
   private HashMap<String, Bitmap> arBitmap; // 게임에 로드된 비트맵 목록
   private volatile int logicFps;
 
   private AppManager() {
     AppManager.tag = getClass().getSimpleName();
 
-    arAct = new LinkedList<BaseActivity>();
+    arAct = new LinkedList<Base>();
     arBitmap = new HashMap<String, Bitmap>();
   }
 
@@ -84,7 +85,7 @@ public class AppManager {
     Log.d(className, methodName);
   }
 
-  public void addActivity(BaseActivity act) {
+  public void addActivity(Base act) {
     if (act != null) {
       if (arAct.contains(act) == false) {
         arAct.addFirst(act);
@@ -94,7 +95,7 @@ public class AppManager {
     Log.d(AppManager.tag, AppManager.getMethodName() + "() " + act.toString());
   }
 
-  public void removeActivity(BaseActivity act) {
+  public void removeActivity(Base act) {
     if (act != null) {
       arAct.remove(act);
     }
@@ -160,6 +161,19 @@ public class AppManager {
 
     Log.d(AppManager.tag, msg);
   }
+  
+
+  public void recycleBitmap(String key)
+  {
+      String msg = AppManager.getMethodName() + "()";
+
+      arBitmap.get(key).recycle();
+
+      msg += key + " recycled";
+
+      Log.d(tag, msg);
+  }
+
 
   public int getLogicFps() {
     return logicFps;

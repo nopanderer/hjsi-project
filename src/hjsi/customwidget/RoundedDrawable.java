@@ -1,4 +1,4 @@
-package exam.customwidget;
+package hjsi.customwidget;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;

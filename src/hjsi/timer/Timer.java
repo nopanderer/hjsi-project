@@ -1,6 +1,6 @@
 package hjsi.timer;
 
-import exam.androidproject.BuildConfig;
+import hjsi.activity.BuildConfig;
 
 /**
  * @author 이상인

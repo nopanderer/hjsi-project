@@ -1,4 +1,4 @@
-package exam.androidproject;
+package hjsi.activity;
 
 import hjsi.common.AppManager;
 import android.app.Activity;
@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-public class MainActivity extends BaseActivity {
+public class Main extends Base {
   // 액티비티 간 통신을 위한 요청코드 상수
   private static final int ACT_NEWGAME = 0;
   private static final int ACT_CONTINUE = 1;
@@ -26,17 +26,17 @@ public class MainActivity extends BaseActivity {
 
     switch (v.getId()) {
       case R.id.btn_gamestart:
-        Intent intentForNewGame = new Intent(MainActivity.this, Picturebook.class);
-        startActivityForResult(intentForNewGame, MainActivity.ACT_NEWGAME);
+        Intent intentForNewGame = new Intent(Main.this, Picturebook.class);
+        startActivityForResult(intentForNewGame, Main.ACT_NEWGAME);
         break;
       case R.id.btn_continue:
-        Intent intentForContGame = new Intent(MainActivity.this, Continue.class);
-        startActivityForResult(intentForContGame, MainActivity.ACT_CONTINUE);
+        Intent intentForContGame = new Intent(Main.this, Continue.class);
+        startActivityForResult(intentForContGame, Main.ACT_CONTINUE);
         break;
 
       case R.id.btn_exit:
         // view가 alert 이면 팝업실행 즉 버튼을 누르면 팝업창이 뜨는 조건
-        new AlertDialog.Builder(MainActivity.this).setTitle("게임종료") // 팝업창 타이틀바
+        new AlertDialog.Builder(Main.this).setTitle("게임종료") // 팝업창 타이틀바
         .setMessage("종료하시겠습니까?") // 팝업창 내용
         .setPositiveButton("게임종료", new DialogInterface.OnClickListener() {
           @Override

@@ -1,6 +1,7 @@
-package exam.androidproject;
+package hjsi.activity;
 
 import hjsi.common.AppManager;
+import hjsi.customwidget.GoodsView;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -9,12 +10,11 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import exam.customwidget.GoodsView;
 
 /**
  * @author 이상인
  */
-public class Store extends BaseActivity implements View.OnClickListener {
+public class Store extends Base implements View.OnClickListener {
   /* 상점 아이템들의 ID 상수 목록 */
   // 등급별 원소 상자
   private static final int LOW = 0;

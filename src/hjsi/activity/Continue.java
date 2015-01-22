@@ -1,4 +1,4 @@
-package exam.androidproject;
+package hjsi.activity;
 
 import hjsi.common.AppManager;
 import android.app.Activity;
@@ -12,7 +12,7 @@ import android.os.Message;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class Continue extends BaseActivity {
+public class Continue extends Base {
   AnimationDrawable mAni;
 
   Runnable loadingMethod = new Runnable() {
@@ -28,6 +28,7 @@ public class Continue extends BaseActivity {
         /*
          * 공통적인 리소스를 불러온다.
          */
+    	  // TODO 비트맵 리소스 읽어오는 걸 텍스트 파일에서 목록을 받아와서 반복문으로 불러오자
         Bitmap imgRes = BitmapFactory.decodeResource(getResources(), R.drawable.img_tempmap);
         AppManager.getInstance().addBitmap("background", imgRes);
 
