@@ -1,4 +1,4 @@
-﻿package exam.customwidget;
+package exam.customwidget;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -12,9 +12,9 @@ import exam.game.EDElement;
 /**
  * ListView에 들어가는 한 줄짜리 View. <br/>
  * 한 가지의 조합법을 보여주는 역할을 한다.
- * 
+ *
  * @author 이상인
- * 
+ *
  */
 public class RecipeView extends RelativeLayout implements View.OnClickListener {
   /* 생성자 */
@@ -46,8 +46,8 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
   private ImageView mImgEqual;
   /**
    * 조합이 되는 재료인 두 개의 Element와 결과물 Element 한 개를 담는 변수다. <br/>
+   * <strong>index 사용법</strong>
    * <ul>
-   * <b>index 사용법</b>
    * <li>0: 왼쪽 재료 Element</li>
    * <li>1: 오른쪽 재료 Element</li>
    * <li>2: 오른쪽 재료 Element</li>
@@ -60,11 +60,11 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
     LHS1, LHS2, RESULT, IMG_PLUS, IMG_EQUAL, LAST;
 
     public int getIndex() {
-      return this.ordinal();
+      return ordinal();
     }
 
     public int getId() {
-      return this.ordinal() + 1;
+      return ordinal() + 1;
     }
   }
 
@@ -83,14 +83,14 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
     }
 
     // 더하기, 등호 리소스 불러옴
-    if (flag == false) {
+    if (RecipeView.flag == false) {
       // 전체 객체 중에서 객체를 처음 생성 할 때 수행함.
-      drawablePlus = getResources().getDrawable(R.drawable.img_recipeview_plus);
-      drawableEqual = getResources().getDrawable(R.drawable.img_recipeview_equal);
-      flag = true;
+      RecipeView.drawablePlus = getResources().getDrawable(R.drawable.img_recipeview_plus);
+      RecipeView.drawableEqual = getResources().getDrawable(R.drawable.img_recipeview_equal);
+      RecipeView.flag = true;
     }
-    mImgPlus.setImageDrawable(drawablePlus);
-    mImgEqual.setImageDrawable(drawableEqual);
+    mImgPlus.setImageDrawable(RecipeView.drawablePlus);
+    mImgEqual.setImageDrawable(RecipeView.drawableEqual);
 
     setPadding(10, 10, 10, 10);
 
@@ -159,10 +159,11 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
 
   @Override
   public void onClick(View v) {
-    if (detailLevel == 1)
+    if (detailLevel == 1) {
       detailLevel = 2;
-    else
+    } else {
       detailLevel = 1;
+    }
 
     // 세 개의 Element의 자세히보기 상태를 전부 변경한다.
     for (ElementView ev : arElementViews) {

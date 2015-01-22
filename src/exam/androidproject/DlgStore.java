@@ -1,5 +1,6 @@
-﻿package exam.androidproject;
+package exam.androidproject;
 
+import hjsi.common.AppManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,7 +13,6 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.TextView;
 import exam.customwidget.ElementView;
-import exam.game.AppManager;
 import exam.game.EDElement;
 
 public class DlgStore extends Dialog implements OnClickListener {
@@ -34,12 +34,12 @@ public class DlgStore extends Dialog implements OnClickListener {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    AppManager.printSimpleLogInfo();
+    AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
 
-    this.requestWindowFeature(Window.FEATURE_NO_TITLE); // 다이얼로그 제목 표시를 없앤다
-    this.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT)); // 다이얼로그 배경을 없앤다
-                                                                                  // (테두리도 없음)
+    requestWindowFeature(Window.FEATURE_NO_TITLE); // 다이얼로그 제목 표시를 없앤다
+    getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT)); // 다이얼로그 배경을 없앤다
+    // (테두리도 없음)
     setContentView(R.layout.dialog_store);
 
     // 구매를 취소하거나 구매 후 "계속 구매", "배치"도 누르지 않는 경우를 위한 리스너

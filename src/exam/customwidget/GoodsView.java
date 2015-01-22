@@ -1,4 +1,4 @@
-﻿package exam.customwidget;
+package exam.customwidget;
 
 import android.content.Context;
 import android.graphics.Bitmap;
