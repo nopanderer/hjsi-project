@@ -50,6 +50,7 @@ public class AppManager
 
     /**
      * 현재 함수명 리턴(1.4 이후에서만 사용가능)
+     * qweqwe
      *
      * @author 2007.11.27(김준호)
      * @since 1.4
