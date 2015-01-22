@@ -1,6 +1,8 @@
-package exam.androidproject;
+package hjsi.activity;
 
 import hjsi.common.AppManager;
+import hjsi.customwidget.ElementView;
+import hjsi.game.EDElement;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,8 +14,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.TextView;
-import exam.customwidget.ElementView;
-import exam.game.EDElement;
 
 public class DlgStore extends Dialog implements OnClickListener {
 

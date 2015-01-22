@@ -1,4 +1,4 @@
-package exam.androidproject;
+package hjsi.activity;
 
 import hjsi.common.AppManager;
 import android.app.Dialog;

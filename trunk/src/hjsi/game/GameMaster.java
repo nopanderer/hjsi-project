@@ -1,4 +1,4 @@
-package exam.game;
+package hjsi.game;
 
 import hjsi.common.AppManager;
 import android.util.Log;
@@ -45,19 +45,35 @@ public class GameMaster implements Runnable {
         // 프레임 시작 시간을 구한다.
         fpsStartTime = System.currentTimeMillis();
 
-        /**
-         *
-         *
-         *
-         *
+        /*
          * 게임 로직 실행
-         *
-         *
-         *
-         *
          */
         for (Unit unit : GameState.getInstance().getUnits()) {
           unit.action();
+        }
+
+        if (GameState.getInstance().usedMob < 10)
+          GameState.getInstance().addMob();
+
+        for (Mob mob : GameState.getInstance().getMobs()) {
+          // 몹이 다 죽으면 새로운 웨이브 시작 및 정지
+          if (GameState.getInstance().deadMob == 10) {
+            nextWave();
+            pauseGame();
+            break;
+          }
+
+          // 몹이 죽지 않았고 1바퀴 돌았으면
+          else if (mob.lap == 2 && mob.dead == false) {
+            mob.dead = true;
+            GameState.getInstance().curMob--;
+            GameState.getInstance().deadMob++;
+            continue;
+          }
+
+          // 몹이 생성되어 있다면 이동
+          else if (mob.created)
+            mob.move();
         }
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
@@ -127,5 +143,19 @@ public class GameMaster implements Runnable {
   public void pauseGame() {
     AppManager.printSimpleLog();
     running = false;
+  }
+
+  public void nextWave() {
+    GameState.getInstance().destroyMob();
+    GameState.getInstance().wave++;
+    // 새로운 비트맵 추가
+    GameState.getInstance().makeFace();
+    // 새로운 몹 생성
+    GameState.getInstance().createMobs();
+    // init(임시)
+    GameState.getInstance().curMob = 0;
+    GameState.getInstance().usedMob = 0;
+    GameState.getInstance().deadMob = 0;
+
   }
 }

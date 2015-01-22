@@ -1,6 +1,8 @@
-package exam.androidproject;
+package hjsi.activity;
 
 import hjsi.common.AppManager;
+import hjsi.customwidget.RecipeView;
+import hjsi.game.EDElement;
 
 import java.util.ArrayList;
 
@@ -16,15 +18,13 @@ import android.widget.ExpandableListView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
-import exam.customwidget.RecipeView;
-import exam.game.EDElement;
 
 /**
  * 조합도감 액티비티
  *
  * @author 이상인
  */
-public class Picturebook extends BaseActivity {
+public class Picturebook extends Base {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     AppManager.printSimpleLog();

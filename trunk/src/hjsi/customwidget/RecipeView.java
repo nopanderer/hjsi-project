@@ -1,13 +1,13 @@
-package exam.customwidget;
+package hjsi.customwidget;
 
+import hjsi.activity.R;
+import hjsi.game.EDElement;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import exam.androidproject.R;
-import exam.game.EDElement;
 
 /**
  * ListView에 들어가는 한 줄짜리 View. <br/>

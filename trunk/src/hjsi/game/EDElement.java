@@ -1,4 +1,4 @@
-package exam.game;
+package hjsi.game;
 
 /**
  * ElementView 테스트용으로 하나 만듦

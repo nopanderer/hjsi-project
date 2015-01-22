@@ -1,4 +1,6 @@
-package exam.customwidget;
+package hjsi.customwidget;
+
+import hjsi.game.EDElement;
 
 import java.util.HashMap;
 
@@ -12,7 +14,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import exam.game.EDElement;
 
 /**
  * 원소의 정보를 보여주는 뷰<br>

@@ -1,4 +1,4 @@
-package exam.androidproject;
+package hjsi.activity;
 
 import hjsi.common.AppManager;
 import android.app.Activity;
@@ -7,7 +7,7 @@ import android.os.Bundle;
 /**
  * 기존의 액티비티 리스트는 AppManager 클래스로 옮김. 이 클래스를 상속하는 액티비티들은 모두 자동으로 AppManager 클래스에 등록과 삭제를 자동으로 하게 된다.
  */
-public class BaseActivity extends Activity {
+public class Base extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);

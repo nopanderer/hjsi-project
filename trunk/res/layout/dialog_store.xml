@@ -69,7 +69,7 @@
         android:padding="0px"
         android:visibility="invisible" >
 
-        <exam.customwidget.ElementView
+        <hjsi.customwidget.ElementView
             android:id="@+id/dlg_store_goods_element"
             android:layout_width="180dp"
             android:layout_height="115dp"
