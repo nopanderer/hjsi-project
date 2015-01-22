@@ -1,8 +1,8 @@
 package hjsi.activity;
 
 import hjsi.common.AppManager;
-import hjsi.customwidget.RecipeView;
-import hjsi.game.EDElement;
+import hjsi.customview.RecipeView;
+import hjsi.game.Tower;
 
 import java.util.ArrayList;
 
@@ -24,7 +24,7 @@ import android.widget.TextView;
  *
  * @author 이상인
  */
-public class Picturebook extends Base {
+public class RecipeBook extends Base {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     AppManager.printSimpleLog();
@@ -40,20 +40,20 @@ public class Picturebook extends Base {
       }
     });
 
-    // 테스트용 Element 생성
-    EDElement ede = new EDElement();
+    // 테스트용 TowerView 생성
+    Tower ede = new Tower();
     ede.name = "나루토";
     ede.imgName = "naruto01";
     ede.dmg = 10;
     ede.rate = 0.8f;
 
-    EDElement ede2 = new EDElement();
+    Tower ede2 = new Tower();
     ede2.name = "사쿠라";
     ede2.imgName = "naruto04";
     ede2.dmg = 9;
     ede2.rate = 1.0f;
 
-    EDElement ede3 = new EDElement();
+    Tower ede3 = new Tower();
     ede3.name = "사스케";
     ede3.imgName = "naruto07";
     ede3.dmg = 11;
@@ -203,15 +203,15 @@ class RecipeExpandibleAdapter extends BaseExpandableListAdapter {
 
 // ExpandibleListView를 위한 자료구조
 class Recipe {
-  EDElement arElements[] = new EDElement[3];
+  Tower arElements[] = new Tower[3];
 
   Recipe() {
     for (int i = 0; i < arElements.length; i++) {
-      arElements[i] = new EDElement();
+      arElements[i] = new Tower();
     }
   }
 
-  Recipe(EDElement e1, EDElement e2, EDElement eResult) {
+  Recipe(Tower e1, Tower e2, Tower eResult) {
     arElements[0] = e1;
     arElements[1] = e2;
     arElements[2] = eResult;

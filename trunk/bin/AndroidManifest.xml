@@ -24,16 +24,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="hjsi.activity.Continue"
+            android:name="hjsi.activity.Loader"
             android:label="ContinueAct"
             android:screenOrientation="landscape" />
         <activity
-            android:name="hjsi.activity.Map"
+            android:name="hjsi.activity.Game"
             android:label="MapAct"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-			android:name=".Picturebook"
+			android:name=".RecipeBook"
             android:label="PicturebookAct"
             android:screenOrientation="landscape" >
         </activity>

@@ -28,12 +28,12 @@ public class Timer {
   private volatile long remain;
 
   /**
-   * callback 모드인 Timer 스스로 주기적인 작업을 수행하도록 할 때, TimerAction으로 구현한 작업을 수행한다.
+   * callback 모드인 Timer 스스로 주기적인 작업을 수행하도록 할 때, TimerRunnable로 구현한 작업을 수행한다.
    */
-  private TimerAction action;
+  private TimerRunnable task;
 
   /**
-   * action으로 지정된 작업을 수행할 횟수를 나타낸다. 음수일 경우 무한 반복한다.
+   * task로 지정된 작업을 수행할 횟수를 나타낸다. 음수일 경우 무한 반복한다.
    */
   private int loop;
 
@@ -41,13 +41,13 @@ public class Timer {
    * 지정된 작업을 일정 주기마다 정해진 횟수만큼 반복 수행하는 타이머를 생성한다. 타이머는 바로 시작되지 않는다.
    *
    * @param milliSec 타이머의 반복 주기(대기시간)를 정한다.
-   * @param action 정해진 주기마다 반복해서 수행할 작업을 지정한다.
+   * @param task 정해진 주기마다 반복해서 수행할 작업을 지정한다.
    * @param loop 작업의 반복 횟수를 지정한다. 음수를 입력할 경우 무한 반복한다.
    */
-  protected Timer(long milliSec, TimerAction action, int loop) {
+  protected Timer(long milliSec, TimerRunnable task, int loop) {
     try {
-      if (action == null) {
-        throw new Exception("TimerAction action must be not null.");
+      if (task == null) {
+        throw new Exception("TimerRunnable task must be not null.");
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -57,7 +57,7 @@ public class Timer {
     period = milliSec;
     remain = period;
 
-    this.action = action;
+    this.task = task;
     this.loop = loop;
   }
 
@@ -100,7 +100,7 @@ public class Timer {
   }
 
   /**
-   * callback 모드 타이머에서만 사용한다. TimerAction action에 지정된 작업을 수행하고 남은 반복 횟수를 차감한다.
+   * callback 모드 타이머에서만 사용한다. TimerRunnable action에 지정된 작업을 수행하고 남은 반복 횟수를 차감한다.
    *
    * @return 이후로도 작업을 계속해야 한다면 true, 이번이 마지막 작업이라면 false
    */
@@ -116,7 +116,7 @@ public class Timer {
       new Thread(new Runnable() {
         @Override
         public void run() {
-          action.doAction();
+          task.run();
         }
       }).start();
 

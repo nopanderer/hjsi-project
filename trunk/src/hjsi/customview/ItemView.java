@@ -1,4 +1,4 @@
-package hjsi.customwidget;
+package hjsi.customview;
 
 import hjsi.activity.R;
 import android.content.Context;
@@ -13,20 +13,20 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class GoodsView extends LinearLayout {
-  public GoodsView(Context context, OnClickListener l, int goodsId) {
+public class ItemView extends LinearLayout {
+  public ItemView(Context context, OnClickListener l, int goodsId) {
     super(context);
     setOnClickListener(l);
     this.goodsId = goodsId;
     init();
   }
 
-  public GoodsView(Context context, AttributeSet attrs) {
+  public ItemView(Context context, AttributeSet attrs) {
     super(context, attrs);
     init();
   }
 
-  public GoodsView(Context context, AttributeSet attrs, int defStyle) {
+  public ItemView(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
     init();
   }

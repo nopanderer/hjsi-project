@@ -1,7 +1,7 @@
-package hjsi.customwidget;
+package hjsi.customview;
 
 import hjsi.activity.R;
-import hjsi.game.EDElement;
+import hjsi.game.Tower;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -45,15 +45,15 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
   private ImageView mImgPlus;
   private ImageView mImgEqual;
   /**
-   * 조합이 되는 재료인 두 개의 Element와 결과물 Element 한 개를 담는 변수다. <br/>
+   * 조합이 되는 재료인 두 개의 Element와 결과물 TowerView 한 개를 담는 변수다. <br/>
    * <strong>index 사용법</strong>
    * <ul>
-   * <li>0: 왼쪽 재료 Element</li>
-   * <li>1: 오른쪽 재료 Element</li>
-   * <li>2: 오른쪽 재료 Element</li>
+   * <li>0: 왼쪽 재료 TowerView</li>
+   * <li>1: 오른쪽 재료 TowerView</li>
+   * <li>2: 오른쪽 재료 TowerView</li>
    * </ul>
    */
-  private ElementView arElementViews[] = new ElementView[3];
+  private TowerView arElementViews[] = new TowerView[3];
 
   /* Identifiers of views */
   private enum viewId {
@@ -77,7 +77,7 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
 
     // ElementView들을 이름까지 보이는 상태로 초기화한다.
     for (int i = 0; i < arElementViews.length; i++) {
-      arElementViews[i] = new ElementView(getContext());
+      arElementViews[i] = new TowerView(getContext());
       arElementViews[i].setId(viewId.LHS1.getId() + i);
       arElementViews[i].changeDetailLevel(detailLevel);
     }
@@ -111,7 +111,7 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
     LayoutParams lp[] = new LayoutParams[viewId.LAST.getIndex()];
 
     /* RecipeView에 각 view를 등록시킴 */
-    // 왼쪽 재료 Element 설정
+    // 왼쪽 재료 TowerView 설정
     int idx = viewId.LHS1.getIndex();
     lp[idx] = arElementViews[idx].getParams();
     lp[idx].addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -126,7 +126,7 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
     lp[idx].topMargin = (arElementViews[viewId.LHS1.getId()].getIconSize() - plusSize) / 2;
     addView(mImgPlus, lp[idx]);
 
-    // 오른쪽 재료 Element 설정
+    // 오른쪽 재료 TowerView 설정
     idx = viewId.LHS2.getIndex();
     lp[idx] = arElementViews[idx].getParams();
     lp[idx].addRule(RelativeLayout.RIGHT_OF, viewId.IMG_PLUS.getId());
@@ -141,7 +141,7 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
     lp[idx].topMargin = (arElementViews[viewId.LHS2.getId()].getIconSize() - plusSize) / 2;
     addView(mImgEqual, lp[idx]);
 
-    // 조합결과 Element 설정
+    // 조합결과 TowerView 설정
     idx = viewId.RESULT.getIndex();
     lp[idx] = arElementViews[idx].getParams();
     lp[idx].addRule(RelativeLayout.RIGHT_OF, viewId.IMG_EQUAL.getId());
@@ -149,9 +149,9 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
   }
 
   /**
-   * @param arElements 하나의 리스트뷰 항목(O+O=O)에 들어갈 EDElement 객체 3개의 배열
+   * @param arElements 하나의 리스트뷰 항목(O+O=O)에 들어갈 Tower 객체 3개의 배열
    */
-  public void setElements(EDElement[] arElements) {
+  public void setElements(Tower[] arElements) {
     for (int i = 0; i < 3; i++) {
       arElementViews[i].setElement(arElements[i]);
     }
@@ -166,7 +166,7 @@ public class RecipeView extends RelativeLayout implements View.OnClickListener {
     }
 
     // 세 개의 Element의 자세히보기 상태를 전부 변경한다.
-    for (ElementView ev : arElementViews) {
+    for (TowerView ev : arElementViews) {
       ev.changeDetailLevel(detailLevel);
     }
   }

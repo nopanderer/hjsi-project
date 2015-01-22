@@ -9,22 +9,22 @@ import android.view.MotionEvent;
 /**
  * 카메라 클래스. 화면에 보이는 영역을 관리한다. 게임 오브젝트를 화면에 출력할 때 필요한 좌표 값 등도 변환한다.
  */
-public class CameraManager {
-  private static final String tag = CameraManager.class.getSimpleName();
-  private static CameraManager uniqueInstance;
+public class Camera {
+  private static final String tag = Camera.class.getSimpleName();
+  private static Camera uniqueInstance;
 
-  private CameraManager() {
+  private Camera() {
     position = new Point(0, 0);
     viewport = new Rect(0, 0, 0, 0);
     worldRect = new Rect(0, 0, 3840, 2160);
     worldMargin = new Rect(125, 125, 125, 125);
   }
 
-  public static CameraManager getInstance() {
+  public static Camera getInstance() {
     if (uniqueInstance == null) {
-      synchronized (CameraManager.class) {
+      synchronized (Camera.class) {
         if (uniqueInstance == null) {
-          uniqueInstance = new CameraManager();
+          uniqueInstance = new Camera();
         }
       }
     }

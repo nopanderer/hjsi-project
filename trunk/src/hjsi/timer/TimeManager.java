@@ -205,11 +205,11 @@ public class TimeManager implements Runnable {
    * 호출한다. 지정된 반복 횟수만큼 작업을 수행하고나면 타이머는 자동으로 제거된다.
    *
    * @param milliSec 지정한 시간마다 action을 반복 수행한다.
-   * @param action 타이머가 수행할 작업인 TimerAction 인터페이스를 구현한 객체를 지정한다.
+   * @param action 타이머가 수행할 작업인 TimerRunnable 인터페이스를 구현한 객체를 지정한다.
    * @param loop 지정된 값만큼 action을 반복 수행한다. 음수 값을 입력하면 무한 반복 수행한다.
    * @return 생성된 Timer 객체
    */
-  public static Timer registerCallbackTimer(long milliSec, TimerAction action, int loop) {
+  public static Timer registerCallbackTimer(long milliSec, TimerRunnable action, int loop) {
     AppManager.printSimpleLog();
 
     Timer timer = new Timer(milliSec, action, loop);

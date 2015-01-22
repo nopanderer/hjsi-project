@@ -1,4 +1,4 @@
-package hjsi.customwidget;
+package hjsi.customview;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;

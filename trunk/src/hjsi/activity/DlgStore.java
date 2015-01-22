@@ -1,8 +1,8 @@
 package hjsi.activity;
 
 import hjsi.common.AppManager;
-import hjsi.customwidget.ElementView;
-import hjsi.game.EDElement;
+import hjsi.customview.TowerView;
+import hjsi.game.Tower;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -74,8 +74,8 @@ public class DlgStore extends Dialog implements OnClickListener {
         // TODO 구매 관련 메소드를 작성한다
 
         // 테스트용으로 기본 element 만들어서 뷰에 설정한다.
-        ElementView ev = (ElementView) findViewById(R.id.dlg_store_goods_element);
-        ev.setElement(new EDElement());
+        TowerView ev = (TowerView) findViewById(R.id.dlg_store_goods_element);
+        ev.setElement(new Tower());
         ev.changeDetailLevel(1);
         break;
 
