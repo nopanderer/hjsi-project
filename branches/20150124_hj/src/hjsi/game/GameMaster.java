@@ -73,7 +73,7 @@ public class GameMaster implements Runnable {
 
           // 몹이 생성되어 있다면 이동
           else if (mob.created)
-            mob.move();
+            mob.action();
         }
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */

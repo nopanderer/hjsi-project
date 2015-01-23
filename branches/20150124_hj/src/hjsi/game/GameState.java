@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 
 /**
  * 게임에 필요한 정보를 저장한다.
@@ -101,9 +102,9 @@ public class GameState {
   public void makeFace() {
 
     int drawableId = res.getIdentifier("mob" + wave, "drawable", "hjsi.activity");
-    BitmapFactory.Options option = new BitmapFactory.Options();
+    Options option = new Options();
 
-    option.inSampleSize = 4;
+    option.inSampleSize = 16;
 
     mImgMob = BitmapFactory.decodeResource(res, drawableId, option);
 
@@ -118,7 +119,7 @@ public class GameState {
   public void createMobs() {
     for (int i = 0; i < MAX_MOP; i++)
       // 여기서는 10마리까지지만 실제로는 파일입력을 통해서
-      Mobs.add(new Mob(90, 90, 64, 64, wave));
+      Mobs.add(new Mob(90, 90, mImgMob, wave));
   }
 
   public void addMob() {

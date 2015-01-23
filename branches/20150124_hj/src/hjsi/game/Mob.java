@@ -1,64 +1,86 @@
 package hjsi.game;
 
-import hjsi.common.AppManager;
 import hjsi.common.Camera;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 
-/*
- * Mob 클래스 Tower와 Mob 클래스는 먼저 만들고 두 클래스의 공통점들이 명확히 보일 때 추상화 시키는게 나을 것 같아서 Unit 클래스를 만들지 않음 (Bounds
- * 상속 받는거 없앰)
+/**
+ * Mob 클래스
+ * 
  */
-public class Mob {
-  /* 게임 속성 */
-  private int hp; // 몹 체력
-  private int x, y; // 위치
-  private int width, height; // 크기
-  private int step = 5; // 5픽셀씩
-  private int sleep = 10; // 10milsec
-  private int range = 400; // 타격 범위
-  private int oldX, oldY; // 초기 생성 위치
+public class Mob extends Unit {
 
-  private long beforeTime; // 움직이기 전 시간
+
+  /**
+   * 최대 체력
+   */
+  private int hpMax;
+  /**
+   * 현재 체력
+   */
+  private int hp;
+  /**
+   * 이동할 거리
+   */
+  private int step = 5;
+  /**
+   * step당 지연시간
+   */
+  private int sleep = 10;
+  /**
+   * 타격범위
+   */
+  private int range = 400;
+  /**
+   * 움직이기 전 시간
+   */
+  private long beforeTime;
+  /**
+   * 웨이브
+   */
   private int wave;
+  /**
+   * 몹이 생성 되었는가
+   */
+  public boolean created;
+  /**
+   * 몹이 죽었는가
+   */
+  public boolean dead;
+  /**
+   * 몇 바퀴 돌았나
+   */
+  public int lap;
 
-  public Bitmap face;
+  /* 처리를 위한 변수 */
 
-  public boolean created; // 몹이 생성 되었는가
-  public boolean dead; // 몹이 죽었는가
-  public int lap; // 몇 바퀴 돌았나(2바퀴 돌면 몹 자체 파괴)
+  /**
+   * 초기 생성 위치
+   */
+  private int oldX, oldY;
 
-  public Mob(int x, int y, int width, int height, int wave) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
+  public Mob(int x, int y, Bitmap face, int wave) {
+    super(x, y, face);
+
     created = false;
     dead = false;
     lap = 0;
     this.wave = wave;
 
     beforeTime = System.currentTimeMillis();
-    // 몹이 초기에 생성되는 위치
+
     oldX = x;
     oldY = y;
 
   }
 
-  public void draw(Canvas canvas) {
-    Paint showRange = new Paint();
-    showRange.setAntiAlias(true);
-    showRange.setStyle(Paint.Style.STROKE); // 원의 윤곽선만 그림
-    showRange.setStrokeWidth(3); // 윤곽선 두께
-    // showRange.setAlpha(0x00); // 원 안을 투명하게
-    showRange.setColor(Color.GREEN); // 윤곽선은 초록색
-    canvas.drawCircle(x + 32, y + 32, range, showRange);
-    canvas.drawBitmap(AppManager.getInstance().getBitmap("mob" + wave), x, y, null);
-  }
-
-  public void move() {
+  /**
+   * (non-Javadoc) 몹 이동 액션
+   * 
+   * @see hjsi.game.Unit#doAction()
+   */
+  @Override
+  public void action() {
     // 10밀리세컨드 마다 5 픽셀씩 이동
     if (System.currentTimeMillis() - beforeTime > sleep)
       beforeTime = System.currentTimeMillis();
@@ -85,7 +107,27 @@ public class Mob {
     else if (x - step >= oldX && y == oldY) {
       x -= step;
     }
-
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#draw(android.graphics.Canvas)
+   */
+  @Override
+  public void draw(Canvas canvas) {
+    super.draw(canvas);
+    showRange(x, y, range, canvas);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#touch()
+   */
+  @Override
+  public void touch() {
+    // TODO Auto-generated method stub
+
+  }
 }
