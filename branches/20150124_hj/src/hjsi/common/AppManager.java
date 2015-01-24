@@ -274,32 +274,49 @@ public class AppManager {
    * @param bitmap
    */
   public void addBitmap(String key, Bitmap bitmap) {
-    String msg = "(\"" + key + "\", " + bitmap.getClass().getCanonicalName();
+    String msg = "(\"" + key + "\", " + bitmap.toString();
 
     Bitmap old = loadedBitmap.put(key, bitmap);
 
-    if (old == null) {
-      msg += ") added.";
-    } else {
-      msg += ") was replaced with new bitmap.";
+    msg += ") was added";
+    if (old != null) {
+      msg += " instead of " + old.toString();
+      old.recycle();
     }
 
     printDetailLog(msg);
   }
 
-  public Bitmap getBitmap(String key, Options opts) {
-    return getBitmap(filePath, key, opts);
-  }
-
+  /**
+   * 로드된 비트맵 혹은 전체 assets 파일 목록에서 key에 해당하는 비트맵을 구한다.
+   * 
+   * @param key 구하려는 비트맵의 키 문자열
+   * @return null or Bitmap
+   */
   public Bitmap getBitmap(String key) {
     return getBitmap(filePath, key, null);
   }
 
   /**
+   * 이미 로드된 비트맵이 있더라도 주어진 Options 객체가 적용된 새로운 비트맵을 생성해서 반환한다.
+   * 
+   * @param key 구하려는 비트맵의 키 문자열
+   * @param opts 적용하려는 옵션을 입력한다. null을 입력할 경우는 <var>AppManager.getBitmap(String key)</var>와 동일한 작업을
+   *        수행한다.
+   * @return null or Bitmap
+   */
+  public Bitmap getBitmap(String key, Options opts) {
+    return getBitmap(filePath, key, opts);
+  }
+
+  /**
+   * 로드된 비트맵 혹은 전체 assets 파일 목록에서 key에 해당하는 비트맵을 구한다. <br>
+   * Options 객체가 주어지면 이미 로드된 비트맵이 있더라도 주어진 Options 객체가 적용된 새로운 비트맵을 생성해서 반환한다.
+   * 
    * @param filePathMap assets의 특정 폴더 내의 파일들로 제한할 경우, 해당 경로 목록의 맵
    * @param key 가져올 이미지의 확장자를 제외한 파일 이름
    * @param opts Options 객체 혹은 null 입력 가능
-   * @return 비트맵 객체 혹은 null
+   * @return null or Bitmap
    */
   public Bitmap getBitmap(HashMap<String, String> filePathMap, String key, Options opts) {
     Bitmap retValue = loadedBitmap.get(key);

@@ -73,7 +73,7 @@ public class Loader extends Base {
          */
 
         /*
-         * 공통적인 리소스를 불러온다.
+         * 공통적인 리소스를 준비한다. (일정 범주의 모든 이미지를 불러오는 방법)
          */
         HashMap<String, String> common = AppManager.getInstance().getFilesRecursively("img/common");
         for (String key : common.keySet()) {
@@ -81,7 +81,7 @@ public class Loader extends Base {
         }
 
         /*
-         * 동상 이미지를 불러온다.
+         * 동상 이미지를 준비한다. (특정한 이미지를 불러오는 방법)
          */
         AppManager.getInstance().loadBitmapAsset("owl");
 
