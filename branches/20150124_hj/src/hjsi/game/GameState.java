@@ -8,7 +8,6 @@ import java.util.LinkedList;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 
 /**
@@ -62,7 +61,7 @@ public class GameState {
     /*
      * 불러온 유저 데이터를 토대로 동상을 생성한다. (유저 데이터의 남아있는 동상의 갯수, 체력, 업그레이드 등을 참조) 생성한 동상은 유닛 목록에 추가한다.
      */
-    arTestUnits.add(new Statue(180, 120, AppManager.getInstance().getBitmap("statue")));
+    arTestUnits.add(new Statue(180, 120, AppManager.getInstance().getBitmap("owl")));
   }
 
   public void initState(Resources res) {
@@ -100,20 +99,16 @@ public class GameState {
   }
 
   public void makeFace() {
-
-    int drawableId = res.getIdentifier("mob" + wave, "drawable", "hjsi.activity");
     Options option = new Options();
-
     option.inSampleSize = 16;
 
-    mImgMob = BitmapFactory.decodeResource(res, drawableId, option);
+    mImgMob = AppManager.getInstance().getBitmap("mob" + wave, option);
 
     if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64)) {
       mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
     }
 
     AppManager.getInstance().addBitmap("mob" + wave, mImgMob);
-
   }
 
   public void createMobs() {
