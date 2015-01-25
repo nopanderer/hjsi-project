@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -81,7 +80,7 @@ public class Game extends Base implements OnClickListener {
     /* GameMaster 생성 */
     gameMaster = new GameMaster();
 
-    Log.d(getClass().getSimpleName(), AppManager.getMethodName() + " is finished.");
+    AppManager.printDetailLog(getClass().getSimpleName() + " 초기화 완료");
   }
 
   @Override
@@ -143,7 +142,7 @@ public class Game extends Base implements OnClickListener {
 
   @Override
   public void onClick(View v) {
-    Log.d(toString(), AppManager.getMethodName() + "() " + v.toString());
+    AppManager.printDetailLog(v.toString());
 
     if (v == settingBtn) {
       showSettingMenu();

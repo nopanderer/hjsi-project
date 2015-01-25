@@ -133,4 +133,15 @@ public class ItemView extends LinearLayout {
   public int getGoodsId() {
     return goodsId;
   }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    // TODO Auto-generated method stub
+    return "caption: " + getCaption() + ", value: " + getValue();
+  }
 }

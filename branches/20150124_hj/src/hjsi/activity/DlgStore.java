@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -64,7 +63,7 @@ public class DlgStore extends Dialog implements OnClickListener {
 
   @Override
   public void onClick(View v) {
-    Log.d(toString(), AppManager.getMethodName() + "() " + v.toString());
+    AppManager.printDetailLog(v.toString());
 
     switch (v.getId()) {
       case R.id.dlg_store_btn_buy: // 정말로 원소 구매할지 확인하는 창의 구매 버튼

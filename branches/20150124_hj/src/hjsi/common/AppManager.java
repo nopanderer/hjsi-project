@@ -12,6 +12,7 @@ import java.util.Stack;
 import android.app.Activity;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
@@ -105,12 +106,9 @@ public class AppManager {
     }
 
     int depth; // printSimpleLog()를 거칠 경우 호출스택이 더 깊어진다.
-
     if (detailMsg != null) {
-      detailMsg = " " + detailMsg;
       depth = 1;
     } else {
-      detailMsg = "";
       depth = 2;
     }
 
@@ -118,7 +116,17 @@ public class AppManager {
     String className = elements[depth].getClassName();
     className = className.substring(className.lastIndexOf(".") + 1);
 
-    Log.d(className, methodName + detailMsg);
+    String tag = "[ETD] ";
+    String msg;
+    if (detailMsg != null) {
+      tag += className + "." + methodName;
+      msg = detailMsg;
+    } else {
+      tag += className;
+      msg = className + "." + methodName + "(); 호출됨";
+    }
+
+    Log.d(tag, msg);
   }
 
   public void addActivity(Base act) {
@@ -128,7 +136,7 @@ public class AppManager {
       }
     }
 
-    printDetailLog(act.toString());
+    printDetailLog(act.toString() + " 액티비티가 추가됨");
   }
 
   public void removeActivity(Base act) {
@@ -136,7 +144,7 @@ public class AppManager {
       runningActivities.remove(act);
     }
 
-    printDetailLog(act.toString());
+    printDetailLog(act.toString() + " 액티비티가 제거됨");
   }
 
   /**
@@ -145,7 +153,7 @@ public class AppManager {
   public void quitApp() {
     for (Activity act : runningActivities) {
       act.finish();
-      Log.d(AppManager.tag, act.toString() + ".finish();");
+      printDetailLog(act.toString() + " finish() 요청함.");
     }
   }
 
@@ -223,6 +231,7 @@ public class AppManager {
         if (subList.length == 0) {
           // 부모 디렉토리 경로->(img/common/) background (.png)<-확장자
           String fileName = fullPath.substring(parentPath.length(), fullPath.indexOf('.'));
+          String fileExt = fullPath.substring(fullPath.indexOf('.'));
 
           // 이미 fileName에 해당하는 개체가 들어가 있는 경우에 대한 처리
           String old = retValue.put(fileName, fullPath);
@@ -231,10 +240,10 @@ public class AppManager {
             countOfFiles++;
           } else {
             // 기존 파일이 존재하므로 기존 파일을 새로운 파일이 대체함. 그래서 카운트는 하지 않음.
-            Log.e("Asset List", "Key 중복 발견: " + old + " --대체 됨--> " + fullPath);
+            printDetailLog("(Asset List) Key 중복 발견: " + old + " >>--교체--> " + fullPath);
           }
 
-          Log.i("Asset List", "[" + countOfFiles + "] " + fullPath);
+          printDetailLog(fileExt + " - [" + findPath + ":" + countOfFiles + "] " + fullPath);
 
         } else {
           /*
@@ -248,7 +257,7 @@ public class AppManager {
       }
     } catch (IOException e) {
       e.printStackTrace();
-      Log.e(tag, getMethodName() + " 입출력 예외가 발생함");
+      printDetailLog("입출력 예외가 발생함");
     }
 
     // 찾은 파일이 하나도 없으므로 null을 반환 값으로 지정
@@ -264,7 +273,9 @@ public class AppManager {
    * @param key
    */
   public void loadBitmapAsset(String key) {
-    addBitmap(key, getBitmap(key));
+    Options opts = new Options();
+    opts.inPreferredConfig = Config.RGB_565;
+    addBitmap(key, getBitmap(key, opts));
   }
 
   /**
@@ -274,13 +285,24 @@ public class AppManager {
    * @param bitmap
    */
   public void addBitmap(String key, Bitmap bitmap) {
-    String msg = "(\"" + key + "\", " + bitmap.toString();
+    String msg = "\"" + key + "\", " + bitmap + ", ";
+
+    // 추가되는 비트맵의 용량 구함
+    float allocMemory = bitmap.getByteCount();
+    // 추가된 비트맵의 용량에 맞게 단위 표시
+    String suffix[] = {"", "K", "M"};
+    int unit = 0;
+    while (allocMemory > 1024f && unit < suffix.length) {
+      allocMemory /= 1024f;
+      unit++;
+    }
+    allocMemory = (long) (allocMemory * 1000f + 0.5f) / 1000f;
+    msg += allocMemory + " " + suffix[unit] + "Bytes 추가";
 
     Bitmap old = loadedBitmap.put(key, bitmap);
-
-    msg += ") was added";
+    // 동일한 key의 객체가 이미 있었던 경우 구 객체의 할당을 해제한다.
     if (old != null) {
-      msg += " instead of " + old.toString();
+      msg += " (제거됨: " + old.toString() + ")";
       old.recycle();
     }
 
@@ -329,6 +351,11 @@ public class AppManager {
         if (path == null) {
           printDetailLog("\"" + key + "\"에 해당하는 파일을 찾을 수 없음.");
         } else {
+          if (retValue != null) {
+          // TODO 이 부분에서 recycle() 하는 것은 다른 클래스에서 recycle된 비트맵을 참조할 가능성을 남기므로 차후에는 수정해야된다.
+            retValue.recycle();
+          }
+
           InputStream is = assetManager.open(path);
           retValue = BitmapFactory.decodeStream(is, null, opts);
         }

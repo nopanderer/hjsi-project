@@ -60,7 +60,7 @@ public class Loader extends Base {
         startActivity(lunchGame); // Game 실행
         finish(); // Loader 종료
 
-        AppManager.printDetailLog("loading complete");
+        AppManager.printDetailLog("로딩 완료");
       }
     }
 
@@ -78,8 +78,10 @@ public class Loader extends Base {
          * 공통적인 리소스를 준비한다. (일정 범주의 모든 이미지를 불러오는 방법)
          */
         HashMap<String, String> common = AppManager.getInstance().getFilesRecursively("img/common");
-        for (String key : common.keySet()) {
-          AppManager.getInstance().loadBitmapAsset(key);
+        if (common != null) {
+          for (String key : common.keySet()) {
+            AppManager.getInstance().loadBitmapAsset(key);
+          }
         }
 
         /*

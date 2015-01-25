@@ -5,8 +5,6 @@ import hjsi.common.AppManager;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import android.util.Log;
-
 public class TimeManager implements Runnable {
   private static String tag; // 로그 출력용 클래스 이름을 갖고 있음
   private static TimeManager uniqueInstance; // 자신의 유일한 인스턴스를 가지고 있는다.
@@ -129,7 +127,7 @@ public class TimeManager implements Runnable {
 
   @Override
   public void run() {
-    Log.i(tag, tag + " is ready.");
+    AppManager.printSimpleLog();
 
     long currentTime = 0L;
 
@@ -155,7 +153,7 @@ public class TimeManager implements Runnable {
                     timer.restart();
                   } else {
                     countList.remove(timer); // 지정된 횟수만큼 작업을 반복했으므로 TimeManager의 count 리스트에서 제거
-                    Log.i(tag, timer + "'s callback is finished.");
+                    AppManager.printDetailLog(timer + "'s callback is finished.");
                   }
 
                 } else {
@@ -178,8 +176,7 @@ public class TimeManager implements Runnable {
       }
       Thread.yield();
     }
-
-    Log.i(tag, tag + " is terminated.");
+    AppManager.printDetailLog("TimeManager 종료.");
   }
 
   /**

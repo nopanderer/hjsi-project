@@ -54,6 +54,7 @@ public class GameState {
       @Override
       public void run() {
         worldTime++;
+        AppManager.printDetailLog("타이머 체크");
       }
     };
     TimeManager.registerCallbackTimer(1000, clock, -1).start();
