@@ -36,9 +36,9 @@ public class Game extends Base implements OnClickListener {
   protected void onCreate(Bundle savedInstanceState) {
     AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
-    
+
     GameState.getInstance().initState(getResources());
-    
+
     // surfaceview 등록
     GameSurface gameView = new GameSurface(this);
     setContentView(gameView);

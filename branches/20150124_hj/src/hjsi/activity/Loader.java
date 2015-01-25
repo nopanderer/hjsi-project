@@ -4,6 +4,7 @@ import hjsi.common.AppManager;
 
 import java.util.HashMap;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
@@ -47,6 +48,7 @@ public class Loader extends Base {
     AppManager.printSimpleLog();
   }
 
+  @SuppressLint("HandlerLeak")
   Handler mHandler = new Handler() {
     @Override
     public void handleMessage(Message msg) {

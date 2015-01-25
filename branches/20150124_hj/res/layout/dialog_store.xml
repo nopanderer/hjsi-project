@@ -24,7 +24,9 @@
             <ImageView
                 android:layout_width="180dp"
                 android:layout_height="90dp"
-                android:background="@drawable/img_goodsview_treasurebox" />
+                android:background="@drawable/img_goodsview_treasurebox"
+                android:contentDescription="상자 이미지"
+                tools:ignore="HardcodedText" />
 
             <TextView
                 android:layout_width="match_parent"
