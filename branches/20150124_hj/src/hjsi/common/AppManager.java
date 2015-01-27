@@ -4,15 +4,14 @@ import hjsi.activity.Base;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.Stack;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
@@ -30,12 +29,6 @@ public class AppManager {
   private LinkedList<Base> runningActivities;
 
   private AssetManager assetManager;
-  /**
-   * assets 폴더 내의 경로 및 확장자를 포함한 파일 목록을 값으로, 이름 부분을 키로 저장한다. <br>
-   * 예) <var>["background"] = img/common/background.png</var> <br>
-   * InputSteam is = getAssets().open(filePath.get("background")); 같은 형식으로 사용한다.
-   */
-  private HashMap<String, String> filePath;
   /**
    * 메모리에 로드된 비트맵 목록
    */
@@ -66,37 +59,11 @@ public class AppManager {
   }
 
   /**
-   * 현재 함수명 리턴(1.4 이후에서만 사용가능)
-   *
-   * @author 2007.11.27(김준호)
-   * @since 1.4
-   */
-  public static String getMethodName() {
-    StackTraceElement[] elements = null;
-
-    try {
-      throw new Exception("getMethodName");
-    } catch (Exception e) {
-      elements = e.getStackTrace();
-    }
-
-    String methodName = ((StackTraceElement) elements[1]).getMethodName();
-    return methodName;
-  }
-
-  /**
-   * 간단하게 클래스 이름을 tag로 하고 메소드 이름을 메시지로 하는 로그캣 로그를 출력한다. (메소드가 제대로 호출되는지 판단하려고)
-   */
-  public static void printSimpleLog() {
-    printDetailLog(null);
-  }
-
-  /**
-   * 간단한 로그에 자세한 메시지를 덧붙여서 출력한다. tag는 클래스 이름, 출력 메시지는 호출한 메소드명과 덧붙인 메시지.
+   * 로그를 출력하려는 개체의 클래스, 메소드 이름을 구한다.
    * 
-   * @param detailMsg 덧붙여서 출력할 String
+   * @return class.method 형태의 문자열
    */
-  public static void printDetailLog(String detailMsg) {
+  private static String getClassMethodName() {
     StackTraceElement[] elements = null;
 
     try {
@@ -104,29 +71,75 @@ public class AppManager {
     } catch (Exception e) {
       elements = e.getStackTrace();
     }
-
-    int depth; // printSimpleLog()를 거칠 경우 호출스택이 더 깊어진다.
-    if (detailMsg != null) {
-      depth = 1;
-    } else {
-      depth = 2;
-    }
-
-    String methodName = elements[depth].getMethodName();
-    String className = elements[depth].getClassName();
+    String methodName = elements[2].getMethodName();
+    String className = elements[2].getClassName();
     className = className.substring(className.lastIndexOf(".") + 1);
 
-    String tag = "[ETD] ";
-    String msg;
-    if (detailMsg != null) {
-      tag += className + "." + methodName;
-      msg = detailMsg;
-    } else {
-      tag += className;
-      msg = className + "." + methodName + "(); 호출됨";
-    }
+    return className + "." + methodName;
+  }
 
-    Log.d(tag, msg);
+  /**
+   * LogCat에서 로그를 필터링하기 위해서 특정 문자열을 tag의 앞에 붙여준다. 일관성을 위해서 메소드로 제작.
+   */
+  private static String getTagPrefix(String tagBody) {
+    return "[ETD] " + tagBody;
+  }
+
+  /**
+   * 메소드의 호출 여부를 확인하기 위해 사용한다.
+   */
+  public static void printSimpleLog() {
+    Log.d(getTagPrefix("메소드 호출"), getClassMethodName() + " 메소드 호출 됨");
+  }
+
+  /**
+   * 호출한 클래스의 이름과 메소드 이름을 TAG로 하는 로그메시지를 출력한다.
+   * 
+   * @param message 로그로 출력할 메시지
+   */
+  public static void printDetailLog(String message) {
+    Log.d(getTagPrefix(getClassMethodName()), message);
+  }
+
+  public static void printDetailLog(String customTag, String message) {
+    Log.d(getTagPrefix(customTag), message);
+  }
+
+  public static void printInfoLog(String message) {
+    Log.i(getTagPrefix(getClassMethodName()), message);
+  }
+
+  public static void printInfoLog(String customTag, String message) {
+    Log.i(getTagPrefix(customTag), message);
+  }
+
+  /**
+   * byte 단위의 숫자를 적절한 단위로 환산한다.
+   * 
+   * @param byteCount 단위를 환산할 바이트 수
+   * @return "#.### Bytes" 형식의 문자열
+   */
+  private String convertByteUnit(float byteCount) {
+    String suffix[] = {"", "K", "M"};
+    int unit = 0;
+    while (byteCount > 1024f && unit < suffix.length) {
+      byteCount /= 1024f;
+      unit++;
+    }
+    byteCount = (long) (byteCount * 1000f + 0.5f) / 1000f;
+
+    return byteCount + " " + suffix[unit] + "Bytes";
+  }
+
+  /**
+   * 로그 출력용으로 만듦. 비트맵 객체를 구별하고 용량을 알아보기 위함.
+   * 
+   * @param bm 비트맵 객체
+   * @return 비트맵 정보
+   */
+  private String bitmapToString(Bitmap bm) {
+    String bitmapId = bm.toString().substring(bm.toString().lastIndexOf('@') + 1);
+    return bitmapId + ", " + convertByteUnit(bm.getByteCount());
   }
 
   public void addActivity(Base act) {
@@ -168,114 +181,7 @@ public class AppManager {
       throw new NullPointerException();
     } else {
       this.assetManager = assetManager;
-      // assets 전체에 대한 파일 경로 목록을 만든다
-      filePath = getFilesRecursively(null);
     }
-  }
-
-  /**
-   * 주어진 경로 아래의 모든 파일을 HashMap에 넣어서 반환한다.
-   * 
-   * @param findPath 특정 경로 혹은 assets의 전체 목록을 구하기 위해서 null
-   * @param assetManager assets 폴더에 접근하기 위한 <strong>AssetManager</strong> 객체
-   * 
-   * @return 경로 및 확장자를 제외한 파일 이름을 키로 하고, 전체 경로를 값으로 갖는 <strong>HashMap</strong> 객체, 아무 파일도 없다면
-   *         <strong>null</strong>
-   */
-  public HashMap<String, String> getFilesRecursively(String findPath) {
-    if (assetManager == null) {
-      printDetailLog("먼저 AssetManager를 세팅하시오.");
-    }
-
-    // assets 폴더를 재귀적으로 탐색하기 위한 stack
-    Stack<String> retrieveStack = new Stack<String>();
-    // findPath에서 찾은 하위 파일 목록을 key(파일 이름)와 value(전체 경로) 형태로 구성한 HashMap
-    HashMap<String, String> retValue = new HashMap<String, String>();
-    // 찾은 파일의 수
-    int countOfFiles = 0;
-
-    try {
-      if (findPath == null) {
-        findPath = "";
-
-        // 마지막에 붙은 / 문자는 제거해준다. (밑에서 붙이기도 함)
-      } else if (findPath.charAt(findPath.length() - 1) == '/') {
-        findPath = findPath.substring(0, findPath.length());
-      }
-      /*
-       * findPath 내부를 탐색하기 위한 폴더 목록을 확인한다.
-       */
-      for (String fileOrDir : assetManager.list(findPath)) {
-        retrieveStack.push(fileOrDir);
-      }
-      /*
-       * AssetManager.list("");를 통해서 내용을 확인해보면 기본적으로 images, sounds, webkit 폴더가 들어있음. 각 폴더 안에는 시스템에서
-       * 사용하는 것 같은 파일들이 있어서 해당 폴더는 탐색하지 않도록 제외함.
-       */
-      if (findPath.equals("")) {
-        retrieveStack.remove("images");
-        retrieveStack.remove("sounds");
-        retrieveStack.remove("webkit");
-      }
-
-      String fullPath;
-      String[] subList;
-      String parentPath = "";
-
-      while (!retrieveStack.isEmpty()) {
-        fullPath = retrieveStack.pop();
-        /*
-         * fullPath가 가지고 있는 하위 디렉토리나 파일의 목록을 구한다. 그 갯수가 0이면 지금의 fullPath는 빈 폴더이거나 파일이다.
-         */
-        subList = assetManager.list(fullPath);
-        if (subList.length == 0) {
-          // 부모 디렉토리 경로->(img/common/) background (.png)<-확장자
-          String fileName = fullPath.substring(parentPath.length(), fullPath.indexOf('.'));
-          String fileExt = fullPath.substring(fullPath.indexOf('.'));
-
-          // 이미 fileName에 해당하는 개체가 들어가 있는 경우에 대한 처리
-          String old = retValue.put(fileName, fullPath);
-          if (old == null) {
-            // 기존 파일이 존재하지 않으므로 정상적으로 파일 갯수 카운트
-            countOfFiles++;
-          } else {
-            // 기존 파일이 존재하므로 기존 파일을 새로운 파일이 대체함. 그래서 카운트는 하지 않음.
-            printDetailLog("(Asset List) Key 중복 발견: " + old + " >>--교체--> " + fullPath);
-          }
-
-          printDetailLog(fileExt + " - [" + findPath + ":" + countOfFiles + "] " + fullPath);
-
-        } else {
-          /*
-           * fullPath가 내부에 폴더나 파일이 하나라도 있으면 현재까지 들어온 경로를 스택에 추가
-           */
-          parentPath = fullPath + "/";
-          for (String subName : subList) {
-            retrieveStack.push(parentPath + subName);
-          }
-        }
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-      printDetailLog("입출력 예외가 발생함");
-    }
-
-    // 찾은 파일이 하나도 없으므로 null을 반환 값으로 지정
-    if (countOfFiles == 0)
-      retValue = null;
-
-    return retValue;
-  }
-
-  /**
-   * key값만으로 assets에 존재하는 파일을 로드함
-   * 
-   * @param key
-   */
-  public void loadBitmapAsset(String key) {
-    Options opts = new Options();
-    opts.inPreferredConfig = Config.RGB_565;
-    addBitmap(key, getBitmap(key, opts));
   }
 
   /**
@@ -285,24 +191,11 @@ public class AppManager {
    * @param bitmap
    */
   public void addBitmap(String key, Bitmap bitmap) {
-    String msg = "\"" + key + "\", " + bitmap + ", ";
-
-    // 추가되는 비트맵의 용량 구함
-    float allocMemory = bitmap.getByteCount();
-    // 추가된 비트맵의 용량에 맞게 단위 표시
-    String suffix[] = {"", "K", "M"};
-    int unit = 0;
-    while (allocMemory > 1024f && unit < suffix.length) {
-      allocMemory /= 1024f;
-      unit++;
-    }
-    allocMemory = (long) (allocMemory * 1000f + 0.5f) / 1000f;
-    msg += allocMemory + " " + suffix[unit] + "Bytes 추가";
-
+    String msg = "\"" + key + "\", " + bitmapToString(bitmap) + " 추가됨";
     Bitmap old = loadedBitmap.put(key, bitmap);
     // 동일한 key의 객체가 이미 있었던 경우 구 객체의 할당을 해제한다.
     if (old != null) {
-      msg += " (제거됨: " + old.toString() + ")";
+      msg += " (제거됨: " + bitmapToString(old) + ")";
       old.recycle();
     }
 
@@ -310,62 +203,159 @@ public class AppManager {
   }
 
   /**
-   * 로드된 비트맵 혹은 전체 assets 파일 목록에서 key에 해당하는 비트맵을 구한다.
+   * 로드된 비트맵을 가져온다.
    * 
-   * @param key 구하려는 비트맵의 키 문자열
-   * @return null or Bitmap
+   * @param key 구하려는 비트맵의 이름
+   * @return 비트맵 객체 혹은 null
    */
   public Bitmap getBitmap(String key) {
-    return getBitmap(filePath, key, null);
+    return loadedBitmap.get(key);
   }
 
   /**
-   * 이미 로드된 비트맵이 있더라도 주어진 Options 객체가 적용된 새로운 비트맵을 생성해서 반환한다.
+   * 주어진 경로 아래의 모든 파일의 전체 경로 목록을 구한다. 특정 경로를 지칭하는 것을 권장한다. 루트에서부터 검색하기 위해 "/"를 입력하면 안드로이드 장비 내의 기본적인
+   * 파일들도 검색 대상에 포함돼서 제대로 된 파일을 얻을 수 없다. 다만, 그 결과는 이 메소드에서 마지막 "/"를 제거하여 ""로 만들기 때문이다. 정말 "/"로부터
+   * 검색한다면 assets 폴더보다 더 상위에서 시작하는데, 권한이 없는 것인지 아무런 결과도 얻을 수 없다.
    * 
-   * @param key 구하려는 비트맵의 키 문자열
-   * @param opts 적용하려는 옵션을 입력한다. null을 입력할 경우는 <var>AppManager.getBitmap(String key)</var>와 동일한 작업을
-   *        수행한다.
-   * @return null or Bitmap
+   * @param path 검색할 경로
+   * @return 파일 경로를 포함하는 ArrayList 객체
    */
-  public Bitmap getBitmap(String key, Options opts) {
-    return getBitmap(filePath, key, opts);
-  }
-
-  /**
-   * 로드된 비트맵 혹은 전체 assets 파일 목록에서 key에 해당하는 비트맵을 구한다. <br>
-   * Options 객체가 주어지면 이미 로드된 비트맵이 있더라도 주어진 Options 객체가 적용된 새로운 비트맵을 생성해서 반환한다.
-   * 
-   * @param filePathMap assets의 특정 폴더 내의 파일들로 제한할 경우, 해당 경로 목록의 맵
-   * @param key 가져올 이미지의 확장자를 제외한 파일 이름
-   * @param opts Options 객체 혹은 null 입력 가능
-   * @return null or Bitmap
-   */
-  public Bitmap getBitmap(HashMap<String, String> filePathMap, String key, Options opts) {
-    Bitmap retValue = loadedBitmap.get(key);
-
-    // 로드된 비트맵 목록에 key가 없거나 Options 개체가 들어온 경우, 새로운 Bitmap을 생성한다.
-    if (retValue == null || opts != null) {
-      try {
-        String path = filePathMap.get(key);
-        // key에 해당하는 파일이 없을 경우는 어디선가 에러가 날 것이다.
-        if (path == null) {
-          printDetailLog("\"" + key + "\"에 해당하는 파일을 찾을 수 없음.");
-        } else {
-          if (retValue != null) {
-          // TODO 이 부분에서 recycle() 하는 것은 다른 클래스에서 recycle된 비트맵을 참조할 가능성을 남기므로 차후에는 수정해야된다.
-            retValue.recycle();
-          }
-
-          InputStream is = assetManager.open(path);
-          retValue = BitmapFactory.decodeStream(is, null, opts);
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
-        printDetailLog("IOException 발생");
+  public ArrayList<String> getFilesList(String path) {
+    /*
+     * 가장 끝에 있는 '/' 글자를 제거한다. lastIndexOf('/')는 전체의 마지막이 '/'가 아니고, 중간에 '/'가 있어도 그 글자가 마지막 '/'이므로 쓰지
+     * 않는다.
+     */
+    int lastIndex = path.length();
+    if (lastIndex-- > 0) {
+      if (path.charAt(lastIndex) == '/') {
+        path = path.substring(0, lastIndex);
       }
     }
 
+    return filesList(path);
+  }
+
+  /**
+   * 특정 경로 아래에 있는 모든 파일들의 전체 경로를 구한다.
+   * 
+   * @param workingDir 현재 검색 중인 경로
+   * @return 파일 경로를 포함하는 ArrayList
+   */
+  private ArrayList<String> filesList(String workingDir) {
+    ArrayList<String> retValue = new ArrayList<String>();
+
+    try {
+      String[] files = assetManager.list(workingDir);
+
+      if (files.length == 0) {
+        retValue.add(workingDir);
+        printInfoLog("파일: " + workingDir);
+      } else {
+        if (workingDir.length() > 0)
+          workingDir += "/";
+
+        for (String file : files) {
+          retValue.addAll(filesList(workingDir + file));
+        }
+      }
+
+    } catch (IOException e) {
+      e.printStackTrace();
+      printDetailLog("입출력 예외가 발생함");
+    }
+
     return retValue;
+  }
+
+  /**
+   * 입력한 키에 해당하는 파일의 전체 경로를 반환한다.
+   * 
+   * @param key 전체 경로를 구할 파일의 확장자를 제외한 이름
+   * @param path 입력한 경로 하위에 속한 파일로 제한
+   * @return 키에 해당하는 파일의 전체 경로, 그런 파일이 없으면 null
+   */
+  private String getPathOf(String key, String path) {
+    String pathOfKey = null;
+
+    for (String file : getFilesList(path)) {
+      int lastIndexOfSlash = file.lastIndexOf('/');
+      int lastIndexOfExt = file.lastIndexOf('.');
+      String fileNameNoExt = file.substring(lastIndexOfSlash + 1, lastIndexOfExt);
+
+      if (key.equalsIgnoreCase(fileNameNoExt)) {
+        pathOfKey = new String(file);
+        break;
+      }
+    }
+
+    return pathOfKey;
+  }
+
+  /**
+   * readTextFile(key, "")를 호출하는 wrapping 메소드. 자세한 내용은 readTextFile(String key, String path)의 내용을
+   * 참조.
+   * 
+   * @param key 내용을 읽어오려는 파일의 이름 (경로 및 확장자는 제외한다)
+   * @return key에 해당하는 파일이 있으면 해당 파일 내용, 없으면 null
+   * @throws IOException
+   */
+  public String readTextFile(String key) throws IOException {
+    return readTextFile(key, "");
+  }
+
+  /**
+   * 입력한 경로 아래에 속하는 모든 경로에서 파일을 찾아서 내용을 읽어온다.
+   * 
+   * @param key 내용을 읽어오려는 파일의 이름 (경로 및 확장자는 제외한다)
+   * @param path 주어진 경로 아래에서만 대상 파일을 찾는다
+   * @return key에 해당하는 파일이 있으면 해당 파일 내용, 없으면 null
+   * @throws IOException
+   */
+  public String readTextFile(String key, String path) throws IOException {
+    String retValue = null;
+    String pathOfKey = getPathOf(key, path);
+
+    if (pathOfKey == null) {
+      throw new IOException("Not found " + key + ".");
+    } else {
+      InputStream is = assetManager.open(pathOfKey);
+      byte[] buffer = new byte[is.available()];
+      is.read(buffer);
+      is.close();
+      retValue = new String(buffer);
+
+      /* 읽어온 파일의 로그 출력 */
+      printInfoLog(pathOfKey, "\"" + key + "\", " + convertByteUnit(buffer.length) + " 읽기 성공");
+      printInfoLog(pathOfKey, retValue);
+    }
+
+    return retValue;
+  }
+
+  /**
+   * 입력한 경로 아래에 속하는 모든 경로에서 파일을 찾아서 비트맵 객체를 생성한다.
+   * 
+   * @param key 읽어올 이미지 파일의 이름 (경로 및 확장자는 제외한다)
+   * @param path 입력된 경로 아래에서만 대상 파일을 찾는다
+   * @param opts 비트맵 생성시 적용할 옵션 객체. 옵션을 적용하지 않을 경우는 null
+   * @return 비트맵 객체 혹은 null
+   * @throws IOException
+   */
+  public Bitmap readImageFile(String key, String path, Options opts) throws IOException {
+    Bitmap bm = null;
+    String pathOfKey = getPathOf(key, path);
+
+    if (pathOfKey == null) {
+      throw new IOException("Not found " + key + ".");
+    } else {
+      InputStream is = assetManager.open(pathOfKey);
+      printInfoLog(pathOfKey, "\"" + key + "\", 원본 용량:" + convertByteUnit(is.available()));
+      bm = BitmapFactory.decodeStream(is, null, opts);
+      is.close();
+      printInfoLog(pathOfKey, "\"" + key + "\", " + bitmapToString(bm) + " 읽기 성공");
+    }
+
+    return bm;
   }
 
   /**

@@ -4,6 +4,7 @@ import hjsi.common.AppManager;
 import hjsi.timer.TimeManager;
 import hjsi.timer.TimerRunnable;
 
+import java.io.IOException;
 import java.util.LinkedList;
 
 import android.content.res.Resources;
@@ -102,14 +103,19 @@ public class GameState {
   public void makeFace() {
     Options option = new Options();
     option.inSampleSize = 16;
+    String key = "mob" + wave;
 
-    mImgMob = AppManager.getInstance().getBitmap("mob" + wave, option);
-
-    if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64)) {
-      mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
+    try {
+      mImgMob = AppManager.getInstance().readImageFile(key, "img", option);
+    } catch (IOException e) {
+      e.printStackTrace();
     }
 
-    AppManager.getInstance().addBitmap("mob" + wave, mImgMob);
+    if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64)) {
+     mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
+    }
+
+    AppManager.getInstance().addBitmap(key, mImgMob);
   }
 
   public void createMobs() {

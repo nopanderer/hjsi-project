@@ -176,7 +176,7 @@ public class TimeManager implements Runnable {
       }
       Thread.yield();
     }
-    AppManager.printDetailLog("TimeManager 종료.");
+    AppManager.printDetailLog("TimeManager 스레드 종료.");
   }
 
   /**

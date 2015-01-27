@@ -2,10 +2,15 @@ package hjsi.activity;
 
 import hjsi.common.AppManager;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.InputStream;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -75,23 +80,42 @@ public class Loader extends Base {
          */
 
         /*
-         * 공통적인 리소스를 준비한다. (일정 범주의 모든 이미지를 불러오는 방법)
+         * 테스트용 코드
          */
-        HashMap<String, String> common = AppManager.getInstance().getFilesRecursively("img/common");
-        if (common != null) {
-          for (String key : common.keySet()) {
-            AppManager.getInstance().loadBitmapAsset(key);
+        AppManager.getInstance().readTextFile("unit_spec_table", "db");
+
+        /*
+         * 공통적인 리소스를 준비한다. (특정 경로의 모든 이미지를 불러오는 방법)
+         */
+        InputStream is;
+        Bitmap bm = null;
+        Options opts = new Options();
+        opts.inPreferredConfig = Config.RGB_565;
+        for (String file : AppManager.getInstance().getFilesList("img/common/")) {
+          is = getAssets().open(file);
+          bm = BitmapFactory.decodeStream(is, null, opts);
+          is.close();
+
+          String key = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
+          if (bm != null) {
+            AppManager.getInstance().addBitmap(key, bm);
           }
         }
+
 
         /*
          * 동상 이미지를 준비한다. (특정한 이미지를 불러오는 방법)
          */
-        AppManager.getInstance().loadBitmapAsset("owl");
+        bm = AppManager.getInstance().readImageFile("owl", "img", null);
+        if (bm != null) {
+          AppManager.getInstance().addBitmap("owl", bm);
+        }
 
 
         Thread.sleep(2000); // 여기서 로딩 작업을 한다고 치고..
       } catch (InterruptedException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
         e.printStackTrace();
       }
 
