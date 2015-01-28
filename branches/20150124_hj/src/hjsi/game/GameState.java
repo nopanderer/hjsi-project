@@ -63,7 +63,7 @@ public class GameState {
     /*
      * 불러온 유저 데이터를 토대로 동상을 생성한다. (유저 데이터의 남아있는 동상의 갯수, 체력, 업그레이드 등을 참조) 생성한 동상은 유닛 목록에 추가한다.
      */
-    arTestUnits.add(new Statue(180, 120, AppManager.getInstance().getBitmap("owl")));
+    arTestUnits.add(new Statue(180, 120, AppManager.getInstance().getBitmap("statue1")));
   }
 
   public void initState(Resources res) {
@@ -106,13 +106,13 @@ public class GameState {
     String key = "mob" + wave;
 
     try {
-      mImgMob = AppManager.getInstance().readImageFile(key, "img", option);
+      mImgMob = AppManager.getInstance().readImageFile("img/mobs/" + key + ".png", option);
     } catch (IOException e) {
       e.printStackTrace();
     }
 
     if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64)) {
-     mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
+      mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
     }
 
     AppManager.getInstance().addBitmap(key, mImgMob);

@@ -1,2 +1,8 @@
-#type,id,maxhp,hpregen,movement,range
-mob,1,100,1,5,400
+# TYPE: statue(0) tower(1) mob(2),,,,,
+,,,,,
+#TYPE,ID,HPMAX,HPREGEN,DEF,MR
+0,1,1000000,1500,10000,5000
+,,,,,
+#TYPE,ID,HPMAX,HPREGEN,MOVEMENT,RANGE
+2,1,1000,2,5,400
+2,2,1500,2,5,350

@@ -312,24 +312,24 @@ public class Camera {
       // 카메라를 움직일 거리와 방향을 계산함.
       if (isOutOfLeft()) {
         dx = Math.min(scrollStep * hScrollScale, hGapLength);
-        msg += "left";
+        msg += "left ";
 
         scrollRemain.set(0, scrollRemain.y); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
       } else if (isOutOfRight()) {
         dx = -Math.min(scrollStep * hScrollScale, hGapLength);
-        msg += "right";
+        msg += "right ";
 
         scrollRemain.set(0, scrollRemain.y); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
       }
 
       if (isOutOfTop()) {
         dy = Math.min(scrollStep * vScrollScale, vGapLength);
-        msg += "top";
+        msg += "top ";
 
         scrollRemain.set(scrollRemain.x, 0); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
       } else if (isOutOfBottom()) {
         dy = -Math.min(scrollStep * vScrollScale, vGapLength);
-        msg += "bottom";
+        msg += "bottom ";
 
         scrollRemain.set(scrollRemain.x, 0); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
       }

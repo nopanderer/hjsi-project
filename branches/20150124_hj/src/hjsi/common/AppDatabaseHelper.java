@@ -3,6 +3,10 @@
  */
 package hjsi.common;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 import android.content.Context;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,10 +14,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * SQLite 데이터베이스를 생성하거나 불러온다. 2015.01.20 현재 시점에서는 당장 필요한 클래스는 아니다. 일단 책보고 만들어뒀음. 자동 생성된 상태에서 바꾼건 거의
- * 없다.
- *
- * @author SANGIN
+ * SQLite 데이터베이스를 생성하거나 불러온다.
  */
 public class AppDatabaseHelper extends SQLiteOpenHelper {
   private final static String TABLE_NAME = "";
@@ -47,7 +48,46 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
    */
   @Override
   public void onCreate(SQLiteDatabase db) {
-    db.execSQL("create table " + AppDatabaseHelper.TABLE_NAME + " (");
+    try {
+
+      String[] keywords = {"statue", "tower", "mob"};
+      ArrayList<LinkedList<String>> linePerType =
+          new ArrayList<LinkedList<String>>(keywords.length);
+
+      // 텍스트 한 덩이를 \n으로 줄로 나눔
+      String[] lines = AppManager.getInstance().readTextFile("db").split("\n");
+
+      for (String line : lines) {
+        line = line.trim();
+
+        // 주석이나 빈 줄은 통과
+        if (line.startsWith("#") || line.length() <= 0) {
+          continue;
+        }
+
+        // 쉼표로 나눔
+        String[] tokens = line.split(",", 2);
+
+        int index = Integer.parseInt(tokens[0]);
+
+        // 이미지를 찾을 수 있는 형태를 만듦. ex) "statue" + "1"
+        String headString = keywords[index] + Integer.parseInt(tokens[1]);
+
+        String tailString = line.substring(line.indexOf(',') + 1);
+        tailString = tailString.substring(tailString.indexOf(','));
+
+
+        linePerType.get(index).add(headString + tailString);
+      }
+
+
+
+      db.execSQL("create table " + TABLE_NAME + " (");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    AppManager.printDetailLog("새 DB가 생성되었습니다.");
   }
 
   /*

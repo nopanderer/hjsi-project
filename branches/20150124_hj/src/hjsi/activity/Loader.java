@@ -3,14 +3,12 @@ package hjsi.activity;
 import hjsi.common.AppManager;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Set;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -82,33 +80,26 @@ public class Loader extends Base {
         /*
          * 테스트용 코드
          */
-        AppManager.getInstance().readTextFile("unit_spec_table", "db");
+        HashMap<String, String> pathMap = AppManager.getInstance().getPathMap("db");
+        AppManager.getInstance().readTextFile(pathMap.get("unit_spec_table"));
 
         /*
          * 공통적인 리소스를 준비한다. (특정 경로의 모든 이미지를 불러오는 방법)
          */
-        InputStream is;
-        Bitmap bm = null;
-        Options opts = new Options();
-        opts.inPreferredConfig = Config.RGB_565;
-        for (String file : AppManager.getInstance().getFilesList("img/common/")) {
-          is = getAssets().open(file);
-          bm = BitmapFactory.decodeStream(is, null, opts);
-          is.close();
-
-          String key = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
-          if (bm != null) {
-            AppManager.getInstance().addBitmap(key, bm);
-          }
+        Bitmap bitmap;
+        pathMap = AppManager.getInstance().getPathMap("img/common");
+        Set<String> keySet = pathMap.keySet();
+        for (String key : keySet) {
+          bitmap = AppManager.getInstance().readImageFile(pathMap.get(key), null);
+          AppManager.getInstance().addBitmap(key, bitmap);
         }
 
-
         /*
-         * 동상 이미지를 준비한다. (특정한 이미지를 불러오는 방법)
+         * 동상 이미지를 준비한다. 구체적인 경로 입력으로 바로 가져올 수도 있음.
          */
-        bm = AppManager.getInstance().readImageFile("owl", "img", null);
-        if (bm != null) {
-          AppManager.getInstance().addBitmap("owl", bm);
+        bitmap = AppManager.getInstance().readImageFile("img/statues/statue1.png", null);
+        if (bitmap != null) {
+          AppManager.getInstance().addBitmap("statue1", bitmap);
         }
 
 

@@ -4,7 +4,6 @@ import hjsi.activity.Base;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
@@ -20,7 +19,6 @@ import android.util.Log;
  * 애플리케이션의 시스템적인 부분을 총괄하는 싱글턴 클래스
  */
 public class AppManager {
-  private static String tag; // 로그 출력용 클래스 이름을 갖고 있음
   private static AppManager uniqueInstance; // 자신의 유일한 인스턴스를 가지고 있는다.
 
   /**
@@ -37,8 +35,6 @@ public class AppManager {
   private volatile int logicFps;
 
   private AppManager() {
-    AppManager.tag = getClass().getSimpleName();
-
     runningActivities = new LinkedList<Base>();
     loadedBitmap = new HashMap<String, Bitmap>();
   }
@@ -89,7 +85,7 @@ public class AppManager {
    * 메소드의 호출 여부를 확인하기 위해 사용한다.
    */
   public static void printSimpleLog() {
-    Log.d(getTagPrefix("메소드 호출"), getClassMethodName() + " 메소드 호출 됨");
+    Log.v(getTagPrefix("메소드 호출"), getClassMethodName() + " 메소드 호출 됨");
   }
 
   /**
@@ -111,6 +107,14 @@ public class AppManager {
 
   public static void printInfoLog(String customTag, String message) {
     Log.i(getTagPrefix(customTag), message);
+  }
+
+  public static void printErrorLog(String message) {
+    Log.e(getTagPrefix(getClassMethodName()), message);
+  }
+
+  public static void printErrorLog(String customTag, String message) {
+    Log.e(getTagPrefix(customTag), message);
   }
 
   /**
@@ -184,6 +188,76 @@ public class AppManager {
     }
   }
 
+
+  /**
+   * 주어진 경로 아래의 모든 파일을 HashMap에 넣어서 반환한다.
+   * 
+   * @param findPath 의도한 결과를 얻기 위해서는 반드시 한 단계의 경로 정도는 입력해야 한다.
+   * @param assetManager assets 폴더에 접근하기 위한 <strong>AssetManager</strong> 객체
+   * 
+   * @return 경로 및 확장자를 제외한 파일 이름을 키로 하고, 전체 경로를 값으로 갖는 <strong>HashMap</strong> 객체, 아무 파일도 없다면
+   *         <strong>null</strong>
+   */
+  public HashMap<String, String> getPathMap(String findPath) {
+    if (assetManager == null) {
+      printErrorLog("먼저 AssetManager를 세팅하시오.");
+      return null;
+    } else if (findPath == null) {
+      printErrorLog("findPath를 입력하시오.");
+      return null;
+    } else if (findPath.equalsIgnoreCase("/")) {
+      printErrorLog("findPath의 값으로 \"/\"을 사용하지마시오.");
+      return null;
+    } else if (findPath.equalsIgnoreCase("")) {
+      printErrorLog("최소한 한 단계의 경로는 지정하시오.");
+      return null;
+    }
+
+    // 파일을 찾으면서 들어간 경로를 스택에 넣는다. 해당 경로를 빠져나오면 스택에서도 없어지는 꼴.
+    LinkedList<String> enteredDir = new LinkedList<String>();
+    // findPath에서 찾은 하위 파일 목록을 key(파일 이름)와 value(전체 경로) 형태로 구성한 HashMap
+    HashMap<String, String> pathMap = new HashMap<String, String>();
+
+    try {
+      // 마지막 글자가 '/'라면 차후 탐색 과정에서 //처럼 연속으로 붙을 가능성이 있으므로 제거함.
+      if (findPath.charAt(findPath.length() - 1) == '/') {
+        findPath = findPath.substring(0, findPath.length());
+      }
+      enteredDir.add(findPath);
+
+      while (!enteredDir.isEmpty()) {
+        String workingPath = enteredDir.poll();
+
+        // 현재 디렉터리가 가지고 있는 하위 디렉터리나 파일의 목록을 구한다.
+        String[] subList = assetManager.list(workingPath);
+
+        if (subList.length == 0) {
+          // 하위 목록 수가 0이면 현재 작업경로는 파일인 경우에 해당한다. (빈 폴더는 아예 list() 메소드에서 반환되지 않는 듯)
+          // 부모 디렉토리 경로->(img/common/) background (.png)<-확장자
+          String fileName =
+              workingPath.substring(workingPath.lastIndexOf('/') + 1, workingPath.indexOf('.'));
+
+          // 이미 fileName(동일한 key)에 해당하는 개체가 들어가 있는 경우에 대한 처리
+          String old = pathMap.put(fileName, workingPath);
+          printDetailLog("[\"" + fileName + "\"] = \"" + workingPath + "\"");
+
+          if (old != null) {
+            printErrorLog("중복 파일 발견!", "기존 파일: " + old + ", 발견 파일: " + workingPath);
+          }
+
+        } else {
+          // 현재 작업경로가 내부에 폴더나 파일을 하나라도 가지고 있는 경우에 해당한다.
+          for (String subPath : subList)
+            enteredDir.add(workingPath + "/" + subPath);
+        }
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return pathMap;
+  }
+
   /**
    * 리소스 관리 대상으로 비트맵을 추가함
    *
@@ -213,146 +287,52 @@ public class AppManager {
   }
 
   /**
-   * 주어진 경로 아래의 모든 파일의 전체 경로 목록을 구한다. 특정 경로를 지칭하는 것을 권장한다. 루트에서부터 검색하기 위해 "/"를 입력하면 안드로이드 장비 내의 기본적인
-   * 파일들도 검색 대상에 포함돼서 제대로 된 파일을 얻을 수 없다. 다만, 그 결과는 이 메소드에서 마지막 "/"를 제거하여 ""로 만들기 때문이다. 정말 "/"로부터
-   * 검색한다면 assets 폴더보다 더 상위에서 시작하는데, 권한이 없는 것인지 아무런 결과도 얻을 수 없다.
-   * 
-   * @param path 검색할 경로
-   * @return 파일 경로를 포함하는 ArrayList 객체
-   */
-  public ArrayList<String> getFilesList(String path) {
-    /*
-     * 가장 끝에 있는 '/' 글자를 제거한다. lastIndexOf('/')는 전체의 마지막이 '/'가 아니고, 중간에 '/'가 있어도 그 글자가 마지막 '/'이므로 쓰지
-     * 않는다.
-     */
-    int lastIndex = path.length();
-    if (lastIndex-- > 0) {
-      if (path.charAt(lastIndex) == '/') {
-        path = path.substring(0, lastIndex);
-      }
-    }
-
-    return filesList(path);
-  }
-
-  /**
-   * 특정 경로 아래에 있는 모든 파일들의 전체 경로를 구한다.
-   * 
-   * @param workingDir 현재 검색 중인 경로
-   * @return 파일 경로를 포함하는 ArrayList
-   */
-  private ArrayList<String> filesList(String workingDir) {
-    ArrayList<String> retValue = new ArrayList<String>();
-
-    try {
-      String[] files = assetManager.list(workingDir);
-
-      if (files.length == 0) {
-        retValue.add(workingDir);
-        printInfoLog("파일: " + workingDir);
-      } else {
-        if (workingDir.length() > 0)
-          workingDir += "/";
-
-        for (String file : files) {
-          retValue.addAll(filesList(workingDir + file));
-        }
-      }
-
-    } catch (IOException e) {
-      e.printStackTrace();
-      printDetailLog("입출력 예외가 발생함");
-    }
-
-    return retValue;
-  }
-
-  /**
-   * 입력한 키에 해당하는 파일의 전체 경로를 반환한다.
-   * 
-   * @param key 전체 경로를 구할 파일의 확장자를 제외한 이름
-   * @param path 입력한 경로 하위에 속한 파일로 제한
-   * @return 키에 해당하는 파일의 전체 경로, 그런 파일이 없으면 null
-   */
-  private String getPathOf(String key, String path) {
-    String pathOfKey = null;
-
-    for (String file : getFilesList(path)) {
-      int lastIndexOfSlash = file.lastIndexOf('/');
-      int lastIndexOfExt = file.lastIndexOf('.');
-      String fileNameNoExt = file.substring(lastIndexOfSlash + 1, lastIndexOfExt);
-
-      if (key.equalsIgnoreCase(fileNameNoExt)) {
-        pathOfKey = new String(file);
-        break;
-      }
-    }
-
-    return pathOfKey;
-  }
-
-  /**
-   * readTextFile(key, "")를 호출하는 wrapping 메소드. 자세한 내용은 readTextFile(String key, String path)의 내용을
-   * 참조.
-   * 
-   * @param key 내용을 읽어오려는 파일의 이름 (경로 및 확장자는 제외한다)
-   * @return key에 해당하는 파일이 있으면 해당 파일 내용, 없으면 null
-   * @throws IOException
-   */
-  public String readTextFile(String key) throws IOException {
-    return readTextFile(key, "");
-  }
-
-  /**
    * 입력한 경로 아래에 속하는 모든 경로에서 파일을 찾아서 내용을 읽어온다.
    * 
-   * @param key 내용을 읽어오려는 파일의 이름 (경로 및 확장자는 제외한다)
    * @param path 주어진 경로 아래에서만 대상 파일을 찾는다
+   * 
    * @return key에 해당하는 파일이 있으면 해당 파일 내용, 없으면 null
    * @throws IOException
    */
-  public String readTextFile(String key, String path) throws IOException {
-    String retValue = null;
-    String pathOfKey = getPathOf(key, path);
+  public String readTextFile(String path) throws IOException {
+    String textData = null;
 
-    if (pathOfKey == null) {
-      throw new IOException("Not found " + key + ".");
+    if (path == null) {
+      throw new IOException("Not found \"" + path + "\".");
     } else {
-      InputStream is = assetManager.open(pathOfKey);
+      InputStream is = assetManager.open(path);
       byte[] buffer = new byte[is.available()];
       is.read(buffer);
       is.close();
-      retValue = new String(buffer);
+      textData = new String(buffer);
 
       /* 읽어온 파일의 로그 출력 */
-      printInfoLog(pathOfKey, "\"" + key + "\", " + convertByteUnit(buffer.length) + " 읽기 성공");
-      printInfoLog(pathOfKey, retValue);
+      printInfoLog("\"" + path + "\", " + convertByteUnit(buffer.length) + " 읽기 성공");
+      printInfoLog(path, textData);
     }
 
-    return retValue;
+    return textData;
   }
 
   /**
    * 입력한 경로 아래에 속하는 모든 경로에서 파일을 찾아서 비트맵 객체를 생성한다.
    * 
-   * @param key 읽어올 이미지 파일의 이름 (경로 및 확장자는 제외한다)
    * @param path 입력된 경로 아래에서만 대상 파일을 찾는다
    * @param opts 비트맵 생성시 적용할 옵션 객체. 옵션을 적용하지 않을 경우는 null
    * @return 비트맵 객체 혹은 null
    * @throws IOException
    */
-  public Bitmap readImageFile(String key, String path, Options opts) throws IOException {
+  public Bitmap readImageFile(String path, Options opts) throws IOException {
     Bitmap bm = null;
-    String pathOfKey = getPathOf(key, path);
 
-    if (pathOfKey == null) {
-      throw new IOException("Not found " + key + ".");
+    if (path == null) {
+      throw new IOException("Not found \"" + path + "\".");
     } else {
-      InputStream is = assetManager.open(pathOfKey);
-      printInfoLog(pathOfKey, "\"" + key + "\", 원본 용량:" + convertByteUnit(is.available()));
+      InputStream is = assetManager.open(path);
+      printInfoLog("\"" + path + "\"", "원본 용량: " + convertByteUnit(is.available()));
       bm = BitmapFactory.decodeStream(is, null, opts);
       is.close();
-      printInfoLog(pathOfKey, "\"" + key + "\", " + bitmapToString(bm) + " 읽기 성공");
+      printInfoLog("\"" + path + "\"", bitmapToString(bm) + " 읽기 성공");
     }
 
     return bm;
@@ -364,17 +344,17 @@ public class AppManager {
   public void allRecycle() {
     String msg = new String();
 
-    Set<String> arKey = loadedBitmap.keySet();
+    Set<String> keySet = loadedBitmap.keySet();
     synchronized (loadedBitmap) {
-      for (String key : arKey) {
-        msg = key + ",";
+      for (String key : keySet) {
+        msg += key + ", ";
         loadedBitmap.get(key).recycle();
       }
       loadedBitmap.clear();
 
       if (msg.length() > 0) {
-        msg = msg.substring(0, msg.length() - 1);
-        msg += " cleared";
+        msg = "\"" + msg.substring(0, msg.length() - 1);
+        msg += "\" recycled";
       }
     }
 
@@ -390,11 +370,13 @@ public class AppManager {
   public void recycleBitmap(String key) {
     String msg = new String();
 
-    if (loadedBitmap.containsKey(key)) {
-      loadedBitmap.get(key).recycle();
-      msg += key + " recycled";
-    } else {
-      msg = key + "를 찾을 수 없음.";
+    synchronized (loadedBitmap) {
+      if (loadedBitmap.containsKey(key)) {
+        loadedBitmap.get(key).recycle();
+        msg += "\"" + key + "\" recycled";
+      } else {
+        msg = "\"" + key + "\"를 찾을 수 없음.";
+      }
     }
 
     printDetailLog(msg);
