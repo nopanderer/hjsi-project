@@ -24,7 +24,9 @@
             <ImageView
                 android:layout_width="180dp"
                 android:layout_height="90dp"
-                android:background="@drawable/goodsview_treasurebox_img" />
+                android:background="@drawable/img_goodsview_treasurebox"
+                android:contentDescription="상자 이미지"
+                tools:ignore="HardcodedText" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -69,7 +71,7 @@
         android:padding="0px"
         android:visibility="invisible" >
 
-        <exam.customwidget.ElementView
+        <hjsi.customview.TowerView
             android:id="@+id/dlg_store_goods_element"
             android:layout_width="180dp"
             android:layout_height="115dp"
