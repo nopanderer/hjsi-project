@@ -3,7 +3,6 @@ package hjsi.activity;
 import hjsi.common.AppManager;
 import hjsi.customview.ItemView;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -134,6 +133,7 @@ public class Store extends Base implements View.OnClickListener {
 
   @Override
   public void onClick(View v) {
+    AppManager.printDetailLog(v.toString());
     ItemView gv = (ItemView) v;
 
     switch (gv.getGoodsId()) {
@@ -147,8 +147,5 @@ public class Store extends Base implements View.OnClickListener {
       case HIGH:
         break;
     }
-
-    Log.d(toString(), AppManager.getMethodName() + "() caption: " + gv.getCaption() + ", value: "
-        + gv.getValue());
   }
 }

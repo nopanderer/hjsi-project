@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -77,7 +76,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
    */
   @Override
   public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-    Log.i(tag, AppManager.getMethodName() + "() (width: " + width + ", height: " + height + ")");
+    AppManager.printDetailLog("width: " + width + ", height: " + height);
     // 표면의 크기가 바뀔 때 그 크기를 기록한다.
     Camera.getInstance().setCamSize(width, height);
   }
@@ -159,8 +158,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         canvas.translate(-Camera.getInstance().x(), -Camera.getInstance().y());
 
         /* 현재 카메라 배율에 맞게 캔버스를 확대/축소함 */
-        canvas
-            .scale(Camera.getInstance().scale(), Camera.getInstance().scale(), 0, 0);
+        canvas.scale(Camera.getInstance().scale(), Camera.getInstance().scale(), 0, 0);
 
         /* 맵 배경을 그린다. */
         canvas.drawBitmap(AppManager.getInstance().getBitmap("background"), 0, 0, null);
@@ -215,7 +213,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
       }
     }
 
-    Log.i(tag, AppManager.getMethodName() + "() is end.");
+    AppManager.printDetailLog("GameSurface 스레드 종료");
   }
 
   /* 개발 참고용 정보 표시 */
@@ -226,7 +224,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   private void displayInformation(Canvas canvas) {
     // 현재 메모리 정보 출력용
     long totMem = 0L;
-    long freeMem;
+    long allocMem;
 
     if (mPaintInfo == null) {
       mPaintInfo = new Paint();
@@ -241,10 +239,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
           (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources()
               .getDisplayMetrics());
 
-      totMem = Runtime.getRuntime().totalMemory();
     }
-
-    freeMem = Runtime.getRuntime().freeMemory();
+    totMem = (long) (Runtime.getRuntime().maxMemory() / 1024f / 1024f + 0.5f);
+    allocMem =
+        (long) ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024f / 1024f + 0.5f);
 
     canvas.save();
     /*
@@ -257,17 +255,16 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 카메라 좌상단 좌표 (논리적인 기준점) 출력
      */
     canvas.translate(0, yForText);
-    canvas.drawText("CAM left: " + Camera.getInstance().x() + " / top: "
-        + Camera.getInstance().y() + " / scale: "
-        + (int) (Camera.getInstance().scale() * 100 + 0.5) + "%", xForText, yForText,
-        mPaintInfo);
+    canvas.drawText("CAM left: " + Camera.getInstance().x() + " / top: " + Camera.getInstance().y()
+        + " / scale: " + (int) (Camera.getInstance().scale() * 100 + 0.5) + "%", xForText,
+        yForText, mPaintInfo);
 
     /*
      * 메모리 정보 표시
      */
     canvas.translate(0, yForText);
-    canvas.drawText("Used Memory: " + (totMem - freeMem) / (1024 * 1024) + " / " + totMem
-        / (1024 * 1024) + "M", xForText, yForText, mPaintInfo);
+    canvas.drawText("Used Memory: " + allocMem + " / " + totMem + "MB", xForText, yForText,
+        mPaintInfo);
 
     /*
      * 게임 시계 출력

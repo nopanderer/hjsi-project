@@ -44,7 +44,7 @@ public class DlgSetting extends Dialog implements OnClickListener {
 
   @Override
   public void onClick(View v) {
-    Log.d(toString(), AppManager.getMethodName() + "() " + v.toString());
+    AppManager.printDetailLog(v.toString());
 
     if (v == resume) {
       hide();

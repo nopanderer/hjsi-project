@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">AndroidProject</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">Element TD</string>
     <string name="btn_back">뒤로</string>
     
     <string name="btn_elementbox">원소 상자</string>

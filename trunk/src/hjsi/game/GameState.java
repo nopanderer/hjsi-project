@@ -4,11 +4,12 @@ import hjsi.common.AppManager;
 import hjsi.timer.TimeManager;
 import hjsi.timer.TimerRunnable;
 
+import java.io.IOException;
 import java.util.LinkedList;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 
 /**
  * 게임에 필요한 정보를 저장한다.
@@ -54,6 +55,7 @@ public class GameState {
       @Override
       public void run() {
         worldTime++;
+        AppManager.printDetailLog("타이머 체크");
       }
     };
     TimeManager.registerCallbackTimer(1000, clock, -1).start();
@@ -61,7 +63,7 @@ public class GameState {
     /*
      * 불러온 유저 데이터를 토대로 동상을 생성한다. (유저 데이터의 남아있는 동상의 갯수, 체력, 업그레이드 등을 참조) 생성한 동상은 유닛 목록에 추가한다.
      */
-    arTestUnits.add(new Statue(180, 120, AppManager.getInstance().getBitmap("statue")));
+    arTestUnits.add(new Statue(180, 120, AppManager.getInstance().getBitmap("statue1")));
   }
 
   public void initState(Resources res) {
@@ -99,26 +101,27 @@ public class GameState {
   }
 
   public void makeFace() {
+    Options option = new Options();
+    option.inSampleSize = 16;
+    String key = "mob" + wave;
 
-    int drawableId = res.getIdentifier("mob" + wave, "drawable", "hjsi.activity");
-    BitmapFactory.Options option = new BitmapFactory.Options();
-
-    option.inSampleSize = 4;
-
-    mImgMob = BitmapFactory.decodeResource(res, drawableId, option);
+    try {
+      mImgMob = AppManager.getInstance().readImageFile("img/mobs/" + key + ".png", option);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
     if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64)) {
       mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
     }
 
-    AppManager.getInstance().addBitmap("mob" + wave, mImgMob);
-
+    AppManager.getInstance().addBitmap(key, mImgMob);
   }
 
   public void createMobs() {
     for (int i = 0; i < MAX_MOP; i++)
       // 여기서는 10마리까지지만 실제로는 파일입력을 통해서
-      Mobs.add(new Mob(90, 90, 64, 64, wave));
+      Mobs.add(new Mob(90, 90, mImgMob, wave));
   }
 
   public void addMob() {

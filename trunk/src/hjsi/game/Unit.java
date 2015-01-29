@@ -2,6 +2,7 @@ package hjsi.game;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 
 /*
@@ -51,4 +52,22 @@ public abstract class Unit {
    * 사용자로부터 입력을 받았을 경우에 대한 처리를 실시한다.
    */
   public abstract void touch();
+
+  /**
+   * 범위 그려주는 메소드
+   * 
+   * @param x
+   * @param y
+   * @param range 타격 범위
+   * @param canvas
+   */
+  public void showRange(int x, int y, int range, Canvas canvas) {
+    Paint circle = new Paint();
+    circle.setAntiAlias(true);
+    circle.setStyle(Paint.Style.STROKE); // 원의 윤곽선만 그림
+    circle.setStrokeWidth(3); // 윤곽선 두께
+    circle.setColor(Color.GREEN); // 윤곽선은 초록색
+    canvas.drawCircle(x + height / 2, y + width / 2, range, circle);
+
+  }
 }
