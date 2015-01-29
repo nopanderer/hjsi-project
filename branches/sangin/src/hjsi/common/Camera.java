@@ -6,31 +6,9 @@ import android.graphics.Rect;
 import android.view.MotionEvent;
 
 /**
- * 카메라 클래스. 화면에 보이는 영역을 관리한다. 게임 오브젝트를 화면에 출력할 때 필요한 좌표 값 등도 변환한다.
+ * 서피스뷰에서 배경, 모든 유닛 클래스 등을 그려줄 때 필요한 기준 좌표와 크기(zoom) 값을 조작하는 클래스.
  */
 public class Camera {
-  private static final String tag = Camera.class.getSimpleName();
-  private static Camera uniqueInstance;
-
-  private Camera() {
-    position = new Point(0, 0);
-    viewport = new Rect(0, 0, 0, 0);
-    worldRect = new Rect(0, 0, 3840, 2160);
-    worldMargin = new Rect(125, 125, 125, 125);
-  }
-
-  public static Camera getInstance() {
-    if (uniqueInstance == null) {
-      synchronized (Camera.class) {
-        if (uniqueInstance == null) {
-          uniqueInstance = new Camera();
-        }
-      }
-    }
-
-    return uniqueInstance;
-  }
-
   /*
    * 카메라 스크롤 속도 배수에 대한 상수
    */
@@ -100,15 +78,12 @@ public class Camera {
    */
   private boolean doNotScroll = false;
 
-  /**
-   * 화면 크기를 설정한다.
-   *
-   * @param width 화면의 가로 크기
-   * @param height 화면의 세로 크기
-   */
-  public void setCamSize(int width, int height) {
-    viewport.right = width;
-    viewport.bottom = height;
+  protected Camera(int width, int height, float factor) {
+    position = new Point(0, 0);
+    viewport = new Rect(0, 0, width, height);
+    worldRect = new Rect(0, 0, (int) (3840 * factor + 0.5f), (int) (2160 * factor + 0.5f));
+    int margin = (int) (125 * factor + 0.5f);
+    worldMargin = new Rect(margin, margin, margin, margin);
   }
 
   /* get 메소드 */

@@ -1,6 +1,5 @@
 package hjsi.game;
 
-import hjsi.common.Camera;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
@@ -91,16 +90,15 @@ public class Mob extends Unit {
       lap++;
 
     // 아래로
-    if (x == oldX && y + step <= Camera.getInstance().worldHeight() - 900) {
+    if (x == oldX && y + step <= 2160 - 900) {
       y += step;
     }
     // 오른쪽
-    else if (x + step <= Camera.getInstance().worldWidth() - 1500
-        && y == Camera.getInstance().worldHeight() - 900) {
+    else if (x + step <= 3840 - 1500 && y == 2160 - 900) {
       x += step;
     }
     // 위로
-    else if (x == Camera.getInstance().worldWidth() - 1500 && y - step >= oldY) {
+    else if (x == 3840 - 1500 && y - step >= oldY) {
       y -= step;
     }
     // 왼쪽

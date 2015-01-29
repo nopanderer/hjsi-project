@@ -5,7 +5,6 @@ import hjsi.game.Mob;
 import hjsi.game.Unit;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -20,22 +19,16 @@ import android.view.SurfaceView;
  * 이벤트는 이 클래스에서 처리한다.
  */
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, Runnable {
-  private final String tag = getClass().getSimpleName();
-
   /* 서피스뷰 그리기에 필요한 객체 및 변수 */
   private Thread mThreadPainter; // 그리기 스레드
   private boolean mIsRunning; // 그리기 스레드 동작 상태
   /**
-   * 메인스레드가 아닌 따로 생성한 스레드에서 그리는 걸 메인 스레드의 캔버스와 연결하는 역할을 한다. 서피스뷰는 액티비티에 컨텐트뷰로 설정되고, getHolder()를 사용해
-   * 그에 대한 홀더를 얻을 수 있다. 홀더는 더블버퍼링 기법으로 사용하는 (아마 메모리상의) 캔버스를 반환한다. (lockCanvas()를 통해서) 스레드를 이용하므로
-   * 캔버스에 락을 거는 것 같다. 홀더에도 synchronized를 써서 사용한다. 각 스레드가 언제 홀더에 접근하는지는 모르겠다. 홀더에서 구한 캔버스에 그림을 그리는 건
-   * 아무 스레드나 해도 상관없다. (편의상 서피스뷰에 러너블 인터페이스 구현) 스레드에서 홀더로부터 캔버스를 받아서 그림을 그리고, 캔버스를 반환하면 메인 스레드는 실제로 그
-   * 그림을 출력하는 메커니즘인것 같다.
+   * 카메라 클래스
    */
-  private SurfaceHolder mHolder;
+  private Camera camera;
 
   /*
-   * 테스트 값 출력용
+   * 각종 정보를 출력하는데 사용함
    */
   private Paint mPaintInfo; // 텍스트 출력용 페인트 객체
   private int mFps; // 그리기 fps
@@ -44,17 +37,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   public GameSurface(Context context) {
     super(context);
 
-    init();
-  }
-
-  /** 생성자 호출시 공통 부문 초기화 */
-  private void init() {
     /*
      * 홀더를 가져와서 Callback 인터페이스를 등록한다. 구현한 각 콜백은 surface의 변화가 있을 때마다 호출된다. 서피스뷰를 가진 액티비티가 화면에 보일 때
      * created(), changed() 호출 화면에서 보이지 않을 때 destroyed() 호출 가로, 세로 전환될 때도 changed() 호출 될거고...
      */
-    mHolder = super.getHolder(); // 인게임 스레드에서 필요할 수도 있어서 똑같은 이름의 함수를 구현했기 때문에 super를 사용하게 됐음
-    mHolder.addCallback(this); // SurfaceHolder.Callback 구현한 메소드를 등록하는 것
+    getHolder().addCallback(this); // SurfaceHolder.Callback 구현한 메소드를 등록하는 것
   }
 
   /* SurfaceHolder.Callback 구현 */
@@ -70,15 +57,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     mThreadPainter.start();
   }
 
-  /*
-   * ☆★☆★☆★중요☆★☆★☆★☆★ 게임 화면을 띄운채로 핸드폰 잠궜다가 켜면, 게임 화면도 세로로 돌아가는 일이 생긴다. 그 때 에러남 나중에 액티비티 생명주기에 따른
-   * 처리(전화왔을 때 내려가는 경우 등등) 화면이 180도 돌아가거나 하는 경우도 처리해줘야겠다.
-   */
   @Override
   public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-    AppManager.printDetailLog("width: " + width + ", height: " + height);
-    // 표면의 크기가 바뀔 때 그 크기를 기록한다.
-    Camera.getInstance().setCamSize(width, height);
+    AppManager.printDetailLog("width: " + width + "px, height: " + height + "px");
+    // 매개변수로 들어온 화면 크기를 이용해 카메라를 생성한다.
+    camera = new Camera(width, height, AppManager.getInstance().getDisplayFactor());
   }
 
   @Override
@@ -100,7 +83,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
    */
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    boolean isCameraEvent = Camera.getInstance().touchHandler(event);
+    boolean isCameraEvent = camera.touchHandler(event);
 
     if (event.getAction() == MotionEvent.ACTION_UP) {
       /*
@@ -127,9 +110,6 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   /* 실제로 그리기를 처리할 부분이다 */
   @Override
   public void run() {
-    Canvas canvas; // lockCanvas()로 얻어온 캔버스를 가리킬 변수
-    Bitmap face; // 게임 개체들의 이미지를 가리킬 변수
-
     /* fps 계산을 위한 변수 */
     long fpsStartTime;
     long fpsElapsedTime = 0L;
@@ -140,14 +120,14 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
       fpsStartTime = System.currentTimeMillis();
 
       // 전체 그리기 수행
-      synchronized (mHolder) {
+      synchronized (getHolder()) {
         // 캔버스를 잠그는 듯
-        canvas = mHolder.lockCanvas();
+        Canvas canvas = getHolder().lockCanvas();
         if (canvas == null) {
           break;
         }
 
-        Camera.getInstance().autoScroll();
+        camera.autoScroll();
 
         canvas.drawColor(Color.DKGRAY); // 게임 배경 바깥 범위를 회색으로 채운다.
 
@@ -155,10 +135,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         canvas.save();
 
         /* 현재 카메라 위치에 맞게 캔버스를 이동시킴 */
-        canvas.translate(-Camera.getInstance().x(), -Camera.getInstance().y());
+        canvas.translate(-camera.x(), -camera.y());
 
         /* 현재 카메라 배율에 맞게 캔버스를 확대/축소함 */
-        canvas.scale(Camera.getInstance().scale(), Camera.getInstance().scale(), 0, 0);
+        canvas.scale(camera.scale(), camera.scale(), 0, 0);
 
         /* 맵 배경을 그린다. */
         canvas.drawBitmap(AppManager.getInstance().getBitmap("background"), 0, 0, null);
@@ -199,7 +179,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         displayInformation(canvas);
 
         // 캔버스의 락을 풀고 실제 화면을 갱신한다.
-        mHolder.unlockCanvasAndPost(canvas);
+        getHolder().unlockCanvasAndPost(canvas);
       }
 
       // 프레임을 구한다.
@@ -255,9 +235,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 카메라 좌상단 좌표 (논리적인 기준점) 출력
      */
     canvas.translate(0, yForText);
-    canvas.drawText("CAM left: " + Camera.getInstance().x() + " / top: " + Camera.getInstance().y()
-        + " / scale: " + (int) (Camera.getInstance().scale() * 100 + 0.5) + "%", xForText,
-        yForText, mPaintInfo);
+    canvas.drawText("CAM left: " + camera.x() + " / top: " + camera.y() + " / scale: "
+        + (int) (camera.scale() * 100 + 0.5) + "%", xForText, yForText, mPaintInfo);
 
     /*
      * 메모리 정보 표시
