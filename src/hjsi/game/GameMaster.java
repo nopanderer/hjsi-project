@@ -1,7 +1,6 @@
 package hjsi.game;
 
 import hjsi.common.AppManager;
-import android.util.Log;
 
 /**
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
@@ -73,7 +72,7 @@ public class GameMaster implements Runnable {
 
           // 몹이 생성되어 있다면 이동
           else if (mob.created)
-            mob.move();
+            mob.action();
         }
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
@@ -106,7 +105,7 @@ public class GameMaster implements Runnable {
       // 게임이 일시정지 중일 땐 인게임 스레드의 cpu time을 양보시킨다.
       Thread.yield();
     }
-    Log.i(tag, AppManager.getMethodName() + "() is end.");
+    AppManager.printDetailLog("GameMaster 스레드 종료.");
   }
 
   /**

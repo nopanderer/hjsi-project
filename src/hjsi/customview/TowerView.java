@@ -1,5 +1,6 @@
 package hjsi.customview;
 
+import hjsi.common.AppManager;
 import hjsi.game.Tower;
 
 import java.util.HashMap;
@@ -9,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -162,13 +162,13 @@ public class TowerView extends RelativeLayout {
   /**
    * ElementView에 보여질 EDElement를 할당하여 이 뷰를 구성하는 위젯들에게 데이터를 설정함.
    *
-   * @param element 이 뷰에 보여줄 원소
+   * @param tower 이 뷰에 보여줄 원소
    */
-  public void setElement(Tower element) {
-    if (element == null) {
-      Log.e("null error", "Tower 요소가 null 값임!");
+  public void setElement(Tower tower) {
+    if (tower == null) {
+      AppManager.printDetailLog("Tower 매개변수로 null 객체가 들어오면 안됨!");
     } else {
-      mElement = element;
+      mElement = tower;
     }
 
     RoundedDrawable roundIcon;

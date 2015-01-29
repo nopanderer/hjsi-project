@@ -3,7 +3,6 @@ package hjsi.common;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.MotionEvent;
 
 /**
@@ -292,7 +291,7 @@ public class Camera {
       default:
         break;
     }
-    Log.i(tag, logMessage);
+    AppManager.printDetailLog(logMessage);
 
     return true;
   }
@@ -305,7 +304,7 @@ public class Camera {
      * 스크롤(터치) 중이지도 않고, 카메라가 게임월드영역을 벗어났다면 제자리도 되돌린다.
      */
     if ((doNotScroll == true || keepScrolling == false) && checkCameraOut() == true) {
-      String msg = "autoback()";
+      String msg = new String();
       getCameraOutLength();
 
       int dx = 0, dy = 0;
@@ -313,24 +312,24 @@ public class Camera {
       // 카메라를 움직일 거리와 방향을 계산함.
       if (isOutOfLeft()) {
         dx = Math.min(scrollStep * hScrollScale, hGapLength);
-        msg += " left";
+        msg += "left ";
 
         scrollRemain.set(0, scrollRemain.y); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
       } else if (isOutOfRight()) {
         dx = -Math.min(scrollStep * hScrollScale, hGapLength);
-        msg += " right";
+        msg += "right ";
 
         scrollRemain.set(0, scrollRemain.y); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
       }
 
       if (isOutOfTop()) {
         dy = Math.min(scrollStep * vScrollScale, vGapLength);
-        msg += " top";
+        msg += "top ";
 
         scrollRemain.set(scrollRemain.x, 0); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
       } else if (isOutOfBottom()) {
         dy = -Math.min(scrollStep * vScrollScale, vGapLength);
-        msg += " bottom";
+        msg += "bottom ";
 
         scrollRemain.set(scrollRemain.x, 0); // 화면을 벗어난다면 해당 방향에 대한 빚을 청산한다.
       }
@@ -345,8 +344,8 @@ public class Camera {
         doNotScroll = false;
       }
 
-      msg += " gap(" + hGapLength + "," + vGapLength + "), (dx: " + dx + ", dy: " + dy + ")";
-      Log.d(tag, msg);
+      msg += "gap(" + hGapLength + "," + vGapLength + "), (dx: " + dx + ", dy: " + dy + ")";
+      AppManager.printDetailLog(msg);
     }
     /*
      * 스크롤 해야할 빚이 남아있으면 계속해서 이동시킨다.
@@ -360,7 +359,6 @@ public class Camera {
    * 카메라가 가로, 세로 방향에 대해 게임월드를 벗어난 길이를 구한다. 해당 값은 hGapLength, vGapLength 필드에 저장된다.
    */
   private void getCameraOutLength() {
-    String msg = "gap() ";
     hGapLength = 0;
     vGapLength = 0;
 
@@ -384,8 +382,8 @@ public class Camera {
     vScrollScale = (int) (vGapLength / speedScaleCell);
     vScrollScale = Math.max(minScrollScale, Math.min(maxScrollScale, vScrollScale));
 
-    msg += "gap level: " + hScrollScale + ", " + vScrollScale + "(per " + speedScaleCell + ")";
-    Log.d(tag, msg);
+    AppManager.printDetailLog("gap level: " + hScrollScale + ", " + vScrollScale + "(per "
+        + speedScaleCell + ")");
   }
 
   /**
@@ -431,7 +429,7 @@ public class Camera {
      * x축 이동 거리가 없을 경우, 스크롤 빚 x를 이용한다. 스크롤 빚이 남아있는지 자체는 이 메소드가 호출되기 전에 검사된다.
      */
     if (dx == 0) {
-      Log.d(tag + "." + AppManager.getMethodName(), "dx:" + dx);
+      AppManager.printDetailLog("dx:" + dx);
       if (Math.abs(scrollRemain.x) > scrollStep) {
         // 스크롤 빚이 scrollStep보다 크면 scrollStep만큼 움직이고, 움직인 거리만큼은 빚을 갚는다.
 
@@ -496,8 +494,8 @@ public class Camera {
 
     position.offset(dx, dy); // 계산된 dx, dy만큼 이동한다.
 
-    Log.d(tag + "." + AppManager.getMethodName(), "Debt(" + scrollRemain.x + "," + scrollRemain.y
-        + "), delta(" + dx + "," + dy + ")");
+    AppManager.printDetailLog("Debt(" + scrollRemain.x + "," + scrollRemain.y + "), delta(" + dx
+        + "," + dy + ")");
   }
 
   private void moveCamera(float dx, float dy) {
