@@ -79,13 +79,8 @@ public class Timer {
     this.timerId = timerId;
     period = milliSec;
     remain = 0;
-  }
 
-  /**
-   * @return Callback 형태로 동작하는 객체라면 true를 반환한다.
-   */
-  protected boolean isCallbackMode() {
-    return timerId == -1;
+    task = null;
   }
 
   /**
@@ -100,30 +95,30 @@ public class Timer {
   }
 
   /**
+   * @return CallBack 형태의 타이머라면 제대로된 타이머러너블 객체를, 아니라면 null
+   */
+  protected TimerRunnable getCallBackTask() {
+    return task;
+  }
+
+  /**
    * callback 모드 타이머에서만 사용한다. TimerRunnable action에 지정된 작업을 수행하고 남은 반복 횟수를 차감한다.
    *
    * @return 이후로도 작업을 계속해야 한다면 true, 이번이 마지막 작업이라면 false
    */
-  protected boolean doAction() {
-    if (BuildConfig.DEBUG & timerId != -1) {
+  protected boolean isFinish() {
+    if (BuildConfig.DEBUG & task == null) {
       throw new AssertionError();
     };
 
-    if (loop != 0) {
-      /*
-       * action의 작업이 오래 걸릴 경우 TimeManager의 시간 측정이 지연되므로 새로운 스레드를 할당해서 작업을 수행한다.
-       */
-      new Thread(new Runnable() {
-        @Override
-        public void run() {
-          task.run();
-        }
-      }).start();
+    boolean isFinish = (loop == 0);
 
-      loop = Math.max(-1, loop - 1); // 양수일 경우는 loop - 1로 대입되고, 음수일 경우는 계속 -1을 유지한다.
+    if (!isFinish) {
+      // loop 초기값이 양수일 경우는 loop - 1로 대입되고, 음수는 계속 -1을 유지하게 된다. (-1이 아닌 음수 자체에 의미가 있음.)
+      loop = Math.max(-1, loop - 1);
     }
 
-    return loop != 0;
+    return isFinish;
   }
 
   /**

@@ -1,12 +1,12 @@
 package hjsi.timer;
 
+import hjsi.activity.BuildConfig;
 import hjsi.common.AppManager;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 
 public class TimeManager implements Runnable {
-  private static String tag; // 로그 출력용 클래스 이름을 갖고 있음
   private static TimeManager uniqueInstance; // 자신의 유일한 인스턴스를 가지고 있는다.
 
   /**
@@ -32,15 +32,19 @@ public class TimeManager implements Runnable {
    */
   private LinkedList<Timer> countList; // 카운트다운이 끝나기를 기다리는 타이머 리스트
   private LinkedList<Timer> countDoneList; // 카운트다운이 끝나서 언제든지 행동을 할 수 있는 타이머 리스트
+  /**
+   * 대기시간이 끝난 타이머의 작업을 가지고 있는 큐다. 작업을 수행하는 스레드(GameMaster)가 이 작업큐에 들어있는 작업을 꺼내서 수행하게 된다.
+   */
+  private LinkedList<TimerRunnable> taskQueue;
 
   /**
    * 비공개 생성자
    */
   private TimeManager() {
-    TimeManager.tag = getClass().getSimpleName();
-
     countList = new LinkedList<Timer>();
     countDoneList = new LinkedList<Timer>();
+
+    taskQueue = new LinkedList<TimerRunnable>();
 
     workerThread = new Thread(this);
     workerThread.start();
@@ -147,13 +151,18 @@ public class TimeManager implements Runnable {
               timer.countdown(elapsedTime);
 
               if (timer.isCountDone()) { // 카운트가 끝났으면
+                TimerRunnable callBack = timer.getCallBackTask();
 
-                if (timer.isCallbackMode()) {
-                  if (timer.doAction()) {
-                    timer.restart();
-                  } else {
+                // CallBack 타이머일 경우
+                if (callBack != null) {
+
+                  // 지정된 반복횟수가 끝났을 경우
+                  if (timer.isFinish()) {
                     countList.remove(timer); // 지정된 횟수만큼 작업을 반복했으므로 TimeManager의 count 리스트에서 제거
                     AppManager.printDetailLog(timer + "'s callback is finished.");
+                  } else {
+                    addTaskQueue(callBack);
+                    timer.restart();
                   }
 
                 } else {
@@ -168,7 +177,7 @@ public class TimeManager implements Runnable {
           startTime = currentTime;
         } else { // 경과 시간이 10ms 이하일 경우, 부족한 시간을 sleep으로 때운다.
           try {
-            Thread.sleep(10 - elapsedTime);
+            Thread.sleep(10L - elapsedTime);
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
@@ -222,7 +231,7 @@ public class TimeManager implements Runnable {
    */
   public static void resetPassiveTimer(Timer timer) {
     try {
-      if (timer.isCallbackMode()) {
+      if (BuildConfig.DEBUG && timer.getCallBackTask() != null) {
         throw new Exception("콜백모드 타이머는 이 메소드를 사용할 수 없음.");
       }
     } catch (Exception e) {
@@ -232,5 +241,17 @@ public class TimeManager implements Runnable {
     removeFromCountDoneList(timer);
     addToCountList(timer);
     timer.restart();
+  }
+
+  public static TimerRunnable nextTask() {
+    synchronized (getInstance().taskQueue) {
+      return getInstance().taskQueue.poll();
+    }
+  }
+
+  private static void addTaskQueue(TimerRunnable task) {
+    synchronized (getInstance().taskQueue) {
+      getInstance().taskQueue.add(task);
+    }
   }
 }

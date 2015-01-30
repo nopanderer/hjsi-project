@@ -76,7 +76,7 @@ public class Mob extends Unit {
   /**
    * (non-Javadoc) 몹 이동 액션
    * 
-   * @see hjsi.game.Unit#doAction()
+   * @see hjsi.game.Unit#isFinish()
    */
   @Override
   public void action() {
