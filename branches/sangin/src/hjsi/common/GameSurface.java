@@ -78,35 +78,6 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     }
   }
 
-  /**
-   * 지금은 터치이벤트를 카메라에 짬때린다.
-   */
-  @Override
-  public boolean onTouchEvent(MotionEvent event) {
-    boolean isCameraEvent = camera.touchHandler(event);
-
-    if (event.getAction() == MotionEvent.ACTION_UP) {
-      /*
-       * 터치 이벤트 처리에서 ACTION_UP의 경우에 무조건 performClick을 호출해줘야한다고 함. 안 하면 경고 뜸. performClick() 자체도
-       * 오버라이드 해줘야함
-       */
-      performClick();
-    }
-
-    if (isCameraEvent == false) {
-      return super.onTouchEvent(event); // 내가 사용할 이벤트와 전혀 상관없으면 슈퍼클래스에서 처리
-    } else {
-      return true;
-    }
-  }
-
-  /* 필요하다고 해서 했음 */
-  @Override
-  public boolean performClick() {
-    AppManager.printSimpleLog();
-    return super.performClick();
-  }
-
   /* 실제로 그리기를 처리할 부분이다 */
   @Override
   public void run() {
@@ -194,6 +165,35 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     }
 
     AppManager.printDetailLog("GameSurface 스레드 종료");
+  }
+
+  /**
+   * 지금은 터치이벤트를 카메라에 짬때린다.
+   */
+  @Override
+  public boolean onTouchEvent(MotionEvent event) {
+    boolean isCameraEvent = camera.touchHandler(event);
+  
+    if (event.getAction() == MotionEvent.ACTION_UP) {
+      /*
+       * 터치 이벤트 처리에서 ACTION_UP의 경우에 무조건 performClick을 호출해줘야한다고 함. 안 하면 경고 뜸. performClick() 자체도
+       * 오버라이드 해줘야함
+       */
+      performClick();
+    }
+  
+    if (isCameraEvent == false) {
+      return super.onTouchEvent(event); // 내가 사용할 이벤트와 전혀 상관없으면 슈퍼클래스에서 처리
+    } else {
+      return true;
+    }
+  }
+
+  /* 필요하다고 해서 했음 */
+  @Override
+  public boolean performClick() {
+    AppManager.printSimpleLog();
+    return super.performClick();
   }
 
   /* 개발 참고용 정보 표시 */

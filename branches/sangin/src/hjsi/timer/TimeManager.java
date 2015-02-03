@@ -177,7 +177,7 @@ public class TimeManager implements Runnable {
           startTime = currentTime;
         } else { // 경과 시간이 10ms 이하일 경우, 부족한 시간을 sleep으로 때운다.
           try {
-            Thread.sleep(10L - elapsedTime);
+            Thread.sleep(Math.max(10L - elapsedTime, 0L));
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
