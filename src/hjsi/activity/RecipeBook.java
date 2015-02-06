@@ -29,7 +29,7 @@ public class RecipeBook extends Base {
   protected void onCreate(Bundle savedInstanceState) {
     AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_picturebook);
+    setContentView(R.layout.activity_recipebook);
 
     // 뒤로가기 버튼 기능 구현
     Button back = (Button) findViewById(R.id.back);
@@ -44,20 +44,20 @@ public class RecipeBook extends Base {
     Tower ede = new Tower();
     ede.name = "나루토";
     ede.imgName = "naruto01";
-    ede.dmg = 10;
-    ede.rate = 0.8f;
+    ede.damage = 10;
+    ede.attackSpeed = 0.8f;
 
     Tower ede2 = new Tower();
     ede2.name = "사쿠라";
     ede2.imgName = "naruto04";
-    ede2.dmg = 9;
-    ede2.rate = 1.0f;
+    ede2.damage = 9;
+    ede2.attackSpeed = 1.0f;
 
     Tower ede3 = new Tower();
     ede3.name = "사스케";
     ede3.imgName = "naruto07";
-    ede3.dmg = 11;
-    ede3.rate = 0.9f;
+    ede3.damage = 11;
+    ede3.attackSpeed = 0.9f;
 
     RecipeExpandibleAdapter recipeListAdapter = new RecipeExpandibleAdapter(this);
 

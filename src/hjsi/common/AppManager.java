@@ -14,25 +14,46 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
+import android.view.MotionEvent;
 
 /**
  * 애플리케이션의 시스템적인 부분을 총괄하는 싱글턴 클래스
  */
 public class AppManager {
+  /*
+   * Fileds 시작
+   */
   private static AppManager uniqueInstance; // 자신의 유일한 인스턴스를 가지고 있는다.
-
   /**
    * 실행 중인 액티비티 목록
    */
   private LinkedList<Base> runningActivities;
-
   private AssetManager assetManager;
   /**
    * 메모리에 로드된 비트맵 목록
    */
   private HashMap<String, Bitmap> loadedBitmap;
-
+  /**
+   * 기기의 해상도와 비교할 기준 해상도(가로)
+   */
+  private static final float standardWidth = 1920f;
+  /**
+   * 기기의 해상도와 비교할 기준 해상도(세로)
+   */
+  private static final float standardHeight = 1080f;
+  /**
+   * 해상도 조정을 위한 비율 변수
+   */
+  private float displayRatioFactor;
+  /**
+   * TODO 제거 대상
+   */
   private volatile int logicFps;
+
+  /*
+   * 
+   * Methods 시작
+   */
 
   private AppManager() {
     runningActivities = new LinkedList<Base>();
@@ -57,9 +78,11 @@ public class AppManager {
   /**
    * 로그를 출력하려는 개체의 클래스, 메소드 이름을 구한다.
    * 
+   * @param deepMore TODO 자세한 주석이 필요한지?
+   * 
    * @return class.method 형태의 문자열
    */
-  private static String getClassMethodName() {
+  private static String getClassMethodName(boolean deepMore) {
     StackTraceElement[] elements = null;
 
     try {
@@ -67,8 +90,10 @@ public class AppManager {
     } catch (Exception e) {
       elements = e.getStackTrace();
     }
-    String methodName = elements[2].getMethodName();
-    String className = elements[2].getClassName();
+
+    int depth = (deepMore == true ? 3 : 2);
+    String methodName = elements[depth].getMethodName();
+    String className = elements[depth].getClassName();
     className = className.substring(className.lastIndexOf(".") + 1);
 
     return className + "." + methodName;
@@ -85,7 +110,63 @@ public class AppManager {
    * 메소드의 호출 여부를 확인하기 위해 사용한다.
    */
   public static void printSimpleLog() {
-    Log.v(getTagPrefix("메소드 호출"), getClassMethodName() + " 메소드 호출 됨");
+    Log.v(getTagPrefix("메소드 호출"), getClassMethodName(true) + " --------> "
+        + getClassMethodName(false) + " 호출되었음");
+  }
+
+  public static void printEventLog(MotionEvent event) {
+    StringBuilder logMsg = new StringBuilder("사용자 입력: ");
+    int action = event.getAction();
+
+    switch (action) {
+      case MotionEvent.ACTION_DOWN:
+        logMsg.append("ACTION_DOWN");
+        break;
+      case MotionEvent.ACTION_UP:
+        logMsg.append("ACTION_UP");
+        break;
+      case MotionEvent.ACTION_CANCEL:
+        logMsg.append("ACTION_CANCEL");
+        break;
+      case MotionEvent.ACTION_OUTSIDE:
+        logMsg.append("ACTION_OUTSIDE");
+        break;
+      case MotionEvent.ACTION_MOVE:
+        logMsg.append("ACTION_MOVE");
+        break;
+      case MotionEvent.ACTION_HOVER_MOVE:
+        logMsg.append("ACTION_HOVER_MOVE");
+        break;
+      case MotionEvent.ACTION_SCROLL:
+        logMsg.append("ACTION_SCROLL");
+        break;
+      case MotionEvent.ACTION_HOVER_ENTER:
+        logMsg.append("ACTION_HOVER_ENTER");
+        break;
+      case MotionEvent.ACTION_HOVER_EXIT:
+        logMsg.append("ACTION_HOVER_EXIT");
+        break;
+    }
+    int index =
+        (action & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+    switch (action & MotionEvent.ACTION_MASK) {
+      case MotionEvent.ACTION_POINTER_DOWN:
+        logMsg.append("ACTION_POINTER_DOWN(" + index + ")");
+        break;
+      case MotionEvent.ACTION_POINTER_UP:
+        logMsg.append("ACTION_POINTER_UP(" + index + ")");
+        break;
+      default:
+        logMsg.append(Integer.toString(action));
+    }
+
+    for (int i = 0; i < event.getPointerCount(); i++) {
+      logMsg.append(", id[").append(i).append("]= ").append(event.getPointerId(i));
+      logMsg.append(", x[").append(i).append("]= ").append(event.getX(i));
+      logMsg.append(", y[").append(i).append("]= ").append(event.getY(i));
+    }
+
+    Log.i(getTagPrefix(getClassMethodName(false)), logMsg.toString());
   }
 
   /**
@@ -94,7 +175,7 @@ public class AppManager {
    * @param message 로그로 출력할 메시지
    */
   public static void printDetailLog(String message) {
-    Log.d(getTagPrefix(getClassMethodName()), message);
+    Log.d(getTagPrefix(getClassMethodName(false)), message);
   }
 
   public static void printDetailLog(String customTag, String message) {
@@ -102,7 +183,7 @@ public class AppManager {
   }
 
   public static void printInfoLog(String message) {
-    Log.i(getTagPrefix(getClassMethodName()), message);
+    Log.i(getTagPrefix(getClassMethodName(false)), message);
   }
 
   public static void printInfoLog(String customTag, String message) {
@@ -110,7 +191,7 @@ public class AppManager {
   }
 
   public static void printErrorLog(String message) {
-    Log.e(getTagPrefix(getClassMethodName()), message);
+    Log.e(getTagPrefix(getClassMethodName(false)), message);
   }
 
   public static void printErrorLog(String customTag, String message) {
@@ -188,6 +269,16 @@ public class AppManager {
     }
   }
 
+  public void setDisplayFactor(int deviceWidth, int deviceHeight) {
+    float horizontalRatio = deviceWidth / standardWidth;
+    float verticalRatio = deviceHeight / standardHeight;
+    displayRatioFactor = Math.max(horizontalRatio, verticalRatio);
+    printDetailLog("비율 변수: " + displayRatioFactor);
+  }
+
+  public float getDisplayFactor() {
+    return displayRatioFactor;
+  }
 
   /**
    * 주어진 경로 아래의 모든 파일을 HashMap에 넣어서 반환한다.
@@ -331,6 +422,9 @@ public class AppManager {
       InputStream is = assetManager.open(path);
       printInfoLog("\"" + path + "\"", "원본 용량: " + convertByteUnit(is.available()));
       bm = BitmapFactory.decodeStream(is, null, opts);
+      bm =
+          Bitmap.createScaledBitmap(bm, (int) (bm.getWidth() * displayRatioFactor + 0.5f),
+              (int) (bm.getHeight() * displayRatioFactor + 0.5f), false);
       is.close();
       printInfoLog("\"" + path + "\"", bitmapToString(bm) + " 읽기 성공");
     }

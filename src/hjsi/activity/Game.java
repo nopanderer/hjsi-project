@@ -1,6 +1,7 @@
 package hjsi.activity;
 
 import hjsi.common.AppManager;
+import hjsi.common.Camera;
 import hjsi.common.GameSurface;
 import hjsi.game.GameMaster;
 import hjsi.game.GameState;
@@ -11,25 +12,27 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ToggleButton;
 
 public class Game extends Base implements OnClickListener {
   private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
 
-  Button settingBtn, btnBook, btnStore;
+  Button btnSetting, btnBook, btnStore;
   ToggleButton btnPlay;
   Drawable drawableBtnPlay_Pause;
   Drawable drawableBtnPlay_Play;
   DlgSetting dlgSetting;
   public static MediaPlayer music;
 
-  /* 게임을 진행하는 인게임 스레드를 가진 개체 */
+  /** 게임을 진행하는 인게임 스레드를 가진 개체 */
   private GameMaster gameMaster;
+  /** 카메라 */
+  private Camera camera;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -38,20 +41,29 @@ public class Game extends Base implements OnClickListener {
 
     GameState.getInstance().initState(getResources());
 
-    // surfaceview 등록
-    GameSurface gameView = new GameSurface(this);
+    /*
+     * 화면 비율을 구해서 카메라를 생성할 때 넘겨준다.
+     */
+    camera = new Camera(AppManager.getInstance().getDisplayFactor());
+    /*
+     * surfaceview 생성 및 등록
+     */
+    GameSurface gameView = new GameSurface(this, camera);
     setContentView(gameView);
 
-    LayoutInflater inflater = getLayoutInflater();
-    View layout = inflater.inflate(R.layout.activity_map, null);
-    addContentView(layout, new LinearLayout.LayoutParams(
-        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-        android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+    /*
+     * 기타 버튼 UI 등록
+     */
+    View layout = getLayoutInflater().inflate(R.layout.activity_game, null);
+    addContentView(layout, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
+    /*
+     * 버튼 뷰 참조자 및 드로블 가져옴
+     */
     drawableBtnPlay_Pause = getResources().getDrawable(R.drawable.btn_pause);
     drawableBtnPlay_Play = getResources().getDrawable(R.drawable.btn_play);
 
-    settingBtn = (Button) findViewById(R.id.setting_btn);
+    btnSetting = (Button) findViewById(R.id.btn_setting);
     btnBook = (Button) findViewById(R.id.btn_book);
     btnPlay = (ToggleButton) findViewById(R.id.btn_play);
     btnStore = (Button) findViewById(R.id.btn_store);
@@ -67,7 +79,7 @@ public class Game extends Base implements OnClickListener {
       }
     });
 
-    settingBtn.setOnClickListener(this);
+    btnSetting.setOnClickListener(this);
     btnBook.setOnClickListener(this);
     btnPlay.setOnClickListener(this);
     btnStore.setOnClickListener(this);
@@ -144,7 +156,7 @@ public class Game extends Base implements OnClickListener {
   public void onClick(View v) {
     AppManager.printDetailLog(v.toString());
 
-    if (v == settingBtn) {
+    if (v == btnSetting) {
       showSettingMenu();
     } else if (v == btnBook) {
       Intent Book = new Intent(Game.this, RecipeBook.class);
@@ -166,6 +178,19 @@ public class Game extends Base implements OnClickListener {
     } else if (v == btnStore) {
       Intent Store = new Intent(Game.this, Store.class);
       startActivity(Store);
+    }
+  }
+
+  @Override
+  public boolean onTouchEvent(MotionEvent event) {
+    AppManager.printEventLog(event);
+    boolean isCameraEvent = camera.touchHandler(event);
+
+    if (isCameraEvent == false) {
+
+      return true;
+    } else {
+      return super.onTouchEvent(event);
     }
   }
 

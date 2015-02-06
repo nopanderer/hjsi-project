@@ -1,23 +1,21 @@
 package hjsi.game;
 
 import hjsi.common.AppManager;
+import hjsi.timer.TimeManager;
+import hjsi.timer.TimerRunnable;
 
 /**
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
  */
 public class GameMaster implements Runnable {
-  private final String tag = getClass().getSimpleName();
-
   /**
    * 게임을 진행시키는 스레드
    */
   private Thread workerThread;
-
   /**
    * GameMaster의 스레드를 완전히 종료하려면 값을 true로 바꾼다.
    */
   private boolean termination = false;
-
   /**
    * GameMaster의 스레드를 재생하려면 true로 설정하고, 일시적으로 멈추려면 false로 설정한다.
    */
@@ -31,12 +29,9 @@ public class GameMaster implements Runnable {
   @Override
   public void run() {
     /* fps 계산을 위한 변수 */
-    int fpsTargetFPS = 100; // 초당 목표 프레임 수
     int fpsRealFps = 0;
-    long fpsTargetTime = 1000 / fpsTargetFPS; // 프레임당 목표 소요 시간
     long fpsStartTime;
     long fpsRealTime; // 프레임당 실제 소요 시간
-    long fpsDelayTime; // 목표 소요시간 - 실제 소요시간만큼 스레드 sleep
     long fpsElapsedTime = 0L; // 1초 측정을 위한 변수
 
     while (!termination) {
@@ -45,25 +40,35 @@ public class GameMaster implements Runnable {
         fpsStartTime = System.currentTimeMillis();
 
         /*
+         * 대기가 끝난 작업을 수행한다.
+         */
+        TimerRunnable task = TimeManager.nextTask();
+        while (task != null) {
+          task.run();
+          task = TimeManager.nextTask();
+        }
+
+        /*
          * 게임 로직 실행
          */
         for (Unit unit : GameState.getInstance().getUnits()) {
           unit.action();
         }
 
-        if (GameState.getInstance().usedMob < 10)
+        if (GameState.getInstance().usedMob < 10) {
           GameState.getInstance().addMob();
+        }
+        // 몹이 다 죽으면 새로운 웨이브 시작 및 정지
+        else if (GameState.getInstance().deadMob == 10) {
+          nextWave();
+          TimeManager.pauseTime();
+          pauseGame();
+          break;
+        }
 
         for (Mob mob : GameState.getInstance().getMobs()) {
-          // 몹이 다 죽으면 새로운 웨이브 시작 및 정지
-          if (GameState.getInstance().deadMob == 10) {
-            nextWave();
-            pauseGame();
-            break;
-          }
-
           // 몹이 죽지 않았고 1바퀴 돌았으면
-          else if (mob.lap == 2 && mob.dead == false) {
+          if (mob.lap == 2 && mob.dead == false) {
             mob.dead = true;
             GameState.getInstance().curMob--;
             GameState.getInstance().deadMob++;
@@ -76,29 +81,13 @@ public class GameMaster implements Runnable {
         }
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
-
-        // 프레임당 실제 소요시간
         fpsRealFps++;
         fpsRealTime = (System.currentTimeMillis() - fpsStartTime);
         fpsElapsedTime += fpsRealTime;
-
-        if (fpsElapsedTime >= 1000) // 1초마다 프레임율 갱신
-        {
-
+        if (fpsElapsedTime >= 1000) { // 1초마다 프레임율 갱신
           AppManager.getInstance().setLogicFps(fpsRealFps);
           fpsRealFps = 0;
           fpsElapsedTime = 0L;
-        }
-
-        /* 너무 빠르면 목표 시간만큼 딜레이 */
-        try {
-          fpsDelayTime = fpsTargetTime - fpsRealTime;
-          fpsElapsedTime += fpsDelayTime;
-          if (fpsDelayTime > 0) {
-            Thread.sleep(fpsDelayTime);
-          }
-        } catch (InterruptedException e) {
-          e.printStackTrace();
         }
       }
 
@@ -145,16 +134,17 @@ public class GameMaster implements Runnable {
   }
 
   public void nextWave() {
-    GameState.getInstance().destroyMob();
-    GameState.getInstance().wave++;
-    // 새로운 비트맵 추가
-    GameState.getInstance().makeFace();
-    // 새로운 몹 생성
-    GameState.getInstance().createMobs();
-    // init(임시)
-    GameState.getInstance().curMob = 0;
-    GameState.getInstance().usedMob = 0;
-    GameState.getInstance().deadMob = 0;
+    GameState gameState = GameState.getInstance();
 
+    gameState.destroyMob();
+    gameState.wave++;
+    // 새로운 비트맵 추가
+    gameState.makeFace();
+    // 새로운 몹 생성
+    gameState.createMobs();
+    // init(임시)
+    gameState.curMob = 0;
+    gameState.usedMob = 0;
+    gameState.deadMob = 0;
   }
 }

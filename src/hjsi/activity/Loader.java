@@ -9,6 +9,9 @@ import java.util.Set;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory.Options;
+import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,7 +29,7 @@ public class Loader extends Base {
   public void onCreate(Bundle savedInstanceState) {
     AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_continue);
+    setContentView(R.layout.activity_loader);
 
     String[] strHelp = getResources().getStringArray(R.array.help_text);
     TextView helpTextView = (TextView) findViewById(R.id.helpTextView);
@@ -41,6 +44,10 @@ public class Loader extends Base {
 
     // 앞으로 AppManager에서 사용할 AssetManager를 설정하고 미리 초기화한다.
     AppManager.getInstance().setAssetManager(getAssets());
+
+    Rect displayRect = new Rect();
+    getWindowManager().getDefaultDisplay().getRectSize(displayRect);
+    AppManager.getInstance().setDisplayFactor(displayRect.right, displayRect.bottom);
 
     worker.start();
   }
@@ -89,15 +96,17 @@ public class Loader extends Base {
         Bitmap bitmap;
         pathMap = AppManager.getInstance().getPathMap("img/common");
         Set<String> keySet = pathMap.keySet();
+        Options opts = new Options();
+        opts.inPreferredConfig = Config.RGB_565;
         for (String key : keySet) {
-          bitmap = AppManager.getInstance().readImageFile(pathMap.get(key), null);
+          bitmap = AppManager.getInstance().readImageFile(pathMap.get(key), opts);
           AppManager.getInstance().addBitmap(key, bitmap);
         }
 
         /*
          * 동상 이미지를 준비한다. 구체적인 경로 입력으로 바로 가져올 수도 있음.
          */
-        bitmap = AppManager.getInstance().readImageFile("img/statues/statue1.png", null);
+        bitmap = AppManager.getInstance().readImageFile("img/statues/statue1.png", opts);
         if (bitmap != null) {
           AppManager.getInstance().addBitmap("statue1", bitmap);
         }

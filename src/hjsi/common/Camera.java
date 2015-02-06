@@ -6,31 +6,9 @@ import android.graphics.Rect;
 import android.view.MotionEvent;
 
 /**
- * 카메라 클래스. 화면에 보이는 영역을 관리한다. 게임 오브젝트를 화면에 출력할 때 필요한 좌표 값 등도 변환한다.
+ * 서피스뷰에서 배경, 모든 유닛 클래스 등을 그려줄 때 필요한 기준 좌표와 크기(zoom) 값을 조작하는 클래스.
  */
 public class Camera {
-  private static final String tag = Camera.class.getSimpleName();
-  private static Camera uniqueInstance;
-
-  private Camera() {
-    position = new Point(0, 0);
-    viewport = new Rect(0, 0, 0, 0);
-    worldRect = new Rect(0, 0, 3840, 2160);
-    worldMargin = new Rect(125, 125, 125, 125);
-  }
-
-  public static Camera getInstance() {
-    if (uniqueInstance == null) {
-      synchronized (Camera.class) {
-        if (uniqueInstance == null) {
-          uniqueInstance = new Camera();
-        }
-      }
-    }
-
-    return uniqueInstance;
-  }
-
   /*
    * 카메라 스크롤 속도 배수에 대한 상수
    */
@@ -100,65 +78,70 @@ public class Camera {
    */
   private boolean doNotScroll = false;
 
-  /**
-   * 화면 크기를 설정한다.
-   *
-   * @param width 화면의 가로 크기
-   * @param height 화면의 세로 크기
-   */
-  public void setCamSize(int width, int height) {
-    viewport.right = width;
-    viewport.bottom = height;
+  public Camera(float factor) {
+    position = new Point(0, 0);
+    worldRect = new Rect(0, 0, (int) (3840 * factor + 0.5f), (int) (2160 * factor + 0.5f));
+    int margin = (int) (125 * factor + 0.5f);
+    worldMargin = new Rect(margin, margin, margin, margin);
+  }
+
+  public void setViewportSize(int width, int height) {
+    if (viewport == null) {
+      viewport = new Rect(0, 0, width, height);
+    } else {
+      viewport.right = width;
+      viewport.bottom = height;
+    }
   }
 
   /* get 메소드 */
-  public int x() {
+  public int getX() {
     return position.x;
   }
 
-  public int y() {
+  public int getY() {
     return position.y;
   }
 
   /**
    * @return viewport.right / zoom
    */
-  public float widthScaled() {
+  public float getWidthScaled() {
     return viewport.right / zoom;
   }
 
   /**
    * @return viewport.bottom / zoom
    */
-  public float heightScaled() {
+  public float getHeightScaled() {
     return viewport.bottom / zoom;
   }
 
-  public float scale() {
+  public float getScale() {
     return zoom;
   }
 
-  public int worldWidth() {
+  public int getWorldWidth() {
     return worldRect.right;
   }
 
-  public int worldHeight() {
+  public int getWorldHeight() {
     return worldRect.bottom;
   }
 
-  private int leftLimit() {
+  private int getLeftLimit() {
     return worldRect.left - (int) (worldMargin.left / zoom);
   }
 
-  private int rightLimit() {
+  private int getRightLimit() {
     return worldRect.right + (int) (worldMargin.right / zoom);
   }
 
-  private int topLimit() {
+  private int getTopLimit() {
     return worldRect.top - (int) (worldMargin.top / zoom);
   }
 
-  private int bottomLimit() {
+  private int getBottomLimit() {
     return worldRect.bottom + (int) (worldMargin.bottom / zoom);
   }
 
@@ -176,8 +159,6 @@ public class Camera {
    * 카메라 이동이나 확대/축소를 한다.
    */
   public boolean touchHandler(MotionEvent event) {
-    String logMessage = "touchHandler()";
-
     float dx = 0f, dy = 0f; // 터치 이동 값
 
     switch (event.getActionMasked()) {
@@ -185,7 +166,6 @@ public class Camera {
      * 화면 한손가락 터치
      */
       case MotionEvent.ACTION_DOWN:
-        logMessage += " ACTION_DOWN ";
         /*
          * 아직 덜 처리된 자동 스크롤이 남아있어도, 사용자가 직접 스크롤하려고 하는 경우므로 남아있는 스크롤을 초기화한다.
          */
@@ -198,14 +178,12 @@ public class Camera {
         }
 
         oldTouch.set(event.getX(), event.getY()); // 이전 좌표를 구해놓음
-        logMessage += "(" + oldTouch.x + "," + oldTouch.y + ")";
         break;
 
       /*
        * 화면 두손가락 터치
        */
       case MotionEvent.ACTION_POINTER_DOWN:
-        logMessage += " ACTION_POINTER_DOWN ";
         doNotScroll = true; // 두 손가락이 닿는 순간 줌은 시작된거므로 스크롤 금지
         oldDistance = getDistance(event); // 두 손가락의 터치 좌표 사이의 거리를 구함
 
@@ -213,19 +191,16 @@ public class Camera {
         PointF midpoint = new PointF();
         midpoint.x = (event.getX(0) + event.getX(1)) / 2;
         midpoint.y = (event.getY(0) + event.getY(1)) / 2;
-        logMessage += "크기조절 중심점=(" + midpoint.x + "," + midpoint.y + ")";
 
         // 줌 터치 중심점의 화면 상의 백분율을 구함.
         midRatio.x = Math.round(midpoint.x / viewport.right * 100) / 100f; // 0.01 아래로 버림
         midRatio.y = Math.round(midpoint.y / viewport.bottom * 100) / 100f;
-        logMessage += ", 비율=(" + midRatio.x + "," + midRatio.y + ")";
         break;
 
       /*
        * 화면 터치 후 이동
        */
       case MotionEvent.ACTION_MOVE:
-        logMessage += " ACTION_MOVE ";
 
         // MotionEvent.getPointerCount()로 터치 수를 가져온다.
         if (event.getPointerCount() == 1) { // 포인터가 하나일 때 == 스크롤
@@ -249,7 +224,6 @@ public class Camera {
 
           // 배율이 한 번에 0.05씩만 바뀌도록 제한함
           if (Math.abs(delta) >= cellWidth) {
-            logMessage += "delta: " + delta; // 로그 출력용
             oldDistance = nowDistance; // 현재 거리는 더 이상 쓸 일이 없으니 이전 거리에 보관
 
             int movedCells = (int) (delta / cellWidth); // 터치가 이동한 거리를 전체 30칸의 칸 단위로 환산
@@ -262,9 +236,11 @@ public class Camera {
              * 구 width와 신 width의 차이를 구하고, 처음 줌 터치할 때의 중점의 X 좌표 값을 화면에 대한 백분율로 환산한 값과 곱한다. 그 값만큼 카메라의
              * left, top을 이동시키면 확대/축소 지점에 적당한 방향으로 카메라가 이동
              */
-            float diff_width = widthScaled() - (viewport.right / freshZoom); // 이전 가로 크기와 새로운 가로 크기의
+            float diff_width = getWidthScaled() - (viewport.right / freshZoom); // 이전 가로 크기와 새로운 가로
+                                                                                // 크기의
             // 차이를 구함
-            float diff_height = heightScaled() - (viewport.bottom / freshZoom); // 이전 세로 크기 - 새로운 세로
+            float diff_height = getHeightScaled() - (viewport.bottom / freshZoom); // 이전 세로 크기 - 새로운
+                                                                                   // 세로
             // 크기
 
             dx = diff_width * midRatio.x;
@@ -275,15 +251,12 @@ public class Camera {
             zoom = freshZoom;
           }
         }
-        logMessage += "(" + dx + ", " + dy + ")";
         break;
 
       case MotionEvent.ACTION_POINTER_UP:
-        logMessage += " ACTION_POINTER_UP ";
         break;
 
       case MotionEvent.ACTION_UP:
-        logMessage += " ACTION_UP ";
         keepScrolling = false; // 손을 떼야 카메라가 복귀 할 수 있음
         doNotScroll = false; // 한 번이라도 줌을 했으면 완전히 손을 떼야 스크롤할 수 있도록 함.
         break;
@@ -291,7 +264,6 @@ public class Camera {
       default:
         break;
     }
-    AppManager.printDetailLog(logMessage);
 
     return true;
   }
@@ -335,8 +307,8 @@ public class Camera {
       }
 
       // 방향에 맞게 dx, dy만큼 카메라를 이동시킴.
-      dx = (int) (dx / scale() * 10 + (dx > 0 ? 5 : -5)) / 10;
-      dy = (int) (dy / scale() * 10 + (dy > 0 ? 5 : -5)) / 10;
+      dx = (int) (dx / getScale() * 10 + (dx > 0 ? 5 : -5)) / 10;
+      dy = (int) (dy / getScale() * 10 + (dy > 0 ? 5 : -5)) / 10;
       position.offset(dx, dy);
 
       // autoScroll을 마치면 현재 터치한 상태에서 스크롤 가능함
@@ -363,15 +335,15 @@ public class Camera {
     vGapLength = 0;
 
     if (isOutOfLeft()) {
-      hGapLength = leftLimit() - position.x;
+      hGapLength = getLeftLimit() - position.x;
     } else if (isOutOfRight()) {
-      hGapLength = position.x + (int) widthScaled() - rightLimit();
+      hGapLength = position.x + (int) getWidthScaled() - getRightLimit();
     }
 
     if (isOutOfTop()) {
-      vGapLength = topLimit() - position.y;
+      vGapLength = getTopLimit() - position.y;
     } else if (isOutOfBottom()) {
-      vGapLength = position.y + (int) heightScaled() - bottomLimit();
+      vGapLength = position.y + (int) getHeightScaled() - getBottomLimit();
     }
 
     int speedScaleCell = viewport.right / (maxScrollScale * 2);
@@ -395,16 +367,16 @@ public class Camera {
     outDirection = OUT_NONE;
 
     // 가로 범위를 벗어났는지 체크한다.
-    if (position.x < leftLimit()) {
+    if (position.x < getLeftLimit()) {
       outDirection = OUT_LEFT;
-    } else if (position.x + (int) widthScaled() > rightLimit()) {
+    } else if (position.x + (int) getWidthScaled() > getRightLimit()) {
       outDirection = OUT_RIGHT;
     }
 
     // 세로 범위를 벗어났는지 체크한다.
-    if (position.y < topLimit()) {
+    if (position.y < getTopLimit()) {
       outDirection |= OUT_TOP;
-    } else if (position.y + (int) heightScaled() > bottomLimit()) {
+    } else if (position.y + (int) getHeightScaled() > getBottomLimit()) {
       outDirection |= OUT_BOTTOM;
     }
 
@@ -429,7 +401,6 @@ public class Camera {
      * x축 이동 거리가 없을 경우, 스크롤 빚 x를 이용한다. 스크롤 빚이 남아있는지 자체는 이 메소드가 호출되기 전에 검사된다.
      */
     if (dx == 0) {
-      AppManager.printDetailLog("dx:" + dx);
       if (Math.abs(scrollRemain.x) > scrollStep) {
         // 스크롤 빚이 scrollStep보다 크면 scrollStep만큼 움직이고, 움직인 거리만큼은 빚을 갚는다.
 
@@ -493,9 +464,6 @@ public class Camera {
     scrollRemain.offset(debtX, debtY); // debtX, debtY 값만큼 스크롤 빚을 가감한다.
 
     position.offset(dx, dy); // 계산된 dx, dy만큼 이동한다.
-
-    AppManager.printDetailLog("Debt(" + scrollRemain.x + "," + scrollRemain.y + "), delta(" + dx
-        + "," + dy + ")");
   }
 
   private void moveCamera(float dx, float dy) {
