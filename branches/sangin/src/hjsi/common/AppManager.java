@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
+import android.view.MotionEvent;
 
 /**
  * 애플리케이션의 시스템적인 부분을 총괄하는 싱글턴 클래스
@@ -77,7 +78,7 @@ public class AppManager {
   /**
    * 로그를 출력하려는 개체의 클래스, 메소드 이름을 구한다.
    * 
-   * @param deepMore TODO
+   * @param deepMore TODO 자세한 주석이 필요한지?
    * 
    * @return class.method 형태의 문자열
    */
@@ -111,6 +112,61 @@ public class AppManager {
   public static void printSimpleLog() {
     Log.v(getTagPrefix("메소드 호출"), getClassMethodName(true) + " --------> "
         + getClassMethodName(false) + " 호출되었음");
+  }
+
+  public static void printEventLog(MotionEvent event) {
+    StringBuilder logMsg = new StringBuilder("사용자 입력: ");
+    int action = event.getAction();
+
+    switch (action) {
+      case MotionEvent.ACTION_DOWN:
+        logMsg.append("ACTION_DOWN");
+        break;
+      case MotionEvent.ACTION_UP:
+        logMsg.append("ACTION_UP");
+        break;
+      case MotionEvent.ACTION_CANCEL:
+        logMsg.append("ACTION_CANCEL");
+        break;
+      case MotionEvent.ACTION_OUTSIDE:
+        logMsg.append("ACTION_OUTSIDE");
+        break;
+      case MotionEvent.ACTION_MOVE:
+        logMsg.append("ACTION_MOVE");
+        break;
+      case MotionEvent.ACTION_HOVER_MOVE:
+        logMsg.append("ACTION_HOVER_MOVE");
+        break;
+      case MotionEvent.ACTION_SCROLL:
+        logMsg.append("ACTION_SCROLL");
+        break;
+      case MotionEvent.ACTION_HOVER_ENTER:
+        logMsg.append("ACTION_HOVER_ENTER");
+        break;
+      case MotionEvent.ACTION_HOVER_EXIT:
+        logMsg.append("ACTION_HOVER_EXIT");
+        break;
+    }
+    int index =
+        (action & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+    switch (action & MotionEvent.ACTION_MASK) {
+      case MotionEvent.ACTION_POINTER_DOWN:
+        logMsg.append("ACTION_POINTER_DOWN(" + index + ")");
+        break;
+      case MotionEvent.ACTION_POINTER_UP:
+        logMsg.append("ACTION_POINTER_UP(" + index + ")");
+        break;
+      default:
+        logMsg.append(Integer.toString(action));
+    }
+
+    for (int i = 0; i < event.getPointerCount(); i++) {
+      logMsg.append(", id[").append(i).append("]= ").append(event.getPointerId(i));
+      logMsg.append(", x[").append(i).append("]= ").append(event.getX(i));
+      logMsg.append(", y[").append(i).append("]= ").append(event.getY(i));
+    }
+
+    Log.i(getTagPrefix(getClassMethodName(false)), logMsg.toString());
   }
 
   /**

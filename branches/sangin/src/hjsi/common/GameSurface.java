@@ -9,7 +9,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.TypedValue;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -33,9 +32,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   private Paint mPaintInfo; // 텍스트 출력용 페인트 객체
   private int mFps; // 그리기 fps
 
-  /** 기본적인 생성자 */
-  public GameSurface(Context context) {
+  public GameSurface(Context context, Camera camera) {
     super(context);
+    this.camera = camera;
 
     /*
      * 홀더를 가져와서 Callback 인터페이스를 등록한다. 구현한 각 콜백은 surface의 변화가 있을 때마다 호출된다. 서피스뷰를 가진 액티비티가 화면에 보일 때
@@ -60,8 +59,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   @Override
   public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
     AppManager.printDetailLog("width: " + width + "px, height: " + height + "px");
-    // 매개변수로 들어온 화면 크기를 이용해 카메라를 생성한다.
-    camera = new Camera(width, height, AppManager.getInstance().getDisplayFactor());
+    camera.setViewportSize(width, height);
   }
 
   @Override
@@ -106,10 +104,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         canvas.save();
 
         /* 현재 카메라 위치에 맞게 캔버스를 이동시킴 */
-        canvas.translate(-camera.x(), -camera.y());
+        canvas.translate(-camera.getX(), -camera.getY());
 
         /* 현재 카메라 배율에 맞게 캔버스를 확대/축소함 */
-        canvas.scale(camera.scale(), camera.scale(), 0, 0);
+        canvas.scale(camera.getScale(), camera.getScale(), 0, 0);
 
         /* 맵 배경을 그린다. */
         canvas.drawBitmap(AppManager.getInstance().getBitmap("background"), 0, 0, null);
@@ -167,35 +165,6 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     AppManager.printDetailLog("GameSurface 스레드 종료");
   }
 
-  /**
-   * 지금은 터치이벤트를 카메라에 짬때린다.
-   */
-  @Override
-  public boolean onTouchEvent(MotionEvent event) {
-    boolean isCameraEvent = camera.touchHandler(event);
-  
-    if (event.getAction() == MotionEvent.ACTION_UP) {
-      /*
-       * 터치 이벤트 처리에서 ACTION_UP의 경우에 무조건 performClick을 호출해줘야한다고 함. 안 하면 경고 뜸. performClick() 자체도
-       * 오버라이드 해줘야함
-       */
-      performClick();
-    }
-  
-    if (isCameraEvent == false) {
-      return super.onTouchEvent(event); // 내가 사용할 이벤트와 전혀 상관없으면 슈퍼클래스에서 처리
-    } else {
-      return true;
-    }
-  }
-
-  /* 필요하다고 해서 했음 */
-  @Override
-  public boolean performClick() {
-    AppManager.printSimpleLog();
-    return super.performClick();
-  }
-
   /* 개발 참고용 정보 표시 */
   private int xForText = 0;
   private int yForText = 0;
@@ -235,8 +204,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 카메라 좌상단 좌표 (논리적인 기준점) 출력
      */
     canvas.translate(0, yForText);
-    canvas.drawText("CAM left: " + camera.x() + " / top: " + camera.y() + " / scale: "
-        + (int) (camera.scale() * 100 + 0.5) + "%", xForText, yForText, mPaintInfo);
+    canvas.drawText("CAM left: " + camera.getX() + " / top: " + camera.getY() + " / scale: "
+        + (int) (camera.getScale() * 100 + 0.5) + "%", xForText, yForText, mPaintInfo);
 
     /*
      * 메모리 정보 표시

@@ -29,7 +29,7 @@ public class Loader extends Base {
   public void onCreate(Bundle savedInstanceState) {
     AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_continue);
+    setContentView(R.layout.activity_loader);
 
     String[] strHelp = getResources().getStringArray(R.array.help_text);
     TextView helpTextView = (TextView) findViewById(R.id.helpTextView);
