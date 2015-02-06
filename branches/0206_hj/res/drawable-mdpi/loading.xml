@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false" >
+
+    <item
+        android:drawable="@drawable/naruto01"
+        android:duration="210"/>
+    <item
+        android:drawable="@drawable/naruto02"
+        android:duration="210"/>
+    <item
+        android:drawable="@drawable/naruto03"
+        android:duration="210"/>
+    <item
+        android:drawable="@drawable/naruto04"
+        android:duration="210"/>
+    <item
+        android:drawable="@drawable/naruto05"
+        android:duration="210"/>
+    <item
+        android:drawable="@drawable/naruto06"
+        android:duration="210"/>
+    <item
+        android:drawable="@drawable/naruto07"
+        android:duration="210"/>
+    <item
+        android:drawable="@drawable/naruto08"
+        android:duration="210"/>
+    <item
+        android:drawable="@drawable/naruto09"
+        android:duration="210"/>
+    <item
+        android:drawable="@drawable/naruto10"
+        android:duration="210"/>
+    <item
+        android:drawable="@drawable/naruto11"
+        android:duration="210"/>
+
+</animation-list>
