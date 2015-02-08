@@ -111,6 +111,23 @@ public class Loader extends Base {
           AppManager.getInstance().addBitmap("statue1", bitmap);
         }
 
+        /*
+         * 임시적인 타워 비트맵 삽입
+         */
+        bitmap = AppManager.getInstance().readImageFile("img/towers/tower1.png", opts);
+        if (bitmap != null) {
+          AppManager.getInstance().addBitmap("tower1", bitmap);
+        }
+
+        /*
+         * 임시적인 투사체 비트맵 삽입
+         */
+        opts.inSampleSize = 16;
+        bitmap = AppManager.getInstance().readImageFile("img/projectile/proj1.png", opts);
+        if (bitmap != null) {
+          AppManager.getInstance().addBitmap("proj1", bitmap);
+        }
+
 
         Thread.sleep(2000); // 여기서 로딩 작업을 한다고 치고..
       } catch (InterruptedException e) {

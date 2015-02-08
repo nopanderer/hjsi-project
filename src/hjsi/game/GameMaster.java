@@ -4,6 +4,7 @@ import hjsi.common.AppManager;
 import hjsi.timer.TimeManager;
 import hjsi.timer.TimerRunnable;
 
+
 /**
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
  */
@@ -38,6 +39,8 @@ public class GameMaster implements Runnable {
       while (running) {
         // 프레임 시작 시간을 구한다.
         fpsStartTime = System.currentTimeMillis();
+
+
 
         /*
          * 대기가 끝난 작업을 수행한다.
@@ -77,8 +80,23 @@ public class GameMaster implements Runnable {
 
           // 몹이 생성되어 있다면 이동
           else if (mob.created)
-            mob.action();
+            mob.move();
         }
+
+        /*
+         * 몹이 타워 사정거리에 들어오면 일정 시간마다 투사체 생성
+         */
+        GameState.getInstance().tower.attack();
+        /*
+         * 투사체 전체 돌면서 몹을 향해 이동. 맞으면 사라짐
+         */
+        for (Projectile proj : GameState.getInstance().getProjs()) {
+          proj.move();
+          if (proj.isHit)
+            GameState.getInstance().projs.remove(proj);
+        }
+
+        // TODO Auto-generated method stub
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
         fpsRealFps++;
