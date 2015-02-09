@@ -14,31 +14,38 @@ public class Projectile extends Unit implements Movable
     /**
      * 목표로 한 몹의 인덱스
      */
-    private int    target;
+    private int              target;
     /**
      * 투사체 속도
      */
-    private int    speed;
+    private int              moveSpeed;
+    /**
+     * 투사체 종류
+     */
+    private int              type;
     /**
      * 몹과 충돌했는지
      */
-    public boolean isHit;
+    public boolean           isHit;
     /**
      * 임시 타이머 변수
      */
-    private long   beforeTime;
-    private int    sleep = 15;
+    private long             beforeTime;
+    private int              sleep  = 15;
 
-    /**
-     * 비트맵 크기
-     */
+    private static final int NORMAL = 1;
+    private static final int SLOW   = 2;
+    private static final int SPLASH = 3;
+    private static final int POISON = 4;
+    private static final int ICED   = 5;
+    private static final int CHAIN  = 6;
 
     public Projectile(int x, int y, int target, Bitmap face)
     {
         super(x, y, face);
         this.target = target;
 
-        speed = 3;
+        moveSpeed = 3;
         isHit = false;
 
         beforeTime = System.currentTimeMillis();
@@ -59,26 +66,26 @@ public class Projectile extends Unit implements Movable
         /* 유도 알고리즘 */
         if (targetCntrX() < x)
         {
-            x -= speed;
+            x -= moveSpeed;
             if (targetCntrY() < y)
-                y -= speed;
+                y -= moveSpeed;
             else if (targetCntrY() > y)
-                y += speed;
+                y += moveSpeed;
         }
         if (targetCntrX() > x)
         {
-            x += speed;
+            x += moveSpeed;
             if (targetCntrY() < y)
-                y -= speed;
+                y -= moveSpeed;
             else if (targetCntrY() > y)
-                y += speed;
+                y += moveSpeed;
         }
         if (targetCntrX() == x)
         {
             if (targetCntrY() < y)
-                y -= speed;
+                y -= moveSpeed;
             else if (targetCntrY() > y)
-                y += speed;
+                y += moveSpeed;
         }
 
     }

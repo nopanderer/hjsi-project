@@ -105,7 +105,6 @@ public class GameMaster implements Runnable
                     if (proj.isHit)
                         GameState.getInstance().projs.remove(proj);
                 }
-
                 // TODO Auto-generated method stub
 
                 /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
