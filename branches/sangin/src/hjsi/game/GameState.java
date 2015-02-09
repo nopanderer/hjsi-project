@@ -7,7 +7,6 @@ import hjsi.timer.TimerRunnable;
 import java.io.IOException;
 import java.util.LinkedList;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 
@@ -15,27 +14,21 @@ import android.graphics.BitmapFactory.Options;
  * 게임에 필요한 정보를 저장한다.
  */
 public class GameState {
-  private static final String tag = GameState.class.getSimpleName();
   private static GameState uniqueInstance;
-
   /**
    * 현재 게임이 진행된 시간을 나타낸다.
    */
   private volatile long worldTime = 0L;
-
   /**
    * 현재 단계
    */
   public int wave = 1;
-
   /**
    * 테스트용 유닛 리스트
    */
   LinkedList<Unit> arTestUnits = new LinkedList<Unit>();
-
   LinkedList<Mob> Mobs = new LinkedList<Mob>();
 
-  public Resources res;
   public Bitmap mImgMob; // 몹 비트맵
   public long beforeRegen = System.currentTimeMillis(); // 리젠하기 전 시간
   public long regen = 1000; // create mob per 1 sec
@@ -43,7 +36,7 @@ public class GameState {
   public int deadMob = 0; // 죽은 몹
   public int curMob = 0; // 현재 몹
 
-  public final int MAX_MOP = 10;
+  public static final int MAX_MOB = 10;
 
   private GameState() {
     AppManager.printSimpleLog();
@@ -61,13 +54,13 @@ public class GameState {
     TimeManager.registerCallbackTimer(1000, clock, -1).start();
 
     /*
-     * 불러온 유저 데이터를 토대로 동상을 생성한다. (유저 데이터의 남아있는 동상의 갯수, 체력, 업그레이드 등을 참조) 생성한 동상은 유닛 목록에 추가한다.
+     * 불러온 유저 데이터를 토대로 동상을 생성한다. (유저 데이터의 남아있는 동상의 갯수, 체력, 업그레이드 등을 참조) 생성한 동상은
+     * 유닛 목록에 추가한다.
      */
-    arTestUnits.add(new Statue(180, 120, AppManager.getInstance().getBitmap("statue1")));
+    arTestUnits.add(new Statue(500, 300, AppManager.getInstance().getBitmap("statue1")));
   }
 
-  public void initState(Resources res) {
-    this.res = res;
+  public void initState() {
     makeFace();
     createMobs();
   }
@@ -96,6 +89,22 @@ public class GameState {
     return worldTime;
   }
 
+  /**
+   * 터치로 입력받은 게임 좌표를 통해서 유닛을 가져온다. 만약, 해당 좌표에 여러 유닛이 걸쳐져 있으면 게임 상에 늦게 추가된 순서로
+   * 우선순위가 있다.
+   * 
+   * @param x 게임 x 좌표
+   * @param y 게임 y 좌표
+   * @return 주어진 게임 좌표 위에 유닛이 있다면 해당 유닛, 없으면 null을 반환한다.
+   */
+  public Unit getUnit(int x, int y) {
+    for (Unit unit : arTestUnits) {
+      if ((unit.x < x && x < unit.x + unit.width) && (unit.y < y && y < unit.y + unit.height))
+        return unit;
+    }
+    return null;
+  }
+
   public LinkedList<Unit> getUnits() {
     return arTestUnits;
   }
@@ -119,7 +128,7 @@ public class GameState {
   }
 
   public void createMobs() {
-    for (int i = 0; i < MAX_MOP; i++)
+    for (int i = 0; i < MAX_MOB; i++)
       // 여기서는 10마리까지지만 실제로는 파일입력을 통해서
       Mobs.add(new Mob(90, 90, mImgMob, wave));
   }
