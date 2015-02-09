@@ -18,17 +18,17 @@ public class Mob extends Unit implements Movable, Attackable
      */
     private int    hp;
     /**
-     * 이동할 거리
+     * 이동속도
      */
-    private int    speed;
-    /**
-     * 공격력
-     */
-    private int    damage;
+    private int    moveSpeed;
     /**
      * 공격속도
      */
     private float  attackSpeed;
+    /**
+     * 공격력
+     */
+    private int    damage;
     /**
      * 방어력
      */
@@ -38,9 +38,10 @@ public class Mob extends Unit implements Movable, Attackable
      */
     private int    range;
     /**
-     * 웨이브
+     * 웨이브 번호
      */
     private int    wave;
+
     /**
      * 몹이 생성 되었는가
      */
@@ -72,7 +73,7 @@ public class Mob extends Unit implements Movable, Attackable
         this.wave = wave;
         beforeTime = System.currentTimeMillis();
 
-        speed = 1;
+        moveSpeed = 1;
         range = 400;
 
         oldX = x;
@@ -113,28 +114,28 @@ public class Mob extends Unit implements Movable, Attackable
             lap++;
 
         // 아래로
-        if (x == oldX && y + speed <= 2160 - 900)
+        if (x == oldX && y + moveSpeed <= 2160 - 900)
         {
-            y += speed;
-            cntrY += speed;
+            y += moveSpeed;
+            cntrY += moveSpeed;
         }
         // 오른쪽
-        else if (x + speed <= 3840 - 1500 && y == 2160 - 900)
+        else if (x + moveSpeed <= 3840 - 1500 && y == 2160 - 900)
         {
-            x += speed;
-            cntrX += speed;
+            x += moveSpeed;
+            cntrX += moveSpeed;
         }
         // 위로
-        else if (x == 3840 - 1500 && y - speed >= oldY)
+        else if (x == 3840 - 1500 && y - moveSpeed >= oldY)
         {
-            y -= speed;
-            cntrY -= speed;
+            y -= moveSpeed;
+            cntrY -= moveSpeed;
         }
         // 왼쪽
-        else if (x - speed >= oldX && y == oldY)
+        else if (x - moveSpeed >= oldX && y == oldY)
         {
-            x -= speed;
-            cntrX -= speed;
+            x -= moveSpeed;
+            cntrX -= moveSpeed;
         }
 
     }
