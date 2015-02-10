@@ -62,6 +62,8 @@ public final class R {
         public static final int naruto09=0x7f020027;
         public static final int naruto10=0x7f020028;
         public static final int naruto11=0x7f020029;
+        public static final int progressbar=0x7f02002a;
+        public static final int progressbar_health=0x7f02002b;
     }
     public static final class id {
         public static final int back=0x7f090001;
@@ -80,6 +82,7 @@ public final class R {
         public static final int grouplist=0x7f090014;
         public static final int helpTextView=0x7f090013;
         public static final int loading=0x7f090012;
+        public static final int progressbar=0x7f090022;
         public static final int set_credits_btn=0x7f090018;
         public static final int set_help_btn=0x7f090016;
         public static final int set_quit_btn=0x7f090019;
