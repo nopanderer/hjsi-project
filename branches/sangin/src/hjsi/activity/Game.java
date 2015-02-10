@@ -23,7 +23,7 @@ import android.widget.ToggleButton;
 public class Game extends Base implements OnClickListener {
   private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
 
-  Button btnSetting, btnBook, btnStore;
+  Button btnSetting, btnBook, btnStore, btnDeploy;
   ToggleButton btnPlay;
   Drawable drawableBtnPlay_Pause;
   Drawable drawableBtnPlay_Play;
@@ -49,7 +49,7 @@ public class Game extends Base implements OnClickListener {
     /*
      * surfaceview 생성 및 등록
      */
-    GameSurface gameView = new GameSurface(this, camera);
+    GameSurface gameView = new GameSurface(getApplicationContext(), camera);
     setContentView(gameView);
 
     /*
@@ -65,9 +65,15 @@ public class Game extends Base implements OnClickListener {
     drawableBtnPlay_Play = getResources().getDrawable(R.drawable.btn_play);
 
     btnSetting = (Button) findViewById(R.id.btn_setting);
+    btnSetting.setOnClickListener(this);
     btnBook = (Button) findViewById(R.id.btn_book);
+    btnBook.setOnClickListener(this);
     btnPlay = (ToggleButton) findViewById(R.id.btn_play);
+    btnPlay.setOnClickListener(this);
     btnStore = (Button) findViewById(R.id.btn_store);
+    btnStore.setOnClickListener(this);
+    btnDeploy = (Button) findViewById(R.id.btn_deploy);
+    btnDeploy.setOnClickListener(this);
 
     dlgSetting = new DlgSetting(Game.this);
     dlgSetting.setCanceledOnTouchOutside(false);
@@ -80,15 +86,9 @@ public class Game extends Base implements OnClickListener {
       }
     });
 
-    btnSetting.setOnClickListener(this);
-    btnBook.setOnClickListener(this);
-    btnPlay.setOnClickListener(this);
-    btnStore.setOnClickListener(this);
-
     Game.music = MediaPlayer.create(this, R.raw.bgm);
     Game.music.setLooping(true);
     Game.music.start();
-
 
     /* GameMaster 생성 */
     gameMaster = new GameMaster();
@@ -179,6 +179,11 @@ public class Game extends Base implements OnClickListener {
     } else if (v == btnStore) {
       Intent Store = new Intent(Game.this, Store.class);
       startActivity(Store);
+    } else if (v == btnDeploy) {
+      if (GameState.getInstance().checkDeployMode() == false)
+        GameState.getInstance().intoDeployMode();
+      else
+        GameState.getInstance().inHand = null;
     }
   }
 

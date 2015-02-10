@@ -8,14 +8,15 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.util.TypedValue;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 /**
- * 게임 내용(맵, 타워, 투사체 등)을 그려줄 서피스뷰 클래스이다. 쓰레드 사용해서 canvas에 그림을 그릴 수 있는 유일한 방법이다. 때문에 게임에선 거의 서피스뷰를
- * 사용한다고 한다. 내부적으로 더블버퍼링을 사용한다. 시스템 UI는 Game 액티비티에서 처리하고(Button 등), 게임 자체를 위한 UI(타워 선택, 카메라 이동 등)
- * 이벤트는 이 클래스에서 처리한다.
+ * 게임 내용(맵, 타워, 투사체 등)을 그려줄 서피스뷰 클래스이다. 쓰레드 사용해서 canvas에 그림을 그릴 수 있는 유일한 방법이다.
+ * 때문에 게임에선 거의 서피스뷰를 사용한다고 한다. 내부적으로 더블버퍼링을 사용한다. 시스템 UI는 Game 액티비티에서
+ * 처리하고(Button 등), 게임 자체를 위한 UI(타워 선택, 카메라 이동 등) 이벤트는 이 클래스에서 처리한다.
  */
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, Runnable {
   /* 서피스뷰 그리기에 필요한 객체 및 변수 */
@@ -32,15 +33,40 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   private Paint mPaintInfo; // 텍스트 출력용 페인트 객체
   private int mFps; // 그리기 fps
 
+  /**
+   * 배치모드에서 격자 그리기용 페인트
+   */
+  private Paint gridPaint;
+
+  /**
+   * GameSurface 생성자
+   * 
+   * @param context getApplicationContext()를 이용하여 컨텍스트 객체를 넣어주셈
+   * @param camera 카메라
+   */
   public GameSurface(Context context, Camera camera) {
     super(context);
     this.camera = camera;
 
-    /*
-     * 홀더를 가져와서 Callback 인터페이스를 등록한다. 구현한 각 콜백은 surface의 변화가 있을 때마다 호출된다. 서피스뷰를 가진 액티비티가 화면에 보일 때
-     * created(), changed() 호출 화면에서 보이지 않을 때 destroyed() 호출 가로, 세로 전환될 때도 changed() 호출 될거고...
-     */
-    getHolder().addCallback(this); // SurfaceHolder.Callback 구현한 메소드를 등록하는 것
+    // 게임 내 변수 출력용 페인트 객체 생성
+    mPaintInfo = new Paint();
+    mPaintInfo.setAntiAlias(true);
+    mPaintInfo.setTextSize(TypedValue
+        .applyDimension(TypedValue.COMPLEX_UNIT_SP, 14, getResources().getDisplayMetrics()));
+
+    // displayInformation용 좌표값
+    xForText = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 52, getResources().getDisplayMetrics());
+    yForText = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources().getDisplayMetrics());
+
+    // 배치모드 표시용 페인트 객체 생성
+    gridPaint = new Paint();
+    gridPaint.setAntiAlias(true);
+    gridPaint.setStyle(Style.STROKE);
+    gridPaint.setStrokeWidth(3);
+    gridPaint.setColor(Color.RED);
+
+    // 홀더를 가져와서 Callback 인터페이스를 등록한다. 구현한 각 콜백은 surface의 변화가 있을 때마다 호출된다.
+    getHolder().addCallback(this);
   }
 
   /* SurfaceHolder.Callback 구현 */
@@ -48,8 +74,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   public void surfaceCreated(SurfaceHolder holder) {
     AppManager.printSimpleLog();
     /*
-     * 표면이 생성될 때 그리기 스레드를 시작한다. 표면은 아마 화면상에 실제로 보이는 그림을 말하는 것 같다. lockCanvas() 할 때 뱉어내는 캔버스가 더블버퍼링을
-     * 위한 메모리 상의 캔버스인 것 같고
+     * 표면이 생성될 때 그리기 스레드를 시작한다. 표면은 아마 화면상에 실제로 보이는 그림을 말하는 것 같다. lockCanvas() 할
+     * 때 뱉어내는 캔버스가 더블버퍼링을 위한 메모리 상의 캔버스인 것 같고
      */
     mThreadPainter = new Thread(this);
     mIsRunning = true;
@@ -66,8 +92,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   public void surfaceDestroyed(SurfaceHolder holder) {
     AppManager.printSimpleLog();
     /*
-     * 표면이 파괴되기 직전에 그리기를 중지한다. 이 콜백이 끝나면 완전히 파괴된다. 파괴된 후에도 스레드가 죽지않으면 canvas에 그리기를 시도할 경우 에러가 난다.
-     * 조건문 false를 한다고 스레드가 바로 멈추는 건 아님 그래서 join을 통해 그리기 스레드가 끝날 때까지 표면 파괴를 늦춘다.
+     * 표면이 파괴되기 직전에 그리기를 중지한다. 이 콜백이 끝나면 완전히 파괴된다. 파괴된 후에도 스레드가 죽지않으면 canvas에
+     * 그리기를 시도할 경우 에러가 난다. 조건문 false를 한다고 스레드가 바로 멈추는 건 아님 그래서 join을 통해 그리기 스레드가
+     * 끝날 때까지 표면 파괴를 늦춘다.
      */
     mIsRunning = false;
     try {
@@ -111,6 +138,16 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
 
         /* 맵 배경을 그린다. */
         canvas.drawBitmap(AppManager.getInstance().getBitmap("background"), 0, 0, null);
+
+        // 배치에 필요한 UI를 그린다.
+        if (GameState.getInstance().checkDeployMode()) {
+          int cellX = 96, cellY = 72;
+          for (int i = 0; i * cellX < 1920; i++) {
+            for (int j = 0; j * cellY < 1080; j++) {
+              canvas.drawRect(i * cellX, j * cellY, (i + 1) * cellX, (j + 1) * cellY, gridPaint);
+            }
+          }
+        }
 
         /**
          * game 오브젝트를 그린다
@@ -172,33 +209,15 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   @SuppressLint("DefaultLocale")
   private void displayInformation(Canvas canvas) {
     // 현재 메모리 정보 출력용
-    long totMem = 0L;
-    long allocMem;
-
-    if (mPaintInfo == null) {
-      mPaintInfo = new Paint();
-      mPaintInfo.setAntiAlias(true);
-      mPaintInfo.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14,
-          getResources().getDisplayMetrics()));
-
-      xForText =
-          (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 52, getResources()
-              .getDisplayMetrics());
-      yForText =
-          (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources()
-              .getDisplayMetrics());
-
-    }
-    totMem = (long) (Runtime.getRuntime().maxMemory() / 1024f / 1024f + 0.5f);
-    allocMem =
+    long totMem = (long) (Runtime.getRuntime().maxMemory() / 1024f / 1024f + 0.5f);;
+    long allocMem =
         (long) ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024f / 1024f + 0.5f);
 
     canvas.save();
     /*
      * 그리기 fps 출력
      */
-    canvas.drawText(mFps + " fps (" + AppManager.getInstance().getLogicFps() + " fps)", xForText,
-        yForText, mPaintInfo);
+    canvas.drawText(mFps + " fps (" + AppManager.getInstance().getLogicFps() + " fps)", xForText, yForText, mPaintInfo);
 
     /*
      * 카메라 좌상단 좌표 (논리적인 기준점) 출력
@@ -211,8 +230,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 메모리 정보 표시
      */
     canvas.translate(0, yForText);
-    canvas.drawText("Used Memory: " + allocMem + " / " + totMem + "MB", xForText, yForText,
-        mPaintInfo);
+    canvas.drawText("Used Memory: " + allocMem + " / " + totMem + "MB", xForText, yForText, mPaintInfo);
 
     /*
      * 게임 시계 출력

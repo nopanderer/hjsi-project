@@ -18,8 +18,14 @@ public class Camera {
   /*
    * 카메라 확대/축소 배율에 대한 상수
    */
-  private final float maxZoom = 2.0f; // 최대 화면 배율
-  private final float minZoom = 0.5f; // 최소 화면 배율
+  /**
+   * 화면 최대 배율
+   */
+  private final float maxZoom = 2.0f;
+  /**
+   * 최소 화면 배율
+   */
+  private final float minZoom = 1.0f;
   private final float zoomStep = 0.01f; // 화면 배율 증감 단위 (+-1%)
 
   /*
@@ -79,7 +85,7 @@ public class Camera {
    * 카메라 줌에 필요한 변수
    */
   private float oldDistance; // 두 포인터 간의 거리
-  private float zoom = 1.0f; // 현재 화면 배율
+  private float zoom = 1.5f; // 현재 화면 배율
   private PointF midRatio = new PointF(); // 줌 터치한 중심점의 화면상의 백분율
 
   /*
@@ -93,7 +99,7 @@ public class Camera {
 
   public Camera(float factor) {
     position = new Point(0, 0);
-    worldRect = new Rect(0, 0, (int) (3840 * factor + 0.5f), (int) (2160 * factor + 0.5f));
+    worldRect = new Rect(0, 0, (int) (1920 * factor + 0.5f), (int) (1080 * factor + 0.5f));
     int margin = (int) (125 * factor + 0.5f);
     worldMargin = new Rect(margin, margin, margin, margin);
   }
@@ -142,10 +148,16 @@ public class Camera {
     return worldRect.bottom;
   }
 
+  /**
+   * @return worldRect.left - (int) (worldMargin.left / zoom)
+   */
   private int getLeftLimit() {
     return worldRect.left - (int) (worldMargin.left / zoom);
   }
 
+  /**
+   * @return worldRect.right + (int) (worldMargin.right / zoom)
+   */
   private int getRightLimit() {
     return worldRect.right + (int) (worldMargin.right / zoom);
   }
@@ -396,14 +408,14 @@ public class Camera {
     // 가로 범위를 벗어났는지 체크한다.
     if (position.x < getLeftLimit()) {
       outDirection = OUT_LEFT;
-    } else if (position.x + (int) getWidthScaled() > getRightLimit()) {
+    } else if ((position.x + viewport.width()) / zoom > getRightLimit()) {
       outDirection = OUT_RIGHT;
     }
 
     // 세로 범위를 벗어났는지 체크한다.
     if (position.y < getTopLimit()) {
       outDirection |= OUT_TOP;
-    } else if (position.y + (int) getHeightScaled() > getBottomLimit()) {
+    } else if ((position.y + viewport.height()) / zoom > getBottomLimit()) {
       outDirection |= OUT_BOTTOM;
     }
 

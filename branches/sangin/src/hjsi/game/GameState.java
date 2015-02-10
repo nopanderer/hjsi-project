@@ -16,6 +16,15 @@ import android.graphics.BitmapFactory.Options;
 public class GameState {
   private static GameState uniqueInstance;
   /**
+   * 아직 자리가 확정되지 않은 배치할 타워를 가리킨다. null이 아니라면 게임 화면이 배치모드로 표시된다.
+   */
+  public Tower inHand = null;
+  /**
+   * 게임 상에 배치되어 있는 타워를 표로 갖고 있다.
+   */
+  private Tower[][] towerTable = new Tower[8][10];
+
+  /**
    * 현재 게임이 진행된 시간을 나타낸다.
    */
   private volatile long worldTime = 0L;
@@ -83,6 +92,28 @@ public class GameState {
     synchronized (GameState.class) {
       GameState.uniqueInstance = null;
     }
+  }
+
+  /**
+   * 게임을 배치모드로 전환하고 랜덤으로 타워를 생성하여 반환한다.
+   * 
+   * @returns 토큰이 충분하다면 true를 반환하고, 토큰이 부족하다면 false를 반환한다.
+   */
+  public boolean intoDeployMode() {
+    // 1. 유저 정보에서 가지고 있는 토큰 수를 확인한다. 부족하면 false를 반환한다.
+    // 2. 토큰 수에 알맞은 등급의 임의의 타워를 생성한다.
+    // 타워 구매 도우미(팩토리 클래스)를 이용해서 타워를 생성한다.
+    inHand = new Tower();
+    return true;
+  }
+
+  /**
+   * 배치모드 여부를 반환한다.
+   * 
+   * @return 현재 배치할 타워가 있으면 true, 없으면 false를 반환한다.
+   */
+  public boolean checkDeployMode() {
+    return (inHand != null);
   }
 
   public long getWorldTime() {
