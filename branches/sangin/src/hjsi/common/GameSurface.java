@@ -164,6 +164,17 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
             mob.draw(canvas);
         }
 
+        /*
+         * 타워 그리기
+         */
+        GameState.getInstance().tower.draw(canvas);
+
+        /*
+         * 투사체 그리기
+         */
+        for (int i = 0; i < GameState.getInstance().projs.size(); i++)
+          GameState.getInstance().projs.get(i).draw(canvas);
+
         // 게임의 유닛들을 그린다.
         for (Unit unit : GameState.getInstance().getUnits()) {
           // 1. 보이는지 검사
@@ -172,6 +183,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
           unit.draw(canvas);
           // }
 
+
           /*
            * 스레드 종료가 필요한 경우 최대한 빨리 끝내기 위해 그림을 그리는 도중에도 스레드 종료 조건을 검사한다.
            */
@@ -179,6 +191,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
             break;
           }
         }
+
+
         canvas.restore(); // 이동, 확대/축소했던 캔버스를 원상태로 복원
 
         // 테스트 정보 표시

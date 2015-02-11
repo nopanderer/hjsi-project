@@ -37,13 +37,21 @@ public class GameState {
    */
   LinkedList<Unit> arTestUnits = new LinkedList<Unit>();
   LinkedList<Mob> Mobs = new LinkedList<Mob>();
+  /**
+   * 투사체 리스트
+   */
+  public LinkedList<Projectile> projs = new LinkedList<Projectile>();
 
   public Bitmap mImgMob; // 몹 비트맵
   public long beforeRegen = System.currentTimeMillis(); // 리젠하기 전 시간
+  public long pBeforeRegen = System.currentTimeMillis(); // 리젠하기 전 시간
   public long regen = 1000; // create mob per 1 sec
   public int usedMob = 0; // 몹이 실제로 생성된(내부적 카운터 위해)
   public int deadMob = 0; // 죽은 몹
   public int curMob = 0; // 현재 몹
+
+  public Tower tower;
+
 
   public static final int MAX_MOB = 10;
 
@@ -67,6 +75,7 @@ public class GameState {
      * 유닛 목록에 추가한다.
      */
     arTestUnits.add(new Statue(500, 300, AppManager.getInstance().getBitmap("statue1")));
+    tower = new Tower(367, 467, AppManager.getInstance().getBitmap("tower1"));
   }
 
   public void initState() {
@@ -182,5 +191,9 @@ public class GameState {
 
   public LinkedList<Mob> getMobs() {
     return Mobs;
+  }
+
+  public LinkedList<Projectile> getProjs() {
+    return projs;
   }
 }
