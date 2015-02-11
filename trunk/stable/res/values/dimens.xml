@@ -1,0 +1,7 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="fontsize_btn_back">20sp</dimen>
+    <dimen name="padding_picturebook_list">20dp</dimen>
+
+</resources>
