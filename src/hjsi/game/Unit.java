@@ -77,9 +77,19 @@ public abstract class Unit {
     canvas.drawCircle(cntrX, cntrY, range, circle);
   }
 
+  /**
+   * 체력바를 그려주는 메소드
+   * 
+   * @param hpMax
+   * @param hp
+   * @param canvas
+   */
   public void showHealthBar(int hpMax, int hp, Canvas canvas) {
     Paint paint = new Paint();
     paint.setColor(Color.GREEN);
+
+    /* 체력량에 따라 체력바 길이가 결정 */
+    float healthScale;
 
     canvas.drawRect(x, y - 10, x + width, y - 5, paint);
   }

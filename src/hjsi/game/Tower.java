@@ -68,20 +68,26 @@ public class Tower extends Unit implements Attackable {
 
   @Override
   public void attack() {
-    // TODO Auto-generated method stub
     if (System.currentTimeMillis() - beforeTime > attackSpeed)
       beforeTime = System.currentTimeMillis();
     else
       return;
-    for (int i = 0; i < GameState.getInstance().Mobs.size(); i++) {
-      if (GameState.getInstance().Mobs.get(i).created == false)
-        continue;
+    for (int i = 0; i < GameState.getInstance().units.size(); i++) {
 
-      else if ((int) Math.sqrt(Math.pow(GameState.getInstance().Mobs.get(i).cntrX - this.cntrX, 2)
-          + Math.pow(GameState.getInstance().Mobs.get(i).cntrY - this.cntrY, 2)) <= range) {
-        GameState.getInstance().projs.add(new Projectile(cntrX, cntrY, damage, i, AppManager
-            .getInstance().getBitmap("proj1")));
-        break;
+      if (GameState.getInstance().units.get(i) instanceof Mob) {
+
+        Mob mob;
+        mob = (Mob) GameState.getInstance().units.get(i);
+
+        if (mob.created == false)
+          continue;
+
+        else if ((int) Math.sqrt(Math.pow(mob.cntrX - this.cntrX, 2)
+            + Math.pow(mob.cntrY - this.cntrY, 2)) <= range) {
+          GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, mob, AppManager
+              .getInstance().getBitmap("proj1")));
+          break;
+        }
       }
     }
 
