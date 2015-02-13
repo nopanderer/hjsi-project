@@ -49,51 +49,84 @@ public class GameMaster implements Runnable {
         }
 
         /*
-         * 게임 로직 실행
+         * 유닛 루프 시작
          */
         for (Unit unit : GameState.getInstance().getUnits()) {
-          unit.action();
-        }
+          /*
+           * 몹 시작
+           */
+          if (unit instanceof Mob) {
 
-        if (GameState.getInstance().usedMob < 10) {
-          GameState.getInstance().addMob();
-        }
-        // 몹이 다 죽으면 새로운 웨이브 시작 및 정지
-        else if (GameState.getInstance().deadMob == 10) {
-          nextWave();
-          TimeManager.pauseTime();
-          pauseGame();
-          break;
-        }
+            if (GameState.getInstance().usedMob < 10) {
+              GameState.getInstance().addMob();
+            }
 
-        for (Mob mob : GameState.getInstance().getMobs()) {
-          // 몹이 죽지 않았고 1바퀴 돌았으면
-          if (mob.lap == 2 && mob.dead == false) {
-            mob.dead = true;
-            GameState.getInstance().curMob--;
-            GameState.getInstance().deadMob++;
-            continue;
+            else if (GameState.getInstance().deadMob == 10) {
+              nextWave();
+              TimeManager.pauseTime();
+              pauseGame();
+              break;
+            }
+
+            else {
+              Mob mob;
+              mob = (Mob) unit;
+              if (mob.lap == 2 && mob.dead == false) {
+                mob.dead = true;
+                GameState.getInstance().curMob--;
+                GameState.getInstance().deadMob++;
+                continue;
+              }
+
+              // 몹이 생성되어 있다면 이동
+              else if (mob.created)
+                mob.move();
+            }
           }
+          /*
+           * 몹 끝
+           */
 
-          // 몹이 생성되어 있다면 이동
-          else if (mob.created)
-            mob.move();
-        }
+          /*
+           * 동상 시작
+           */
+          else if (unit instanceof Statue) {
+            unit.action();
+          }
+          /*
+           * 동상 끝
+           */
 
-        /*
-         * 몹이 타워 사정거리에 들어오면 일정 시간마다 투사체 생성
-         */
-        GameState.getInstance().tower.attack();
-        /*
-         * 투사체 전체 돌면서 몹을 향해 이동. 맞으면 사라짐
-         */
-        for (int i = 0; i < GameState.getInstance().projs.size(); i++) {
-          GameState.getInstance().projs.get(i).move();
-          /* 투사체가 몹과 충돌한다면 */
-          if (GameState.getInstance().projs.get(i).isHit)
-            GameState.getInstance().projs.remove(i);
+          /*
+           * 타워 시작
+           */
+          else if (unit instanceof Tower) {
+            ((Tower) unit).attack();
+          }
+          /*
+           * 타워 끝
+           */
+
+          /*
+           * 투사체 시작
+           */
+          else if (unit instanceof Projectile) {
+            Projectile proj;
+            proj = (Projectile) unit;
+            proj.move();
+
+            /* 투사체가 몹과 충돌한다면 */
+            if (proj.isHit)
+              GameState.getInstance().units.remove(proj);
+          }
+          /*
+           * 투사체 끝
+           */
+
         }
-        // TODO Auto-generated method stub
+        /*
+         * 유닛 루프 끝
+         */
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
         fpsRealFps++;
@@ -106,11 +139,13 @@ public class GameMaster implements Runnable {
         }
       }
 
-      // 게임이 일시정지 중일 땐 인게임 스레드의 cpu time을 양보시킨다.
-      Thread.yield();
     }
+
+    // 게임이 일시정지 중일 땐 인게임 스레드의 cpu time을 양보시킨다.
+    Thread.yield();
     AppManager.printDetailLog("GameMaster 스레드 종료.");
   }
+
 
   /**
    * 게임을 종료할 때 호출한다. 게임 진행 스레드를 완전히 종료시킨다.

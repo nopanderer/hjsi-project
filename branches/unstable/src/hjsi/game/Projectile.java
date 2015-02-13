@@ -11,9 +11,9 @@ import android.graphics.Bitmap;
 public class Projectile extends Unit implements Movable {
 
   /**
-   * 목표로 한 몹의 인덱스
+   * 타겟 몹
    */
-  private int target;
+  Mob targetMob;
   /**
    * 투사체 속도
    */
@@ -43,12 +43,13 @@ public class Projectile extends Unit implements Movable {
   private static final int ICED = 5;
   private static final int CHAIN = 6;
 
-  public Projectile(int x, int y, int damage, int target, Bitmap face) {
+  public Projectile(int x, int y, int damage, Mob targetMob, Bitmap face) {
     super(x, y, face);
-    this.target = target;
+    this.targetMob = targetMob;
 
     moveSpeed = 3;
     isHit = false;
+    type = NORMAL;
 
     beforeTime = System.currentTimeMillis();
   }
@@ -61,59 +62,41 @@ public class Projectile extends Unit implements Movable {
       return;
 
     /* 충돌검사 */
-    if ((x >= targetX() && x <= targetXWidth()) && y >= targetY() && y <= targetYHeight()) {
+    if ((x >= targetMob.x && x <= targetXWidth()) && y >= targetMob.y && y <= targetYHeight()) {
       isHit = true;
-      GameState.getInstance().Mobs.get(target).hit(damage);
+      targetMob.hit(damage);
     }
 
     /* 유도 알고리즘 */
-    if (targetCntrX() < x) {
+    if (targetMob.cntrX < x) {
       x -= moveSpeed;
-      if (targetCntrY() < y)
+      if (targetMob.cntrY < y)
         y -= moveSpeed;
-      else if (targetCntrY() > y)
+      else if (targetMob.cntrY > y)
         y += moveSpeed;
     }
-    if (targetCntrX() > x) {
+    if (targetMob.cntrX > x) {
       x += moveSpeed;
-      if (targetCntrY() < y)
+      if (targetMob.cntrY < y)
         y -= moveSpeed;
-      else if (targetCntrY() > y)
+      else if (targetMob.cntrY > y)
         y += moveSpeed;
     }
-    if (targetCntrX() == x) {
-      if (targetCntrY() < y)
+    if (targetMob.cntrX == x) {
+      if (targetMob.cntrY < y)
         y -= moveSpeed;
-      else if (targetCntrY() > y)
+      else if (targetMob.cntrY > y)
         y += moveSpeed;
     }
 
-  }
-
-  private int targetX() {
-    return GameState.getInstance().Mobs.get(target).x;
-  }
-
-  private int targetY() {
-    return GameState.getInstance().Mobs.get(target).y;
-  }
-
-  private int targetCntrX() {
-    return GameState.getInstance().Mobs.get(target).cntrX;
-  }
-
-  private int targetCntrY() {
-    return GameState.getInstance().Mobs.get(target).cntrY;
   }
 
   private int targetXWidth() {
-    return GameState.getInstance().Mobs.get(target).x
-        + GameState.getInstance().Mobs.get(target).width;
+    return targetMob.x + targetMob.width;
   }
 
   private int targetYHeight() {
-    return GameState.getInstance().Mobs.get(target).y
-        + GameState.getInstance().Mobs.get(target).height;
+    return targetMob.y + targetMob.height;
   }
 
   @Override
