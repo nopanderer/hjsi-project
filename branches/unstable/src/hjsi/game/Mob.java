@@ -1,6 +1,7 @@
 package hjsi.game;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 
 /**
  * Mob 클래스
@@ -71,12 +72,21 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     this.wave = wave;
     beforeTime = System.currentTimeMillis();
 
+    hpMax = 100;
+    hp = hpMax;
+
     moveSpeed = 1;
     range = 400;
 
     oldX = x;
     oldY = y;
 
+  }
+
+  @Override
+  public void draw(Canvas canvas) {
+    super.draw(canvas);
+    showHealthBar(hpMax, hp, canvas);
   }
 
   /*
@@ -141,6 +151,6 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   @Override
   public void hit(int damage) {
     // TODO Auto-generated method stub
-
+    hp -= damage;
   }
 }

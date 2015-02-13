@@ -87,11 +87,11 @@ public class GameMaster implements Runnable {
         /*
          * 투사체 전체 돌면서 몹을 향해 이동. 맞으면 사라짐
          */
-        for (Projectile proj : GameState.getInstance().getProjs()) {
-          proj.move();
+        for (int i = 0; i < GameState.getInstance().projs.size(); i++) {
+          GameState.getInstance().projs.get(i).move();
           /* 투사체가 몹과 충돌한다면 */
-          if (proj.isHit)
-            GameState.getInstance().projs.remove(proj);
+          if (GameState.getInstance().projs.get(i).isHit)
+            GameState.getInstance().projs.remove(i);
         }
         // TODO Auto-generated method stub
 
