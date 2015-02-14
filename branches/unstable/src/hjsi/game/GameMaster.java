@@ -48,25 +48,24 @@ public class GameMaster implements Runnable {
           task = TimeManager.nextTask();
         }
 
+        /* 최대 유닛까지 몹 생성 */
+        if (GameState.getInstance().usedMob < GameState.MAX_MOB) {
+          GameState.getInstance().addMob();
+        }
+
+        /* 몹이 전부 죽으면 다음 스테이지 준비 */
+        else if (GameState.getInstance().deadMob == 10) {
+          GameState.getInstance().nextWave();
+          TimeManager.pauseTime();
+          pauseGame();
+        }
+
         /*
          * 유닛 루프 시작
          */
         for (int i = 0; i < GameState.getInstance().getUnits().size(); i++) {
-          /*
-           * 몹 시작
-           */
+          /* 임시유닛 */
           Unit unit = GameState.getInstance().getUnits().get(i);
-
-          if (GameState.getInstance().usedMob < GameState.getInstance().MAX_MOB) {
-            GameState.getInstance().addMob();
-          }
-
-          else if (GameState.getInstance().deadMob == 10) {
-            nextWave();
-            TimeManager.pauseTime();
-            pauseGame();
-            break;
-          }
 
           if (unit instanceof Mob) {
             Mob mob;
@@ -77,50 +76,23 @@ public class GameMaster implements Runnable {
               GameState.getInstance().deadMob++;
               continue;
             }
-
-            // 몹이 생성되어 있다면 이동
-            else
-              mob.move();
           }
-          /*
-           * 몹 끝
-           */
 
-          /*
-           * 동상 시작
-           */
           else if (unit instanceof Statue) {
             unit.action();
           }
-          /*
-           * 동상 끝
-           */
 
-          /*
-           * 타워 시작
-           */
-          else if (unit instanceof Tower) {
-            ((Tower) unit).attack();
-          }
-          /*
-           * 타워 끝
-           */
-
-          /*
-           * 투사체 시작
-           */
-          else if (unit instanceof Projectile) {
-            Projectile proj;
-            proj = (Projectile) unit;
-            proj.move();
+          if (unit instanceof Movable) {
+            ((Movable) unit).move();
 
             /* 투사체가 몹과 충돌한다면 */
-            if (proj.isHit)
-              GameState.getInstance().units.remove(proj);
+            if (unit instanceof Projectile && ((Projectile) unit).isHit)
+              GameState.getInstance().units.remove(unit);
           }
-          /*
-           * 투사체 끝
-           */
+
+          if (unit instanceof Attackable) {
+            ((Attackable) unit).attack();
+          }
 
         }
         /*
@@ -144,7 +116,6 @@ public class GameMaster implements Runnable {
     Thread.yield();
     AppManager.printDetailLog("GameMaster 스레드 종료.");
   }
-
 
   /**
    * 게임을 종료할 때 호출한다. 게임 진행 스레드를 완전히 종료시킨다.
@@ -182,16 +153,4 @@ public class GameMaster implements Runnable {
     running = false;
   }
 
-  public void nextWave() {
-    GameState gameState = GameState.getInstance();
-
-    gameState.destroyMob();
-    gameState.wave++;
-    // 새로운 비트맵 추가
-    gameState.makeFace();
-    // init(임시)
-    gameState.curMob = 0;
-    gameState.usedMob = 0;
-    gameState.deadMob = 0;
-  }
 }
