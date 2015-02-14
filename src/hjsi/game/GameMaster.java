@@ -51,37 +51,36 @@ public class GameMaster implements Runnable {
         /*
          * 유닛 루프 시작
          */
-        for (Unit unit : GameState.getInstance().getUnits()) {
+        for (int i = 0; i < GameState.getInstance().getUnits().size(); i++) {
           /*
            * 몹 시작
            */
+          Unit unit = GameState.getInstance().getUnits().get(i);
+
+          if (GameState.getInstance().usedMob < GameState.getInstance().MAX_MOB) {
+            GameState.getInstance().addMob();
+          }
+
+          else if (GameState.getInstance().deadMob == 10) {
+            nextWave();
+            TimeManager.pauseTime();
+            pauseGame();
+            break;
+          }
+
           if (unit instanceof Mob) {
-
-            if (GameState.getInstance().usedMob < 10) {
-              GameState.getInstance().addMob();
+            Mob mob;
+            mob = (Mob) unit;
+            if (mob.lap == 2 && mob.dead == false) {
+              mob.dead = true;
+              GameState.getInstance().curMob--;
+              GameState.getInstance().deadMob++;
+              continue;
             }
 
-            else if (GameState.getInstance().deadMob == 10) {
-              nextWave();
-              TimeManager.pauseTime();
-              pauseGame();
-              break;
-            }
-
-            else {
-              Mob mob;
-              mob = (Mob) unit;
-              if (mob.lap == 2 && mob.dead == false) {
-                mob.dead = true;
-                GameState.getInstance().curMob--;
-                GameState.getInstance().deadMob++;
-                continue;
-              }
-
-              // 몹이 생성되어 있다면 이동
-              else if (mob.created)
-                mob.move();
-            }
+            // 몹이 생성되어 있다면 이동
+            else
+              mob.move();
           }
           /*
            * 몹 끝
@@ -190,8 +189,6 @@ public class GameMaster implements Runnable {
     gameState.wave++;
     // 새로운 비트맵 추가
     gameState.makeFace();
-    // 새로운 몹 생성
-    gameState.createMobs();
     // init(임시)
     gameState.curMob = 0;
     gameState.usedMob = 0;
