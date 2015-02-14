@@ -17,25 +17,12 @@ import android.database.sqlite.SQLiteOpenHelper;
  * SQLite 데이터베이스를 생성하거나 불러온다.
  */
 public class AppDatabaseHelper extends SQLiteOpenHelper {
-  private final static String TABLE_NAME = "";
+  private final static String[] TABLE_LIST = {"userdata", "tower"};
 
-  /**
-   * @param context
-   * @param name
-   * @param factory
-   * @param version
-   */
   public AppDatabaseHelper(Context context, String name, CursorFactory factory, int version) {
     super(context, name, factory, version);
   }
 
-  /**
-   * @param context
-   * @param name
-   * @param factory
-   * @param version
-   * @param errorHandler
-   */
   public AppDatabaseHelper(Context context, String name, CursorFactory factory, int version,
       DatabaseErrorHandler errorHandler) {
     super(context, name, factory, version, errorHandler);
@@ -44,18 +31,51 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
   /*
    * (non-Javadoc)
    * 
-   * @see android.database.sqlite.SQLiteOpenHelper#onCreate(android.database.sqlite.SQLiteDatabase)
+   * @see
+   * android.database.sqlite.SQLiteOpenHelper#onCreate(android.database.sqlite
+   * .SQLiteDatabase)
    */
   @Override
   public void onCreate(SQLiteDatabase db) {
-    try {
+    AppManager.printSimpleLog();
+    String sql = null;
 
+    for (String tableName : TABLE_LIST) {
+      try {
+        sql = AppManager.getInstance().readTextFile("db/create_table_" + tableName + ".sql");
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+      if (sql != null) {
+        execSQL(db, sql);
+      }
+    }
+
+    // user data 초기화
+    execSQL(db, "insert into USER_DATA (_id, wave, gold, coin) values (1, 0, 1000, 3);");
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * android.database.sqlite.SQLiteOpenHelper#onUpgrade(android.database.sqlite
+   * .SQLiteDatabase, int, int)
+   */
+  @Override
+  public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    AppManager.printSimpleLog();
+  }
+
+  private void parseUnitTable() {
+    try {
       String[] keywords = {"statue", "tower", "mob"};
-      ArrayList<LinkedList<String>> linePerType =
-          new ArrayList<LinkedList<String>>(keywords.length);
+      ArrayList<LinkedList<String>> linePerType = new ArrayList<LinkedList<String>>(keywords.length);
 
       // 텍스트 한 덩이를 \n으로 줄로 나눔
-      String[] lines = AppManager.getInstance().readTextFile("db").split("\n");
+      String[] lines;
+      lines = AppManager.getInstance().readTextFile("db").split("\n");
 
       for (String line : lines) {
         line = line.trim();
@@ -79,25 +99,15 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
         linePerType.get(index).add(headString + tailString);
       }
-
-
-
-      db.execSQL("create table " + TABLE_NAME + " (");
     } catch (IOException e) {
       e.printStackTrace();
     }
-
-    AppManager.printDetailLog("새 DB가 생성되었습니다.");
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see android.database.sqlite.SQLiteOpenHelper#onUpgrade(android.database.sqlite.SQLiteDatabase,
-   * int, int)
-   */
-  @Override
-  public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    // TODO Auto-generated method stub
+  protected static void execSQL(SQLiteDatabase db, String sql) {
+    if (db != null) {
+      AppManager.printDetailLog(sql + " ---> query executed.");
+      db.execSQL(sql);
+    }
   }
 }

@@ -20,9 +20,9 @@ public class GameState {
    */
   public Tower inHand = null;
   /**
-   * 게임 상에 배치되어 있는 타워를 표로 갖고 있다.
+   * 게임 상에 배치되어 있는 타워 자리 표
    */
-  private Tower[][] towerTable = new Tower[8][10];
+  private boolean[][] deployTable = new boolean[8][10];
 
   /**
    * 현재 게임이 진행된 시간을 나타낸다.
@@ -117,7 +117,8 @@ public class GameState {
   }
 
   /**
-   * 터치로 입력받은 게임 좌표를 통해서 유닛을 가져온다. 만약, 해당 좌표에 여러 유닛이 걸쳐져 있으면 게임 상에 늦게 추가된 순서로 우선순위가 있다.
+   * 터치로 입력받은 게임 좌표를 통해서 유닛을 가져온다. 만약, 해당 좌표에 여러 유닛이 걸쳐져 있으면 게임 상에 늦게 추가된 순서로
+   * 우선순위가 있다.
    * 
    * @param x 게임 x 좌표
    * @param y 게임 y 좌표

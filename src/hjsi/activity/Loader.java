@@ -1,5 +1,6 @@
 package hjsi.activity;
 
+import hjsi.common.AppDatabase;
 import hjsi.common.AppManager;
 
 import java.io.IOException;
@@ -80,6 +81,11 @@ public class Loader extends Base {
     @Override
     public void run() {
       try {
+        /*
+         * 어플리케이션 최초 실행시, 사용할 데이터베이스를 구축해놓는다.
+         */
+        AppDatabase.loadDatabase(getApplicationContext(), 1);
+
         /*
          * 저장된 게임 진행 상태를 먼저 불러온다. 진행 상태를 토대로 앞으로 필요한 각종 리소스를 불러온다.
          */
