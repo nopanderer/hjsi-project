@@ -5,10 +5,25 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-/*
- * 게임 오브젝트의 기본이 되는 추상 클래스(가 될 예정)
+/**
+ * 게임 오브젝트의 기본이 되는 추상 클래스
  */
 public abstract class Unit {
+  public static final int TYPE_STATUE = 0;
+  public static final int TYPE_TOWER = 1;
+  public static final int TYPE_MOB = 2;
+  public static final int TYPE_ETC = 3;
+
+  /**
+   * 유닛의 종류를 나타내는 값. Unit.TYPE_XXXX
+   */
+  private int type;
+  /**
+   * 유닛의 종류별로 고유한 아이디. 즉, 유닛의 종류가 다를 경우 같은 아이디를 가질 수 있으며, 같은 id를 가지는 개체도 존재할 수
+   * 있음.
+   */
+  private int id;
+
   /*
    * 위치 및 크기 관련 변수
    */
@@ -24,12 +39,20 @@ public abstract class Unit {
   protected Bitmap face;
   private Paint paint;
 
-  /* 게임 속성 */
-  public Unit() {
-    // 임시 생성자
-  }
+  // 임시 생성자
+  public Unit() {}
 
-  public Unit(int x, int y, Bitmap face) {
+  /**
+   * @param type 유닛의 종류를 입력한다. -> Unit.TYPE_XXXX
+   * @param id 해당하는 종류 안에서 특정 유닛을 가리키는 정수 값
+   * @param x 이미지를 표시할 x 좌표
+   * @param y 이미지를 표시할 y 좌표
+   * @param face 화면에 표시할 이미지
+   */
+  public Unit(int type, int id, int x, int y, Bitmap face) {
+    this.type = type;
+    this.id = id;
+
     this.x = x;
     this.y = y;
     width = face.getWidth();
@@ -39,6 +62,24 @@ public abstract class Unit {
 
     this.face = face;
     paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+  }
+
+  /**
+   * 오버라이딩 금지.
+   * 
+   * @return 유닛의 타입을 의미하는 정수를 반환한다.
+   */
+  public final int getType() {
+    return type;
+  }
+
+  /**
+   * 오버라이딩 금지.
+   * 
+   * @return 유닛 타입별로 고유한 아이디를 나타내는 정수를 반환한다.
+   */
+  public final int getId() {
+    return id;
   }
 
   /**

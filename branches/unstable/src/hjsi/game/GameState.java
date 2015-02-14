@@ -1,12 +1,17 @@
 package hjsi.game;
 
+import hjsi.common.AppDatabaseHelper;
 import hjsi.common.AppManager;
 import hjsi.timer.TimeManager;
 import hjsi.timer.TimerRunnable;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 
@@ -16,14 +21,38 @@ import android.graphics.BitmapFactory.Options;
 public class GameState {
   private static GameState uniqueInstance;
   /**
+   * DB 도우미
+   */
+  private AppDatabaseHelper databaseHelper;
+  /**
+   * DB 파일명
+   */
+  private static final String DB_NAME = "ElementTD.db";
+  /**
+   * 마지막으로 클리어한 웨이브
+   */
+  private int userWave;
+  /**
+   * 보유 중인 골드
+   */
+  private int userGold;
+  /**
+   * 보유 중인 배치 코인
+   */
+  private int userCoin;
+
+  /**
    * 아직 자리가 확정되지 않은 배치할 타워를 가리킨다. null이 아니라면 게임 화면이 배치모드로 표시된다.
    */
   public Tower inHand = null;
   /**
-   * 게임 상에 배치되어 있는 타워 자리 표
+   * 타워가 차지하는 자리 크기 가로
    */
-  private boolean[][] deployTable = new boolean[8][10];
-
+  private static final int TOWER_SPACE_WIDTH = 96;
+  /**
+   * 타워가 차지하는 자리 크기 세로
+   */
+  private static final int TOWER_SPACE_HEIGHT = 96;
   /**
    * 현재 게임이 진행된 시간을 나타낸다.
    */
@@ -91,6 +120,72 @@ public class GameState {
   }
 
   /**
+   * 유저 데이터를 로드한다. 파일로 저장되어 있는 DB의 버전보다 새로 입력된 DB의 버전이 더 최신일 경우 DB도우미 클래스에서
+   * onUpdate를 호출한다.
+   */
+  public void loadDatabase(Context context, int version) {
+    databaseHelper = new AppDatabaseHelper(context, DB_NAME, null, version);
+    // 최초 실행시 DB 생성도 같이 됨
+    SQLiteDatabase db = databaseHelper.getReadableDatabase();
+
+    Cursor cursor = db.rawQuery("select * from USER_DATA where _id = 1", null);
+    while (cursor.moveToNext()) {
+      userWave = cursor.getInt(1);
+      userGold = cursor.getInt(2);
+      userCoin = cursor.getInt(3);
+      String towers = cursor.getString(4);
+      String recipes = cursor.getString(5);
+      String upgrades = cursor.getString(6);
+      AppManager.printDetailLog("wave: " + userWave + ", gold: " + userGold + ", coin: " + userCoin + ", towers: "
+          + towers);
+
+      // TODO 문자열 형태의 tower 목록을 파싱해서 units 리스트에 집어넣는다.
+    }
+    cursor.close();
+    db.close();
+  }
+
+  public void save() {
+    SQLiteDatabase db = databaseHelper.getWritableDatabase();
+  }
+
+  private void parseUnitTable() {
+    try {
+      String[] keywords = {"statue", "tower", "mob"};
+      ArrayList<LinkedList<String>> linePerType = new ArrayList<LinkedList<String>>(keywords.length);
+
+      // 텍스트 한 덩이를 \n으로 줄로 나눔
+      String[] lines;
+      lines = AppManager.getInstance().readTextFile("db").split("\n");
+
+      for (String line : lines) {
+        line = line.trim();
+
+        // 주석이나 빈 줄은 통과
+        if (line.startsWith("#") || line.length() <= 0) {
+          continue;
+        }
+
+        // 쉼표로 나눔
+        String[] tokens = line.split(",", 2);
+
+        int index = Integer.parseInt(tokens[0]);
+
+        // 이미지를 찾을 수 있는 형태를 만듦. ex) "statue" + "1"
+        String headString = keywords[index] + Integer.parseInt(tokens[1]);
+
+        String tailString = line.substring(line.indexOf(',') + 1);
+        tailString = tailString.substring(tailString.indexOf(','));
+
+
+        linePerType.get(index).add(headString + tailString);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
    * 게임을 배치모드로 전환하고 랜덤으로 타워를 생성하여 반환한다.
    * 
    * @returns 토큰이 충분하다면 true를 반환하고, 토큰이 부족하다면 false를 반환한다.
@@ -139,6 +234,23 @@ public class GameState {
    */
   public LinkedList<Unit> getUnits() {
     return units;
+  }
+
+  /**
+   * 전체 유닛 리스트에서 타워의 목록만 가져온다.
+   * 
+   * @return 타워가 들어있는 연결리스트 혹은 타워가 아예 없으면 null
+   */
+  private LinkedList<Tower> getTowers() {
+    LinkedList<Tower> towers = new LinkedList<Tower>();
+    for (Unit unit : units) {
+      if (unit.getType() == Unit.TYPE_TOWER) {
+        towers.add((Tower) unit);
+      }
+    }
+    if (towers.size() == 0)
+      towers = null;
+    return towers;
   }
 
   public void makeFace() {
