@@ -20,14 +20,17 @@ import android.view.MotionEvent;
  * 애플리케이션의 시스템적인 부분을 총괄하는 싱글턴 클래스
  */
 public class AppManager {
-  /*
-   * Fileds 시작
+  /**
+   * 자신의 유일한 인스턴스를 가지고 있는다.
    */
-  private static AppManager uniqueInstance; // 자신의 유일한 인스턴스를 가지고 있는다.
+  private static AppManager uniqueInstance;
   /**
    * 실행 중인 액티비티 목록
    */
   private LinkedList<Base> runningActivities;
+  /**
+   * 어플리케이션 애셋관리자의 참조를 가지고 있는다.
+   */
   private AssetManager assetManager;
   /**
    * 메모리에 로드된 비트맵 목록
