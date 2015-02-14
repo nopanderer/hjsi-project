@@ -65,12 +65,9 @@ public class GameState {
     /*
      * 동상 타워 추가
      */
+    makeFace();
     units.add(new Statue(500, 300, AppManager.getInstance().getBitmap("statue1")));
     units.add(new Tower(367, 467, AppManager.getInstance().getBitmap("tower1")));
-  }
-
-  public void initState() {
-    makeFace();
   }
 
   public static GameState getInstance() {
@@ -178,6 +175,17 @@ public class GameState {
       if (units.get(i) instanceof Mob)
         GameState.getInstance().units.remove(i);
 
+  }
+
+  public void nextWave() {
+    destroyMob();
+    wave++;
+    // 새로운 비트맵 추가
+    makeFace();
+    // init(임시)
+    curMob = 0;
+    usedMob = 0;
+    deadMob = 0;
   }
 
 }
