@@ -79,7 +79,7 @@ public class Tower extends Unit implements Attackable {
         Mob mob;
         mob = (Mob) GameState.getInstance().units.get(i);
 
-        if (mob.created == false)
+        if (mob == null)
           continue;
 
         else if ((int) Math.sqrt(Math.pow(mob.cntrX - this.cntrX, 2)

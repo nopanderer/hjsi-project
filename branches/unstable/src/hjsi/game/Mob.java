@@ -43,10 +43,6 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   private int wave;
 
   /**
-   * 몹이 생성 되었는가
-   */
-  public boolean created;
-  /**
    * 몹이 죽었는가
    */
   public boolean dead;
@@ -66,7 +62,6 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   public Mob(int x, int y, Bitmap face, int wave) {
     super(x, y, face);
 
-    created = false;
     dead = false;
     lap = 0;
     this.wave = wave;

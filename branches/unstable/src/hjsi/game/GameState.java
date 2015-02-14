@@ -71,7 +71,6 @@ public class GameState {
 
   public void initState() {
     makeFace();
-    createMobs();
   }
 
   public static GameState getInstance() {
@@ -162,23 +161,15 @@ public class GameState {
     AppManager.getInstance().addBitmap(key, mImgMob);
   }
 
-  public void createMobs() {
-    for (int i = 0; i < MAX_MOB; i++)
-      // 여기서는 10마리까지지만 실제로는 파일입력을 통해서
-      units.add(new Mob(90, 90, mImgMob, wave));
-  }
-
   public void addMob() {
     if (System.currentTimeMillis() - beforeRegen > regen)
       beforeRegen = System.currentTimeMillis();
     else
       return;
 
-    if (units.get(usedMob) instanceof Mob) {
-      ((Mob) units.get(usedMob)).created = true;
-      usedMob++;
-      curMob++;
-    }
+    units.add(new Mob(90, 90, mImgMob, wave));
+    usedMob++;
+    curMob++;
   }
 
   public void destroyMob() {

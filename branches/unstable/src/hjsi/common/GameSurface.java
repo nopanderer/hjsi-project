@@ -2,9 +2,6 @@ package hjsi.common;
 
 import hjsi.game.GameState;
 import hjsi.game.Mob;
-import hjsi.game.Projectile;
-import hjsi.game.Statue;
-import hjsi.game.Tower;
 import hjsi.game.Unit;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -160,7 +157,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
          */
 
         // 게임의 유닛들을 그린다.
-        for (Unit unit : GameState.getInstance().getUnits()) {
+        for (int i = 0; i < GameState.getInstance().getUnits().size(); i++) {
+          Unit unit = GameState.getInstance().getUnits().get(i);
           // 1. 보이는지 검사
           if (unit instanceof Mob) {
             Mob mob;
@@ -169,21 +167,12 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
               continue;
 
             // 보이므로 그린다
-            else if (mob.created)
+            else
               unit.draw(canvas);
           }
 
-          else if (unit instanceof Statue) {
+          else
             unit.draw(canvas);
-          }
-
-          else if (unit instanceof Tower) {
-            unit.draw(canvas);
-          }
-
-          else if (unit instanceof Projectile) {
-            unit.draw(canvas);
-          }
 
           /*
            * 스레드 종료가 필요한 경우 최대한 빨리 끝내기 위해 그림을 그리는 도중에도 스레드 종료 조건을 검사한다.
