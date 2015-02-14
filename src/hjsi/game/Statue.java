@@ -10,8 +10,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 
 /**
- * 체력, 공격속도 등과 같은 능력치는 변수 타입은 정수형이지만 소수점으로 생각하고 다룬다. float 계산의 성능과 정확성 때문이다. 예를 들면, 1초당 10.5의 체력을
- * 회복할 경우 변수에 들어갈 값은 1050이다.
+ * 체력, 공격속도 등과 같은 능력치는 변수 타입은 정수형이지만 소수점으로 생각하고 다룬다. float 계산의 성능과 정확성 때문이다. 예를
+ * 들면, 1초당 10.5의 체력을 회복할 경우 변수에 들어갈 값은 1050이다.
  */
 public class Statue extends Unit implements Hittable {
 
@@ -46,7 +46,7 @@ public class Statue extends Unit implements Hittable {
    *
    */
   public Statue(int x, int y, Bitmap face) {
-    super(x, y, face);
+    super(Unit.TYPE_STATUE, 0, x, y, face);
 
     hpRegen = 1500; // 1초당 1.5 재생 = 0.1초당 0.15 재생 = hpRegen 150
     hpMax = 1000000; // 1000.000

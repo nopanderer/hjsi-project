@@ -60,7 +60,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   private int oldX, oldY;
 
   public Mob(int x, int y, Bitmap face, int wave) {
-    super(x, y, face);
+    super(Unit.TYPE_MOB, 0, x, y, face);
 
     dead = false;
     lap = 0;

@@ -44,7 +44,7 @@ public class Projectile extends Unit implements Movable {
   private static final int CHAIN = 6;
 
   public Projectile(int x, int y, int damage, Mob targetMob, Bitmap face) {
-    super(x, y, face);
+    super(Unit.TYPE_ETC, 0, x, y, face);
     this.targetMob = targetMob;
 
     moveSpeed = 3;
