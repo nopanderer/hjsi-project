@@ -19,8 +19,7 @@ public abstract class Unit {
    */
   private int type;
   /**
-   * 유닛의 종류별로 고유한 아이디. 즉, 유닛의 종류가 다를 경우 같은 아이디를 가질 수 있으며, 같은 id를 가지는 개체도 존재할 수
-   * 있음.
+   * 유닛의 종류별로 고유한 아이디. 즉, 유닛의 종류가 다를 경우 같은 아이디를 가질 수 있으며, 같은 id를 가지는 개체도 존재할 수 있음.
    */
   private int id;
 
@@ -130,8 +129,8 @@ public abstract class Unit {
     paint.setColor(Color.GREEN);
 
     /* 체력량에 따라 체력바 길이가 결정 */
-    float healthScale;
+    float healthScale = (float) hp / hpMax;
 
-    canvas.drawRect(x, y - 10, x + width, y - 5, paint);
+    canvas.drawRect(x, y - 10, x + width * healthScale, y - 5, paint);
   }
 }
