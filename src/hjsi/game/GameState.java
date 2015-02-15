@@ -1,7 +1,7 @@
 package hjsi.game;
 
-import hjsi.common.AppDatabaseHelper;
 import hjsi.common.AppManager;
+import hjsi.common.DataManager;
 import hjsi.timer.TimeManager;
 import hjsi.timer.TimerRunnable;
 
@@ -9,10 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 
@@ -21,14 +17,6 @@ import android.graphics.BitmapFactory.Options;
  */
 public class GameState {
   private static GameState uniqueInstance;
-  /**
-   * DB 도우미
-   */
-  private AppDatabaseHelper databaseHelper;
-  /**
-   * DB 파일명
-   */
-  private static final String DB_NAME = "ElementTD.db";
   /**
    * 마지막으로 클리어한 웨이브
    */
@@ -116,53 +104,18 @@ public class GameState {
    */
   public void purgeGameState() {
     synchronized (GameState.class) {
-      save();
+      DataManager.save(uniqueInstance);
       GameState.uniqueInstance = null;
     }
   }
 
-  /**
-   * 유저 데이터를 로드한다. 파일로 저장되어 있는 DB의 버전보다 새로 입력된 DB의 버전이 더 최신일 경우 DB도우미 클래스에서
-   * onUpdate를 호출한다.
-   */
-  public void loadDatabase(Context context, int version) {
-    databaseHelper = new AppDatabaseHelper(context, DB_NAME, null, version);
-    // 최초 실행시 DB 생성도 같이 됨
-    SQLiteDatabase db = databaseHelper.getReadableDatabase();
-
-    Cursor cursor = db.rawQuery("select * from USER_DATA where _id = 1", null);
-    while (cursor.moveToNext()) {
-      userWave = cursor.getInt(1);
-      userGold = cursor.getInt(2);
-      userCoin = cursor.getInt(3);
-      String towers = cursor.getString(4);
-      String recipes = cursor.getString(5);
-      String upgrades = cursor.getString(6);
-      AppManager.printDetailLog("wave: " + userWave + ", gold: " + userGold + ", coin: " + userCoin + ", towers: "
-          + towers);
-
-      // TODO 문자열 형태의 tower 목록을 파싱해서 units 리스트에 집어넣는다.
+  public void setUserData(int wave, int gold, int coin, LinkedList<Tower> towers) {
+    userWave = wave;
+    userGold = gold;
+    userCoin = coin;
+    for (Tower tower : towers) {
+      units.add(tower);
     }
-    cursor.close();
-    db.close();
-  }
-
-  public void save() {
-    SQLiteDatabase db = databaseHelper.getWritableDatabase();
-
-    StringBuilder towers = new StringBuilder();
-    for (Tower tower : getTowers()) {
-      towers.append(tower.getId()).append(',');
-    }
-
-    ContentValues values = new ContentValues();
-    values.put("wave", userWave);
-    values.put("gold", userGold + 100);
-    values.put("coin", userCoin + 1);
-    values.put("towers", towers.toString());
-    int affectedRows = db.update("user_data", values, "_id=?", new String[] {"1"});
-    AppManager.printDetailLog("db updated " + affectedRows + " row(s).");
-    db.close();
   }
 
   private void parseUnitTable() {
@@ -223,13 +176,24 @@ public class GameState {
     return (inHand != null);
   }
 
+  public int getWave() {
+    return userWave;
+  }
+
+  public int getGold() {
+    return userGold;
+  }
+
+  public int getCoin() {
+    return userCoin;
+  }
+
   public long getWorldTime() {
     return worldTime;
   }
 
   /**
-   * 터치로 입력받은 게임 좌표를 통해서 유닛을 가져온다. 만약, 해당 좌표에 여러 유닛이 걸쳐져 있으면 게임 상에 늦게 추가된 순서로
-   * 우선순위가 있다.
+   * 터치로 입력받은 게임 좌표를 통해서 유닛을 가져온다. 만약, 해당 좌표에 여러 유닛이 걸쳐져 있으면 게임 상에 늦게 추가된 순서로 우선순위가 있다.
    * 
    * @param x 게임 x 좌표
    * @param y 게임 y 좌표
