@@ -11,6 +11,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 
 public class DataManager {
   /**
@@ -158,5 +159,33 @@ public class DataManager {
     }
 
     return values;
+  }
+
+  public static Tower createTower(int towerId) {
+    String[] columns = "id,name,tier,damage,attackspeed,range".split(",");
+
+    SQLiteDatabase db = databaseHelper.getReadableDatabase();
+    Cursor cursor =
+        db.query(TABLE_TOWERINFO, columns, "id=?", new String[] {String.valueOf(towerId)}, null, null, null);
+
+    cursor.moveToNext();
+    int id = cursor.getInt(0);
+    String name = cursor.getString(1);
+    int tier = cursor.getInt(2);
+    int dmg = cursor.getInt(3);
+    int atkSpeed = cursor.getInt(4);
+    int range = cursor.getInt(5);
+
+    String fileName = "tower" + id;
+    Bitmap face = AppManager.getBitmap(fileName);
+    if (face == null) {
+      try {
+        face = AppManager.readImageFile("img/towers/" + fileName + ".png", null);
+        AppManager.addBitmap(fileName, face);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    return new Tower(id, name, tier, dmg, atkSpeed, range, face);
   }
 }

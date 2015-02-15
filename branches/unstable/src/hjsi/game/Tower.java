@@ -21,7 +21,7 @@ public class Tower extends Unit implements Attackable {
   /**
    * 등급
    */
-  private int type;
+  private int tier;
   public String imgName;
 
   private long beforeTime = System.currentTimeMillis();
@@ -37,14 +37,32 @@ public class Tower extends Unit implements Attackable {
   public Tower() {
     super();
     name = "불";
-    type = 0;
+    tier = 0;
     damage = 5;
     imgName = "element_match";
 
   }
 
-  public Tower(int x, int y, Bitmap face) {
-    super(Unit.TYPE_TOWER, 0, x, y, face);
+  /**
+   * @param id 타워 식별자
+   * @param name 게임에 표시될 타워 이름
+   * @param tier 타워 등급
+   * @param damage 타워 데미지
+   * @param attackSpeed 타워의 공격속도
+   * @param range 타워 사정거리
+   * @param face 타워 이미지
+   */
+  public Tower(int id, String name, int tier, int damage, int attackSpeed, int range, Bitmap face) {
+    super(Unit.TYPE_TOWER, id, face);
+    this.name = name;
+    this.tier = tier;
+    this.damage = damage;
+    this.attackSpeed = attackSpeed;
+    this.range = range;
+  }
+
+  public Tower(int id, int x, int y, Bitmap face) {
+    super(Unit.TYPE_TOWER, id, x, y, face);
     range = 400;
   }
 
