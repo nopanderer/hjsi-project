@@ -86,47 +86,41 @@ public class Loader extends Base {
          */
 
         /*
-         * 테스트용 코드
-         */
-        HashMap<String, String> pathMap = AppManager.getInstance().getPathMap("db");
-        // AppManager.getInstance().readTextFile(pathMap.get("unit_spec_table"));
-
-        /*
          * 공통적인 리소스를 준비한다. (특정 경로의 모든 이미지를 불러오는 방법)
          */
         Bitmap bitmap;
-        pathMap = AppManager.getInstance().getPathMap("img/common");
+        HashMap<String, String> pathMap = AppManager.getPathMap("img/common");
         Set<String> keySet = pathMap.keySet();
         Options opts = new Options();
         opts.inPreferredConfig = Config.RGB_565;
         for (String key : keySet) {
-          bitmap = AppManager.getInstance().readImageFile(pathMap.get(key), opts);
-          AppManager.getInstance().addBitmap(key, bitmap);
+          bitmap = AppManager.readImageFile(pathMap.get(key), opts);
+          AppManager.addBitmap(key, bitmap);
         }
 
         /*
          * 동상 이미지를 준비한다. 구체적인 경로 입력으로 바로 가져올 수도 있음.
          */
-        bitmap = AppManager.getInstance().readImageFile("img/statues/statue1.png", opts);
+        bitmap = AppManager.readImageFile("img/statues/statue1.png", opts);
         if (bitmap != null) {
-          AppManager.getInstance().addBitmap("statue1", bitmap);
+          AppManager.addBitmap("statue1", bitmap);
         }
 
         /*
          * 임시적인 타워 비트맵 삽입
          */
-        bitmap = AppManager.getInstance().readImageFile("img/towers/tower1.png", opts);
+        bitmap = AppManager.readImageFile("img/towers/tower1.png", opts);
         if (bitmap != null) {
-          AppManager.getInstance().addBitmap("tower1", bitmap);
+          AppManager.addBitmap("tower1", bitmap);
         }
 
         /*
          * 임시적인 투사체 비트맵 삽입
          */
         opts.inSampleSize = 16;
-        bitmap = AppManager.getInstance().readImageFile("img/projectile/proj1.png", opts);
+        bitmap = AppManager.readImageFile("img/projectile/proj1.png", opts);
         if (bitmap != null) {
-          AppManager.getInstance().addBitmap("proj1", bitmap);
+          AppManager.addBitmap("proj1", bitmap);
         }
 
         /*

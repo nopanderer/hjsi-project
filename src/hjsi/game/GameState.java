@@ -6,7 +6,6 @@ import hjsi.timer.TimeManager;
 import hjsi.timer.TimerRunnable;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import android.graphics.Bitmap;
@@ -84,8 +83,8 @@ public class GameState {
      * 동상 타워 추가
      */
     makeFace();
-    units.add(new Statue(500, 300, AppManager.getInstance().getBitmap("statue1")));
-    units.add(new Tower(367, 467, AppManager.getInstance().getBitmap("tower1")));
+    units.add(new Statue(500, 300, AppManager.getBitmap("statue1")));
+    units.add(new Tower(367, 467, AppManager.getBitmap("tower1")));
   }
 
   public static GameState getInstance() {
@@ -104,7 +103,7 @@ public class GameState {
    */
   public void purgeGameState() {
     synchronized (GameState.class) {
-      DataManager.save(uniqueInstance);
+      DataManager.save();
       GameState.uniqueInstance = null;
     }
   }
@@ -115,42 +114,6 @@ public class GameState {
     userCoin = coin;
     for (Tower tower : towers) {
       units.add(tower);
-    }
-  }
-
-  private void parseUnitTable() {
-    try {
-      String[] keywords = {"statue", "tower", "mob"};
-      ArrayList<LinkedList<String>> linePerType = new ArrayList<LinkedList<String>>(keywords.length);
-
-      // 텍스트 한 덩이를 \n으로 줄로 나눔
-      String[] lines;
-      lines = AppManager.getInstance().readTextFile("db").split("\n");
-
-      for (String line : lines) {
-        line = line.trim();
-
-        // 주석이나 빈 줄은 통과
-        if (line.startsWith("#") || line.length() <= 0) {
-          continue;
-        }
-
-        // 쉼표로 나눔
-        String[] tokens = line.split(",", 2);
-
-        int index = Integer.parseInt(tokens[0]);
-
-        // 이미지를 찾을 수 있는 형태를 만듦. ex) "statue" + "1"
-        String headString = keywords[index] + Integer.parseInt(tokens[1]);
-
-        String tailString = line.substring(line.indexOf(',') + 1);
-        tailString = tailString.substring(tailString.indexOf(','));
-
-
-        linePerType.get(index).add(headString + tailString);
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
     }
   }
 
@@ -239,7 +202,7 @@ public class GameState {
     String key = "mob" + wave;
 
     try {
-      mImgMob = AppManager.getInstance().readImageFile("img/mobs/" + key + ".png", option);
+      mImgMob = AppManager.readImageFile("img/mobs/" + key + ".png", option);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -248,7 +211,7 @@ public class GameState {
       mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
     }
 
-    AppManager.getInstance().addBitmap(key, mImgMob);
+    AppManager.addBitmap(key, mImgMob);
   }
 
   public void addMob() {
