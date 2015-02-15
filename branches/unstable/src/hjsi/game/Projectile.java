@@ -34,7 +34,9 @@ public class Projectile extends Unit implements Movable {
    * 임시 타이머 변수
    */
   private long beforeTime;
-  private int sleep = 15;
+  private int sleep = 10;
+
+  private Vector2d vector;
 
   private static final int NORMAL = 1;
   private static final int SLOW = 2;
@@ -50,6 +52,8 @@ public class Projectile extends Unit implements Movable {
     moveSpeed = 3;
     isHit = false;
     type = NORMAL;
+
+
 
     beforeTime = System.currentTimeMillis();
   }
@@ -68,27 +72,16 @@ public class Projectile extends Unit implements Movable {
     }
 
     /* 유도 알고리즘 */
-    if (targetMob.cntrX < x) {
-      x -= moveSpeed;
-      if (targetMob.cntrY < y)
-        y -= moveSpeed;
-      else if (targetMob.cntrY > y)
-        y += moveSpeed;
-    }
-    if (targetMob.cntrX > x) {
-      x += moveSpeed;
-      if (targetMob.cntrY < y)
-        y -= moveSpeed;
-      else if (targetMob.cntrY > y)
-        y += moveSpeed;
-    }
-    if (targetMob.cntrX == x) {
-      if (targetMob.cntrY < y)
-        y -= moveSpeed;
-      else if (targetMob.cntrY > y)
-        y += moveSpeed;
-    }
 
+    /* 투사체에서 몹까지의 벡터 */
+    vector = new Vector2d(targetMob.cntrX - cntrX, targetMob.cntrY - cntrY);
+    /* 벡터 정규화 */
+    vector.nor();
+    /* 투사체 이동속도 스칼라 곱 */
+    vector.mul(moveSpeed);
+
+    x += vector.x;
+    y += vector.y;
   }
 
   private int targetXWidth() {
