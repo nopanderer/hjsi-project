@@ -52,8 +52,7 @@ public class Projectile extends Unit implements Movable {
     moveSpeed = 3;
     isHit = false;
     type = NORMAL;
-
-
+    this.damage = damage;
 
     beforeTime = System.currentTimeMillis();
   }
