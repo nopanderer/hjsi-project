@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -115,6 +116,7 @@ public class GameState {
    */
   public void purgeGameState() {
     synchronized (GameState.class) {
+      save();
       GameState.uniqueInstance = null;
     }
   }
@@ -147,6 +149,20 @@ public class GameState {
 
   public void save() {
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
+
+    StringBuilder towers = new StringBuilder();
+    for (Tower tower : getTowers()) {
+      towers.append(tower.getId()).append(',');
+    }
+
+    ContentValues values = new ContentValues();
+    values.put("wave", userWave);
+    values.put("gold", userGold + 100);
+    values.put("coin", userCoin + 1);
+    values.put("towers", towers.toString());
+    int affectedRows = db.update("user_data", values, "_id=?", new String[] {"1"});
+    AppManager.printDetailLog("db updated " + affectedRows + " row(s).");
+    db.close();
   }
 
   private void parseUnitTable() {
@@ -241,7 +257,7 @@ public class GameState {
    * 
    * @return 타워가 들어있는 연결리스트 혹은 타워가 아예 없으면 null
    */
-  private LinkedList<Tower> getTowers() {
+  public LinkedList<Tower> getTowers() {
     LinkedList<Tower> towers = new LinkedList<Tower>();
     for (Unit unit : units) {
       if (unit.getType() == Unit.TYPE_TOWER) {
