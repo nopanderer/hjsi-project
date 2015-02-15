@@ -83,8 +83,7 @@ public class Tower extends Unit implements Attackable {
           continue;
 
         else if ((int) Math.sqrt(Math.pow(mob.cntrX - this.cntrX, 2) + Math.pow(mob.cntrY - this.cntrY, 2)) <= range) {
-          GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, mob, AppManager.getInstance()
-              .getBitmap("proj1")));
+          GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, mob, AppManager.getBitmap("proj1")));
           break;
         }
       }

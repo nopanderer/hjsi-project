@@ -68,6 +68,12 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     attributes.clear();
     db.execSQL(sql);
     AppManager.printInfoLog("query", sql);
+
+    ArrayList<ContentValues> records = DataManager.parseTable("tower_spec_table");
+    for (ContentValues record : records) {
+      long rowId = db.insert(DataManager.TABLE_TOWERINFO, null, record);
+      AppManager.printInfoLog(rowId + "번째 레코드: " + record.toString() + " 삽입");
+    }
   }
 
   /*

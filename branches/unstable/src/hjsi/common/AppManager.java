@@ -205,7 +205,7 @@ public class AppManager {
    * @param byteCount 단위를 환산할 바이트 수
    * @return "#.### Bytes" 형식의 문자열
    */
-  private String convertByteUnit(float byteCount) {
+  private static String convertByteUnit(float byteCount) {
     String suffix[] = {"", "K", "M"};
     int unit = 0;
     while (byteCount > 1024f && unit < suffix.length) {
@@ -223,7 +223,7 @@ public class AppManager {
    * @param bm 비트맵 객체
    * @return 비트맵 정보
    */
-  private String bitmapToString(Bitmap bm) {
+  private static String bitmapToString(Bitmap bm) {
     String bitmapId = bm.toString().substring(bm.toString().lastIndexOf('@') + 1);
     return bitmapId + ", " + convertByteUnit(bm.getByteCount());
   }
@@ -284,14 +284,14 @@ public class AppManager {
   /**
    * 주어진 경로 아래의 모든 파일을 HashMap에 넣어서 반환한다.
    * 
-   * @param findPath 의도한 결과를 얻기 위해서는 반드시 한 단계의 경로 정도는 입력해야 한다.
+   * @param findPath 의도한 결과를 얻기 위해서는 반드시 한 단계의 경로 정도는 입력해야 한다. ""과 같은 빈 문자열을 입력하면 안된다.
    * @param assetManager assets 폴더에 접근하기 위한 <strong>AssetManager</strong> 객체
    * 
    * @return 경로 및 확장자를 제외한 파일 이름을 키로 하고, 전체 경로를 값으로 갖는 <strong>HashMap</strong> 객체, 아무 파일도
    *         없다면 <strong>null</strong>
    */
-  public HashMap<String, String> getPathMap(String findPath) {
-    if (assetManager == null) {
+  public static HashMap<String, String> getPathMap(String findPath) {
+    if (getInstance().assetManager == null) {
       printErrorLog("먼저 AssetManager를 세팅하시오.");
       return null;
     } else if (findPath == null) {
@@ -321,7 +321,7 @@ public class AppManager {
         String workingPath = enteredDir.poll();
 
         // 현재 디렉터리가 가지고 있는 하위 디렉터리나 파일의 목록을 구한다.
-        String[] subList = assetManager.list(workingPath);
+        String[] subList = getInstance().assetManager.list(workingPath);
 
         if (subList.length == 0) {
           // 하위 목록 수가 0이면 현재 작업경로는 파일인 경우에 해당한다. (빈 폴더는 아예 list() 메소드에서 반환되지 않는 듯)
@@ -355,9 +355,9 @@ public class AppManager {
    * @param key
    * @param bitmap
    */
-  public void addBitmap(String key, Bitmap bitmap) {
+  public static void addBitmap(String key, Bitmap bitmap) {
     String msg = "\"" + key + "\", " + bitmapToString(bitmap) + " 추가됨";
-    Bitmap old = loadedBitmap.put(key, bitmap);
+    Bitmap old = getInstance().loadedBitmap.put(key, bitmap);
     // 동일한 key의 객체가 이미 있었던 경우 구 객체의 할당을 해제한다.
     if (old != null) {
       msg += " (제거됨: " + bitmapToString(old) + ")";
@@ -373,25 +373,25 @@ public class AppManager {
    * @param key 구하려는 비트맵의 이름
    * @return 비트맵 객체 혹은 null
    */
-  public Bitmap getBitmap(String key) {
-    return loadedBitmap.get(key);
+  public static Bitmap getBitmap(String key) {
+    return getInstance().loadedBitmap.get(key);
   }
 
   /**
-   * 입력한 경로 아래에 속하는 모든 경로에서 파일을 찾아서 내용을 읽어온다.
+   * 입력한 경로 아래에 속하는 모든 경로에서 파일을 찾아서 내용을 읽어온다. "\n"으로 잘라낸 string 배열을 반환한다.
    * 
    * @param path 주어진 경로 아래에서만 대상 파일을 찾는다
    * 
-   * @return key에 해당하는 파일이 있으면 해당 파일 내용, 없으면 null
+   * @return key에 해당하는 파일이 있으면 해당 파일 내용을 라인 별로 잘라서 String 배열로 반환한다. 파일이 없으면 null을 반환한다.
    * @throws IOException
    */
-  public String readTextFile(String path) throws IOException {
+  public static String[] readTextFile(String path) throws IOException {
     String textData = null;
 
     if (path == null) {
       throw new IOException("Not found \"" + path + "\".");
     } else {
-      InputStream is = assetManager.open(path);
+      InputStream is = getInstance().assetManager.open(path);
       byte[] buffer = new byte[is.available()];
       is.read(buffer);
       is.close();
@@ -402,7 +402,7 @@ public class AppManager {
       printInfoLog(path, textData);
     }
 
-    return textData;
+    return textData.split("\n");
   }
 
   /**
@@ -413,18 +413,18 @@ public class AppManager {
    * @return 비트맵 객체 혹은 null
    * @throws IOException
    */
-  public Bitmap readImageFile(String path, Options opts) throws IOException {
+  public static Bitmap readImageFile(String path, Options opts) throws IOException {
     Bitmap bm = null;
 
     if (path == null) {
       throw new IOException("Not found \"" + path + "\".");
     } else {
-      InputStream is = assetManager.open(path);
+      InputStream is = getInstance().assetManager.open(path);
       printInfoLog("\"" + path + "\"", "원본 용량: " + convertByteUnit(is.available()));
       bm = BitmapFactory.decodeStream(is, null, opts);
       bm =
-          Bitmap.createScaledBitmap(bm, (int) (bm.getWidth() * displayRatioFactor + 0.5f), (int) (bm.getHeight()
-              * displayRatioFactor + 0.5f), false);
+          Bitmap.createScaledBitmap(bm, (int) (bm.getWidth() * getInstance().displayRatioFactor + 0.5f),
+              (int) (bm.getHeight() * getInstance().displayRatioFactor + 0.5f), false);
       is.close();
       printInfoLog("\"" + path + "\"", bitmapToString(bm) + " 읽기 성공");
     }

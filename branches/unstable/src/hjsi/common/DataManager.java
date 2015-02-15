@@ -3,6 +3,7 @@ package hjsi.common;
 import hjsi.game.GameState;
 import hjsi.game.Tower;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -72,21 +73,90 @@ public class DataManager {
     db.close();
   }
 
-  public static void save(GameState state) {
+  /**
+   * 게임의 정보를 저장한다.
+   * 
+   * @param state
+   */
+  public static void save() {
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
     StringBuilder towers = new StringBuilder();
-    for (Tower tower : state.getTowers()) {
+    for (Tower tower : GameState.getInstance().getTowers()) {
       towers.append(tower.getId()).append(',');
     }
 
     ContentValues values = new ContentValues();
-    values.put("wave", state.getWave());
-    values.put("gold", state.getGold() + 100);
-    values.put("coin", state.getCoin() + 1);
+    values.put("wave", GameState.getInstance().getWave());
+    values.put("gold", GameState.getInstance().getGold() + 100);
+    values.put("coin", GameState.getInstance().getCoin() + 1);
     values.put("towers", towers.toString());
     int affectedRows = db.update("user_data", values, "id=?", new String[] {"1"});
     AppManager.printDetailLog("db updated " + affectedRows + " row(s).");
     db.close();
+  }
+
+  public static void insertRecords(String tableName, ArrayList<ContentValues> values) {
+    SQLiteDatabase db = databaseHelper.getWritableDatabase();
+    for (ContentValues value : values) {
+      long rowId = db.insert(tableName, null, value);
+      AppManager.printInfoLog(rowId + "번째 레코드: " + value.toString() + " 삽입");
+    }
+    db.close();
+  }
+
+  /**
+   * 파일로부터 데이터를 읽어서 파싱한 후 데이터베이스에 삽입할 수 있는 레코드 형태로 반환한다. assets/db/tower_spec_table.csv 같은
+   * 형태의 파일만 취급한다.
+   * 
+   * @param fileName 데이터베이스에 입력할 데이터가 들어있는 assets/db 폴더 내의 csv 파일이름
+   * @return DB 테이블에 삽입할 레코드들(ContentValues 리스트)
+   */
+  public static ArrayList<ContentValues> parseTable(String fileName) {
+    ArrayList<ContentValues> values = new ArrayList<ContentValues>();
+
+    try {
+      String[] lines = AppManager.readTextFile(AppManager.getPathMap("db").get(fileName));
+      for (int i = 0; i < lines.length; i++) {
+        lines[i] = lines[i].trim();
+      }
+
+      String[] attrNames = lines[0].split(",");
+      String[] attrTypes = lines[1].split(",");
+
+      for (int i = 2; i < lines.length; i++) {
+        String[] attrValues = lines[i].split(",");
+
+        // 데이터 컬럼 수, 타입의 수와 값의 갯수가 서로 일치하는지 검사한다.
+        if (attrNames.length != attrTypes.length || attrNames.length != attrValues.length) {
+          AppManager.printErrorLog(fileName + "의 파일 내용이 형식에 맞지 않습니다!");
+          AppManager.printErrorLog(i + "행: " + attrNames.length + ", " + attrTypes.length + ", " + attrValues.length);
+        }
+
+        ContentValues value = new ContentValues();
+        // 텍스트의 한 줄에 대해서 컬럼 별로 처리를 한다.
+        for (int j = 0; j < attrNames.length; j++) {
+          String attrType = attrTypes[j];
+          // 정수형
+          if (attrType.equalsIgnoreCase("integer")) {
+            value.put(attrNames[j], Integer.parseInt(attrValues[j]));
+          }
+          // 문자형
+          else if (attrType.equalsIgnoreCase("text")) {
+            value.put(attrNames[j], attrValues[j]);
+          }
+          // 이외의 경우
+          else {
+            AppManager.printErrorLog(i + "행의 " + j + "번 컬럼의 데이터 형식이 지정되지 않았습니다.");
+          }
+        }
+        // 레코드를 ArrayList에 추가함
+        values.add(value);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return values;
   }
 }
