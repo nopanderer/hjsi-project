@@ -20,6 +20,17 @@ public class Vector2d {
     this.y = other.y;
   }
 
+  public void set(float x, float y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  public Vector2d sub(Vector2d vector) {
+    x -= vector.x;
+    y -= vector.y;
+    return this;
+  }
+
   public void nor() {
     float len = len();
     if (len != 0) {
@@ -31,6 +42,7 @@ public class Vector2d {
   public float len() {
     return FloatMath.sqrt(x * x + y * y);
   }
+
 
   public void mul(float scalar) {
     x *= scalar;

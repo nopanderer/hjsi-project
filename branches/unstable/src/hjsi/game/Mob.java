@@ -54,10 +54,10 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   /* 리젠 */
   private long beforeTime;
   private int sleep = 10;
-  /**
-   * 초기 생성 위치
-   */
-  private int oldX, oldY;
+
+  public Vector2d vector;
+  private int stationIndex;
+  private Station station;
 
   public Mob(int x, int y, Bitmap face, int wave) {
     super(Unit.TYPE_MOB, 0, x, y, face);
@@ -73,9 +73,9 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     moveSpeed = 1;
     range = 400;
 
-    oldX = x;
-    oldY = y;
-
+    vector = new Vector2d();
+    stationIndex = 0;
+    station = GameState.getInstance().stations.get(stationIndex);
   }
 
   @Override
@@ -104,35 +104,31 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   @Override
   public void move() {
     // TODO Auto-generated method stub
-    // 10밀리세컨드 마다 5 픽셀씩 이동
+    // 10밀리세컨드 마다 1 픽셀씩 이동
 
     if (System.currentTimeMillis() - beforeTime > sleep)
       beforeTime = System.currentTimeMillis();
     else
       return;
 
-    if (x == oldX && y == oldY)
-      lap++;
+    vector.set(station.x - x, station.y - y);
+    vector.nor();
+    vector.mul(moveSpeed);
 
-    // 아래로
-    if (x == oldX && y + moveSpeed <= 2160 - 900) {
-      y += moveSpeed;
-      cntrY += moveSpeed;
-    }
-    // 오른쪽
-    else if (x + moveSpeed <= 3840 - 1500 && y == 2160 - 900) {
-      x += moveSpeed;
-      cntrX += moveSpeed;
-    }
-    // 위로
-    else if (x == 3840 - 1500 && y - moveSpeed >= oldY) {
-      y -= moveSpeed;
-      cntrY -= moveSpeed;
-    }
-    // 왼쪽
-    else if (x - moveSpeed >= oldX && y == oldY) {
-      x -= moveSpeed;
-      cntrX -= moveSpeed;
+    x += vector.x;
+    y += vector.y;
+    cntrX += vector.x;
+    cntrY += vector.y;
+
+    System.out.println(lap);
+    if (station.arrive(this)) {
+      stationIndex++;
+      if (stationIndex >= GameState.getInstance().stations.size()) {
+        lap++;
+        return;
+      }
+
+      station = GameState.getInstance().stations.get(stationIndex);
     }
 
   }
