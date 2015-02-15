@@ -26,12 +26,12 @@ public abstract class Unit {
   /*
    * 위치 및 크기 관련 변수
    */
-  protected int x;
-  protected int y;
+  protected float x;
+  protected float y;
   /**
    * 유닛 정중앙
    */
-  protected int cntrX, cntrY;
+  protected float cntrX, cntrY;
   protected int width;
   protected int height;
 
@@ -57,7 +57,7 @@ public abstract class Unit {
    * @param y 이미지를 표시할 y 좌표
    * @param face 화면에 표시할 이미지
    */
-  public Unit(int type, int id, int x, int y, Bitmap face) {
+  public Unit(int type, int id, float x, float y, Bitmap face) {
     this.type = type;
     this.id = id;
 

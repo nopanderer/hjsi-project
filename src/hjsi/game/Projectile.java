@@ -45,7 +45,7 @@ public class Projectile extends Unit implements Movable {
   private static final int ICED = 5;
   private static final int CHAIN = 6;
 
-  public Projectile(int x, int y, int damage, Mob targetMob, Bitmap face) {
+  public Projectile(float x, float y, int damage, Mob targetMob, Bitmap face) {
     super(Unit.TYPE_ETC, 0, x, y, face);
     this.targetMob = targetMob;
 
@@ -53,6 +53,8 @@ public class Projectile extends Unit implements Movable {
     isHit = false;
     type = NORMAL;
     this.damage = damage;
+
+    vector = new Vector2d();
 
     beforeTime = System.currentTimeMillis();
   }
@@ -64,6 +66,17 @@ public class Projectile extends Unit implements Movable {
     else
       return;
 
+    /* 투사체가 이동중일때 몹이 죽어버린 경우, 투사체를 삭제 */
+    if (targetMob == null)
+      GameState.getInstance().units.remove(this);
+
+    /* 투사체에서 몹까지의 벡터 */
+    vector.set(targetMob.cntrX - x, targetMob.cntrY - y);
+    /* 벡터 정규화 */
+    vector.nor();
+    /* 투사체 이동속도 스칼라 곱 */
+    vector.mul(moveSpeed);
+
     /* 충돌검사 */
     if ((x >= targetMob.x && x <= targetXWidth()) && y >= targetMob.y && y <= targetYHeight()) {
       isHit = true;
@@ -72,22 +85,19 @@ public class Projectile extends Unit implements Movable {
 
     /* 유도 알고리즘 */
 
-    /* 투사체에서 몹까지의 벡터 */
-    vector = new Vector2d(targetMob.cntrX - cntrX, targetMob.cntrY - cntrY);
-    /* 벡터 정규화 */
-    vector.nor();
-    /* 투사체 이동속도 스칼라 곱 */
-    vector.mul(moveSpeed);
+    Vector2d desired = new Vector2d(targetMob.vector.x + vector.x, targetMob.vector.y + vector.y);
 
-    x += vector.x;
-    y += vector.y;
+    x += desired.x;
+    y += desired.y;
+    cntrX += desired.x;
+    cntrY += desired.y;
   }
 
-  private int targetXWidth() {
+  private float targetXWidth() {
     return targetMob.x + targetMob.width;
   }
 
-  private int targetYHeight() {
+  private float targetYHeight() {
     return targetMob.y + targetMob.height;
   }
 

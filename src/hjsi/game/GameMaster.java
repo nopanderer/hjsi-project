@@ -70,7 +70,7 @@ public class GameMaster implements Runnable {
           if (unit instanceof Mob) {
             Mob mob;
             mob = (Mob) unit;
-            if (mob.lap == 2 && mob.dead == false) {
+            if (mob.lap == 1 && mob.dead == false) {
               mob.dead = true;
               GameState.getInstance().curMob--;
               GameState.getInstance().deadMob++;

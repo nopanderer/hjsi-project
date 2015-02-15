@@ -6,6 +6,7 @@ import hjsi.timer.TimeManager;
 import hjsi.timer.TimerRunnable;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import android.graphics.Bitmap;
@@ -64,6 +65,8 @@ public class GameState {
 
   public static final int MAX_MOB = 10;
 
+  public ArrayList<Station> stations = new ArrayList<Station>();
+
   private GameState() {
     AppManager.printSimpleLog();
 
@@ -83,8 +86,14 @@ public class GameState {
      * 동상 타워 추가
      */
     makeFace();
-    units.add(new Statue(500, 300, AppManager.getBitmap("statue1")));
-    units.add(new Tower(1, 367, 467, AppManager.getBitmap("tower1")));
+    units.add(new Statue(5, 5, AppManager.getBitmap("statue1")));
+    units.add(new Tower(1, 320, 170, AppManager.getBitmap("tower1")));
+
+    /* 정류장 삽입 */
+    stations.add(new Station(80, 580));
+    stations.add(new Station(1100, 580));
+    stations.add(new Station(1100, 80));
+    stations.add(new Station(80, 80));
   }
 
   public static GameState getInstance() {
@@ -227,7 +236,7 @@ public class GameState {
     else
       return;
 
-    units.add(new Mob(90, 90, mImgMob, wave));
+    units.add(new Mob(80, 80, mImgMob, wave));
     usedMob++;
     curMob++;
   }

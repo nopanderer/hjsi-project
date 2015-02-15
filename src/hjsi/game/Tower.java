@@ -63,7 +63,7 @@ public class Tower extends Unit implements Attackable {
 
   public Tower(int id, int x, int y, Bitmap face) {
     super(Unit.TYPE_TOWER, id, x, y, face);
-    range = 400;
+    range = 300;
   }
 
   @Override
@@ -100,8 +100,10 @@ public class Tower extends Unit implements Attackable {
         if (mob == null)
           continue;
 
-        else if ((int) Math.sqrt(Math.pow(mob.cntrX - this.cntrX, 2) + Math.pow(mob.cntrY - this.cntrY, 2)) <= range) {
-          GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, mob, AppManager.getBitmap("proj1")));
+        else if ((int) Math.sqrt(Math.pow(mob.cntrX - this.cntrX, 2)
+            + Math.pow(mob.cntrY - this.cntrY, 2)) <= range) {
+          GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, mob, AppManager
+              .getInstance().getBitmap("proj1")));
           break;
         }
       }
