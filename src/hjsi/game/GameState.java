@@ -84,7 +84,7 @@ public class GameState {
      */
     makeFace();
     units.add(new Statue(500, 300, AppManager.getBitmap("statue1")));
-    units.add(new Tower(367, 467, AppManager.getBitmap("tower1")));
+    units.add(new Tower(1, 367, 467, AppManager.getBitmap("tower1")));
   }
 
   public static GameState getInstance() {
@@ -126,8 +126,15 @@ public class GameState {
     // 1. 유저 정보에서 가지고 있는 토큰 수를 확인한다. 부족하면 false를 반환한다.
     // 2. 토큰 수에 알맞은 등급의 임의의 타워를 생성한다.
     // 타워 구매 도우미(팩토리 클래스)를 이용해서 타워를 생성한다.
-    inHand = new Tower();
+    inHand = DataManager.createTower(1);
     return true;
+  }
+
+  public void deployTower(int x, int y) {
+    inHand.setX(x);
+    inHand.setY(y);
+    units.add(inHand);
+    inHand = null;
   }
 
   /**

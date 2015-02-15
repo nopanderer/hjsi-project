@@ -44,6 +44,15 @@ public abstract class Unit {
   /**
    * @param type 유닛의 종류를 입력한다. -> Unit.TYPE_XXXX
    * @param id 해당하는 종류 안에서 특정 유닛을 가리키는 정수 값
+   * @param face 화면에 표시할 이미지
+   */
+  public Unit(int type, int id, Bitmap face) {
+    this(type, id, -1, -1, face);
+  }
+
+  /**
+   * @param type 유닛의 종류를 입력한다. -> Unit.TYPE_XXXX
+   * @param id 해당하는 종류 안에서 특정 유닛을 가리키는 정수 값
    * @param x 이미지를 표시할 x 좌표
    * @param y 이미지를 표시할 y 좌표
    * @param face 화면에 표시할 이미지
@@ -61,6 +70,14 @@ public abstract class Unit {
 
     this.face = face;
     paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+  }
+
+  public final void setX(int x) {
+    this.x = x;
+  }
+
+  public final void setY(int y) {
+    this.y = y;
   }
 
   /**

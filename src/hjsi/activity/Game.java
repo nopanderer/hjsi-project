@@ -178,9 +178,11 @@ public class Game extends Base implements OnClickListener {
       Intent Store = new Intent(Game.this, Store.class);
       startActivity(Store);
     } else if (v == btnDeploy) {
-      if (GameState.getInstance().checkDeployMode() == false)
-        GameState.getInstance().intoDeployMode();
-      else
+      if (GameState.getInstance().checkDeployMode() == false) {
+        if (GameState.getInstance().intoDeployMode() == false) {
+          GameState.getInstance().inHand = null;
+        }
+      } else
         GameState.getInstance().inHand = null;
     }
   }
@@ -188,14 +190,15 @@ public class Game extends Base implements OnClickListener {
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     /*
-     * 기본적인 View 객체에 대한 이벤트는 해당 객체가 먼저 이벤트를 받아서 처리하므로, 여기서는 카메라 및 유닛 등의 조작에 대해서만 고려한다. 다음은 터치 이벤트 중
-     * 스크롤 및 핀치줌 인/아웃에 관한 동작은 카메라가 처리하도록 한다.
+     * 기본적인 View 객체에 대한 이벤트는 해당 객체가 먼저 이벤트를 받아서 처리하므로, 여기서는 카메라 및 유닛 등의 조작에 대해서만 고려한다. 다음은
+     * 터치 이벤트 중 스크롤 및 핀치줌 인/아웃에 관한 동작은 카메라가 처리하도록 한다.
      */
     if (camera.touchHandler(event))
       return true;
 
     /*
-     * 카메라가 처리할 이벤트가 아닌 경우는 보통의 클릭 동작이며, 여러가지 게임 개체에 대한 동작을 수행한다. 가장 먼저, 화면 터치 좌표를 게임월드의 좌표로 변환한다.
+     * 카메라가 처리할 이벤트가 아닌 경우는 보통의 클릭 동작이며, 여러가지 게임 개체에 대한 동작을 수행한다. 가장 먼저, 화면 터치 좌표를 게임월드의
+     * 좌표로 변환한다.
      */
     int x = (int) ((event.getX() + camera.getX()) / camera.getScale());
     int y = (int) ((event.getY() + camera.getY()) / camera.getScale());
@@ -203,6 +206,8 @@ public class Game extends Base implements OnClickListener {
     Unit unit = GameState.getInstance().getUnit(x, y);
     if (unit != null) {
       AppManager.printInfoLog(unit.toString());
+    } else if (GameState.getInstance().checkDeployMode()) {
+      GameState.getInstance().deployTower(x, y);
     }
 
 
