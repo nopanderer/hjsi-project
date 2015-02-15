@@ -1,5 +1,7 @@
 package hjsi.common;
 
+import java.util.ArrayList;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.DatabaseErrorHandler;
@@ -33,16 +35,16 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     String sql = null;
 
     /* 유저정보 테이블 생성 */
-    ContentValues columns = new ContentValues();
-    columns.put("id", "integer primary key" + notNull);
-    columns.put("wave", "integer" + notNull);
-    columns.put("gold", "integer" + notNull);
-    columns.put("coin", "integer" + notNull);
-    columns.put("towers", "text");
-    columns.put("recipes", "text");
-    columns.put("upgrades", "text");
-    sql = DataManager.getSqlCreateTable(DataManager.TABLE_USERDATA, columns);
-    columns.clear();
+    ArrayList<String> attributes = new ArrayList<String>();
+    attributes.add("id integer primary key" + notNull);
+    attributes.add("wave integer" + notNull);
+    attributes.add("gold integer" + notNull);
+    attributes.add("coin integer" + notNull);
+    attributes.add("towers text");
+    attributes.add("recipes text");
+    attributes.add("upgrades text");
+    sql = DataManager.getSqlCreateTable(DataManager.TABLE_USERDATA, attributes);
+    attributes.clear();
     db.execSQL(sql);
     AppManager.printInfoLog("query", sql);
 
@@ -56,14 +58,14 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     values = null;
 
     /* 타워정보 테이블 생성 */
-    columns.put("id", "integer primary key" + notNull);
-    columns.put("name", "text" + notNull);
-    columns.put("tier", "integer" + notNull);
-    columns.put("damage", "integer" + notNull);
-    columns.put("attackspeed", "integer" + notNull);
-    columns.put("range", "integer" + notNull);
-    sql = DataManager.getSqlCreateTable(DataManager.TABLE_TOWERINFO, columns);
-    columns.clear();
+    attributes.add("id integer primary key" + notNull);
+    attributes.add("name text" + notNull);
+    attributes.add("tier integer" + notNull);
+    attributes.add("damage integer" + notNull);
+    attributes.add("attackspeed integer" + notNull);
+    attributes.add("range integer" + notNull);
+    sql = DataManager.getSqlCreateTable(DataManager.TABLE_TOWERINFO, attributes);
+    attributes.clear();
     db.execSQL(sql);
     AppManager.printInfoLog("query", sql);
   }
