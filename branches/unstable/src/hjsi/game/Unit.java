@@ -61,23 +61,22 @@ public abstract class Unit {
     this.type = type;
     this.id = id;
 
-    this.x = x;
-    this.y = y;
     width = face.getWidth();
     height = face.getHeight();
-    cntrX = x + (width / 2);
-    cntrY = y + (height / 2);
+
+    setX(x);
+    setY(y);
 
     this.face = face;
     paint = new Paint(Paint.ANTI_ALIAS_FLAG);
   }
 
-  public final void setX(int x) {
+  public final void setX(float x) {
     this.x = x;
     cntrX = x + (width / 2);
   }
 
-  public final void setY(int y) {
+  public final void setY(float y) {
     this.y = y;
     cntrY = y + (height / 2);
   }
