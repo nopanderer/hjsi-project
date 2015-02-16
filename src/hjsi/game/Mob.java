@@ -43,10 +43,6 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   private int wave;
 
   /**
-   * 몹이 죽었는가
-   */
-  public boolean dead;
-  /**
    * 몇 바퀴 돌았나
    */
   public int lap;
@@ -62,7 +58,6 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   public Mob(int x, int y, Bitmap face, int wave) {
     super(Unit.TYPE_MOB, 0, x, y, face);
 
-    dead = false;
     lap = 0;
     this.wave = wave;
     beforeTime = System.currentTimeMillis();
@@ -120,7 +115,6 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     cntrX += vector.x;
     cntrY += vector.y;
 
-    System.out.println(lap);
     if (station.arrive(this)) {
       stationIndex++;
       if (stationIndex >= GameState.getInstance().stations.size()) {
@@ -143,5 +137,13 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   public void hit(int damage) {
     // TODO Auto-generated method stub
     hp -= damage;
+    if (hp <= 0)
+      dead();
+  }
+
+  public void dead() {
+    destroyed = true;
+    GameState.getInstance().curMob--;
+    GameState.getInstance().deadMob++;
   }
 }

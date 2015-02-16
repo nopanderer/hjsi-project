@@ -49,13 +49,10 @@ public class GameMaster implements Runnable {
         }
 
         /* 최대 유닛까지 몹 생성 */
-        if (GameState.getInstance().usedMob < GameState.MAX_MOB) {
-          GameState.getInstance().addMob();
-        }
+        GameState.getInstance().addMob();
 
         /* 몹이 전부 죽으면 다음 스테이지 준비 */
-        else if (GameState.getInstance().deadMob == 10) {
-          GameState.getInstance().nextWave();
+        if (GameState.getInstance().nextWave()) {
           TimeManager.pauseTime();
           pauseGame();
         }
@@ -67,13 +64,16 @@ public class GameMaster implements Runnable {
           /* 임시유닛 */
           Unit unit = GameState.getInstance().getUnits().get(i);
 
+          if (unit.destroyed) {
+            GameState.getInstance().units.remove(unit);
+            continue;
+          }
+
           if (unit instanceof Mob) {
             Mob mob;
             mob = (Mob) unit;
-            if (mob.lap == 1 && mob.dead == false) {
-              mob.dead = true;
-              GameState.getInstance().curMob--;
-              GameState.getInstance().deadMob++;
+            if (mob.lap == 1) {
+              mob.dead();
               continue;
             }
           }
@@ -84,10 +84,6 @@ public class GameMaster implements Runnable {
 
           if (unit instanceof Movable) {
             ((Movable) unit).move();
-
-            /* 투사체가 몹과 충돌한다면 */
-            if (unit instanceof Projectile && ((Projectile) unit).isHit)
-              GameState.getInstance().units.remove(unit);
           }
 
           if (unit instanceof Attackable) {
