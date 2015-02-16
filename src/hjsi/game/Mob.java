@@ -135,10 +135,11 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public void hit(int damage) {
-    // TODO Auto-generated method stub
-    hp -= damage;
-    if (hp <= 0)
-      dead();
+    if (destroyed == false) {
+      hp -= damage;
+      if (hp <= 0)
+        dead();
+    }
   }
 
   public void dead() {
