@@ -66,6 +66,9 @@ public abstract class Unit {
     width = face.getWidth();
     height = face.getHeight();
 
+    setX(x);
+    setY(y);
+
     destroyed = false;
 
     this.face = face;
