@@ -235,10 +235,11 @@ public class GameState {
       beforeRegen = System.currentTimeMillis();
     else
       return;
-
-    units.add(new Mob(80, 80, mImgMob, wave));
-    usedMob++;
-    curMob++;
+    if (usedMob < MAX_MOB) {
+      units.add(new Mob(80, 80, mImgMob, wave));
+      usedMob++;
+      curMob++;
+    }
   }
 
   public void destroyMob() {
@@ -249,15 +250,22 @@ public class GameState {
 
   }
 
-  public void nextWave() {
-    destroyMob();
-    wave++;
-    // 새로운 비트맵 추가
-    makeFace();
-    // init(임시)
-    curMob = 0;
-    usedMob = 0;
-    deadMob = 0;
+  public boolean nextWave() {
+    if (deadMob == 10) {
+      destroyMob();
+      wave++;
+      // 새로운 비트맵 추가
+      makeFace();
+
+      curMob = 0;
+      usedMob = 0;
+      deadMob = 0;
+
+      return true;
+    }
+
+    else
+      return false;
   }
 
 }

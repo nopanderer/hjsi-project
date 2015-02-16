@@ -1,7 +1,6 @@
 package hjsi.common;
 
 import hjsi.game.GameState;
-import hjsi.game.Mob;
 import hjsi.game.Unit;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -14,9 +13,9 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 /**
- * 게임 내용(맵, 타워, 투사체 등)을 그려줄 서피스뷰 클래스이다. 쓰레드 사용해서 canvas에 그림을 그릴 수 있는 유일한 방법이다. 때문에 게임에선 거의
- * 서피스뷰를 사용한다고 한다. 내부적으로 더블버퍼링을 사용한다. 시스템 UI는 Game 액티비티에서 처리하고(Button 등), 게임 자체를 위한 UI(타워
- * 선택, 카메라 이동 등) 이벤트는 이 클래스에서 처리한다.
+ * 게임 내용(맵, 타워, 투사체 등)을 그려줄 서피스뷰 클래스이다. 쓰레드 사용해서 canvas에 그림을 그릴 수 있는 유일한 방법이다. 때문에 게임에선 거의 서피스뷰를
+ * 사용한다고 한다. 내부적으로 더블버퍼링을 사용한다. 시스템 UI는 Game 액티비티에서 처리하고(Button 등), 게임 자체를 위한 UI(타워 선택, 카메라 이동 등)
+ * 이벤트는 이 클래스에서 처리한다.
  */
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, Runnable {
   /* 서피스뷰 그리기에 필요한 객체 및 변수 */
@@ -51,12 +50,16 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     // 게임 내 변수 출력용 페인트 객체 생성
     mPaintInfo = new Paint();
     mPaintInfo.setAntiAlias(true);
-    mPaintInfo.setTextSize(TypedValue
-        .applyDimension(TypedValue.COMPLEX_UNIT_SP, 14, getResources().getDisplayMetrics()));
+    mPaintInfo.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14, getResources()
+        .getDisplayMetrics()));
 
     // displayInformation용 좌표값
-    xForText = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 52, getResources().getDisplayMetrics());
-    yForText = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources().getDisplayMetrics());
+    xForText =
+        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 52, getResources()
+            .getDisplayMetrics());
+    yForText =
+        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources()
+            .getDisplayMetrics());
 
     // 배치모드 표시용 페인트 객체 생성
     gridPaint = new Paint();
@@ -74,8 +77,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   public void surfaceCreated(SurfaceHolder holder) {
     AppManager.printSimpleLog();
     /*
-     * 표면이 생성될 때 그리기 스레드를 시작한다. 표면은 아마 화면상에 실제로 보이는 그림을 말하는 것 같다. lockCanvas() 할 때 뱉어내는
-     * 캔버스가 더블버퍼링을 위한 메모리 상의 캔버스인 것 같고
+     * 표면이 생성될 때 그리기 스레드를 시작한다. 표면은 아마 화면상에 실제로 보이는 그림을 말하는 것 같다. lockCanvas() 할 때 뱉어내는 캔버스가 더블버퍼링을
+     * 위한 메모리 상의 캔버스인 것 같고
      */
     mThreadPainter = new Thread(this);
     mIsRunning = true;
@@ -92,8 +95,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   public void surfaceDestroyed(SurfaceHolder holder) {
     AppManager.printSimpleLog();
     /*
-     * 표면이 파괴되기 직전에 그리기를 중지한다. 이 콜백이 끝나면 완전히 파괴된다. 파괴된 후에도 스레드가 죽지않으면 canvas에 그리기를 시도할 경우
-     * 에러가 난다. 조건문 false를 한다고 스레드가 바로 멈추는 건 아님 그래서 join을 통해 그리기 스레드가 끝날 때까지 표면 파괴를 늦춘다.
+     * 표면이 파괴되기 직전에 그리기를 중지한다. 이 콜백이 끝나면 완전히 파괴된다. 파괴된 후에도 스레드가 죽지않으면 canvas에 그리기를 시도할 경우 에러가 난다.
+     * 조건문 false를 한다고 스레드가 바로 멈추는 건 아님 그래서 join을 통해 그리기 스레드가 끝날 때까지 표면 파괴를 늦춘다.
      */
     mIsRunning = false;
     try {
@@ -155,18 +158,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         // 게임의 유닛들을 그린다.
         for (int i = 0; i < GameState.getInstance().getUnits().size(); i++) {
           Unit unit = GameState.getInstance().getUnits().get(i);
-          // 1. 보이는지 검사
-          if (unit instanceof Mob) {
-            Mob mob;
-            mob = (Mob) unit;
-            if (mob.dead)
-              continue;
+          /* 파괴되었는지 검사 */
+          if (unit.destroyed)
+            continue;
 
-            // 보이므로 그린다
-            else
-              unit.draw(canvas);
-          }
-
+          /* 살아있으면 그리기 */
           else
             unit.draw(canvas);
 
@@ -217,7 +213,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     /*
      * 그리기 fps 출력
      */
-    canvas.drawText(mFps + " fps (" + AppManager.getInstance().getLogicFps() + " fps)", xForText, yForText, mPaintInfo);
+    canvas.drawText(mFps + " fps (" + AppManager.getInstance().getLogicFps() + " fps)", xForText,
+        yForText, mPaintInfo);
 
     /*
      * 카메라 좌상단 좌표 (논리적인 기준점) 출력
@@ -230,7 +227,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 메모리 정보 표시
      */
     canvas.translate(0, yForText);
-    canvas.drawText("Used Memory: " + allocMem + " / " + totMem + "MB", xForText, yForText, mPaintInfo);
+    canvas.drawText("Used Memory: " + allocMem + " / " + totMem + "MB", xForText, yForText,
+        mPaintInfo);
 
     /*
      * 게임 시계 출력

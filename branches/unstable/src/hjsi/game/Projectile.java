@@ -26,10 +26,7 @@ public class Projectile extends Unit implements Movable {
    * 타워의 공격 데미지
    */
   private int damage;
-  /**
-   * 몹과 충돌했는지
-   */
-  public boolean isHit;
+
   /**
    * 임시 타이머 변수
    */
@@ -50,7 +47,6 @@ public class Projectile extends Unit implements Movable {
     this.targetMob = targetMob;
 
     moveSpeed = 3;
-    isHit = false;
     type = NORMAL;
     this.damage = damage;
 
@@ -79,7 +75,7 @@ public class Projectile extends Unit implements Movable {
 
     /* 충돌검사 */
     if ((x >= targetMob.x && x <= targetXWidth()) && y >= targetMob.y && y <= targetYHeight()) {
-      isHit = true;
+      destroyed = true;
       targetMob.hit(damage);
     }
 

@@ -28,6 +28,8 @@ public abstract class Unit {
    */
   protected float x;
   protected float y;
+
+  public boolean destroyed;
   /**
    * 유닛 정중앙
    */
@@ -64,8 +66,7 @@ public abstract class Unit {
     width = face.getWidth();
     height = face.getHeight();
 
-    setX(x);
-    setY(y);
+    destroyed = false;
 
     this.face = face;
     paint = new Paint(Paint.ANTI_ALIAS_FLAG);

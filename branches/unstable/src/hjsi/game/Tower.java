@@ -63,6 +63,7 @@ public class Tower extends Unit implements Attackable {
 
   public Tower(int id, int x, int y, Bitmap face) {
     super(Unit.TYPE_TOWER, id, x, y, face);
+    damage = 50;
     range = 300;
   }
 
