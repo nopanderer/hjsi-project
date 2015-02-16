@@ -74,10 +74,12 @@ public abstract class Unit {
 
   public final void setX(int x) {
     this.x = x;
+    cntrX = x + (width / 2);
   }
 
   public final void setY(int y) {
     this.y = y;
+    cntrY = y + (height / 2);
   }
 
   /**
