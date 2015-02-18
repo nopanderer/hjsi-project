@@ -148,10 +148,16 @@ public abstract class Unit {
    */
   public void showHealthBar(int hpMax, int hp, Canvas canvas) {
     Paint paint = new Paint();
-    paint.setColor(Color.GREEN);
 
     /* 체력량에 따라 체력바 길이가 결정 */
     float healthScale = (float) hp / hpMax;
+
+    if (healthScale >= 0.7)
+      paint.setColor(Color.GREEN);
+    else if (0.4 <= healthScale && healthScale < 0.7)
+      paint.setColor(Color.YELLOW);
+    else if (healthScale < 0.4)
+      paint.setColor(Color.RED);
 
     canvas.drawRect(x, y - 10, x + width * healthScale, y - 5, paint);
   }

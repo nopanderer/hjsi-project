@@ -21,6 +21,8 @@ public class GameMaster implements Runnable {
    */
   private boolean running = false;
 
+  private boolean waveDone = false;
+
   public GameMaster() {
     workerThread = new Thread(this);
     workerThread.start();
@@ -49,12 +51,13 @@ public class GameMaster implements Runnable {
         }
 
         /* 최대 유닛까지 몹 생성 */
-        GameState.getInstance().addMob();
+        if (waveDone == false)
+          GameState.getInstance().addMob();
 
         /* 몹이 전부 죽으면 다음 스테이지 준비 */
         if (GameState.getInstance().nextWave()) {
           TimeManager.pauseTime();
-          pauseGame();
+          waveDone = true;
         }
 
         /*
@@ -138,6 +141,7 @@ public class GameMaster implements Runnable {
      * 일시정지했다가 다시 시작하는건지, 한 웨이브가 끝난 후 새로운 웨이브를 시작하는건지 구별할 필요가 있다. (새로운 정보를 세팅하는 과정이 필요하니까)
      */
     running = true;
+    waveDone = false;
     // workerThread.interrupt(); // 대기 중인 스레드 바로 깨우기 (되는지 모르겠음)
   }
 
