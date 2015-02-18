@@ -34,10 +34,6 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
    */
   private int armor;
   /**
-   * 사정거리
-   */
-  private int range;
-  /**
    * 웨이브 번호
    */
   private int wave;

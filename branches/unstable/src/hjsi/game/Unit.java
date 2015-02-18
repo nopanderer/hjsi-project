@@ -37,6 +37,15 @@ public abstract class Unit {
   protected int width;
   protected int height;
 
+  /**
+   * 사정거리
+   */
+  protected float range;
+  /**
+   * 충돌거리
+   */
+  protected float hitRange;
+
   protected Bitmap face;
   private Paint paint;
 
@@ -69,6 +78,7 @@ public abstract class Unit {
     setX(x);
     setY(y);
 
+    hitRange = Math.max(width, height) / 2;
     destroyed = false;
 
     this.face = face;
@@ -130,7 +140,7 @@ public abstract class Unit {
    * @param range 타격 범위
    * @param canvas
    */
-  public void showRange(int range, Canvas canvas) {
+  public void showRange(float range, Canvas canvas) {
     Paint circle = new Paint();
     circle.setAntiAlias(true);
     circle.setStyle(Paint.Style.STROKE); // 원의 윤곽선만 그림
@@ -160,5 +170,21 @@ public abstract class Unit {
       paint.setColor(Color.RED);
 
     canvas.drawRect(x, y - 10, x + width * healthScale, y - 5, paint);
+  }
+
+  /**
+   * suspect의 사정거리 안에 victim이 있는지
+   * 
+   * @param suspect 때리는 놈
+   * @param victim 맞는 놈
+   * @return
+   */
+  public boolean inRange(Unit suspect, Unit victim) {
+    /* 두 점 사이의 거리가 반지름의 합보다 작을 경우 충돌로 판단 */
+    if (Math.sqrt(Math.pow(suspect.cntrX - victim.cntrX, 2)
+        + Math.pow(suspect.cntrY - victim.cntrY, 2)) < suspect.range + victim.hitRange)
+      return true;
+    else
+      return false;
   }
 }
