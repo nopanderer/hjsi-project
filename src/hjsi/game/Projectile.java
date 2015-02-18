@@ -62,10 +62,6 @@ public class Projectile extends Unit implements Movable {
     else
       return;
 
-    /* 투사체가 이동중일때 몹이 죽어버린 경우, 투사체를 삭제 */
-    if (targetMob == null)
-      GameState.getInstance().units.remove(this);
-
     /* 투사체에서 몹까지의 벡터 */
     vector.set(targetMob.cntrX - x, targetMob.cntrY - y);
     /* 벡터 정규화 */
