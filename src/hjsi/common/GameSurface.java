@@ -1,6 +1,7 @@
 package hjsi.common;
 
 import hjsi.game.GameState;
+import hjsi.game.Mob;
 import hjsi.game.Unit;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -172,6 +173,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
           if (mIsRunning == false) {
             break;
           }
+          if (unit instanceof Mob)
+            ((Mob) unit).update(System.currentTimeMillis());
 
         }
 
