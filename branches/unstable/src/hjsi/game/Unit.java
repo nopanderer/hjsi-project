@@ -113,6 +113,14 @@ public abstract class Unit {
     return id;
   }
 
+  public final float getX() {
+    return x;
+  }
+
+  public final float getY() {
+    return y;
+  }
+
   /**
    * 단순히 멤버로 가지고 있는 비트맵 이미지를 출력해서 객체 자기 자신을 나타낸다.
    * 

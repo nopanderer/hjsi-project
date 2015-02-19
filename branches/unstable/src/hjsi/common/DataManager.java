@@ -46,20 +46,38 @@ public class DataManager {
     SQLiteDatabase db = databaseHelper.getReadableDatabase();
 
     Cursor cursor = db.rawQuery("select * from " + TABLE_USERDATA + " where id=1", null);
-    while (cursor.moveToNext()) {
-      int userWave = cursor.getInt(1);
-      int userGold = cursor.getInt(2);
-      int userCoin = cursor.getInt(3);
-      String towers = cursor.getString(4);
-      String recipes = cursor.getString(5);
-      String upgrades = cursor.getString(6);
-      AppManager.printDetailLog("유저정보 wave: " + userWave + ", gold: " + userGold + ", coin: "
-          + userCoin + ", towers: " + towers);
+    cursor.moveToNext();
+    int userWave = cursor.getInt(1);
+    int userGold = cursor.getInt(2);
+    int userCoin = cursor.getInt(3);
+    String towers = cursor.getString(4);
+    String recipes = cursor.getString(5);
+    String upgrades = cursor.getString(6);
+    AppManager.printDetailLog("유저정보 wave: " + userWave + ", gold: " + userGold + ", coin: "
+        + userCoin + ", towers: " + towers);
 
-      // TODO 문자열 형태의 tower 목록을 파싱해서 타워 객체를 생성하고 링크드리스트<Tower> 형태로 만든다.
+    LinkedList<Tower> towerList = new LinkedList<Tower>();
+    Tower tower = null;
 
-      GameState.getInstance().setUserData(userWave, userGold, userCoin, new LinkedList<Tower>());
+    // 타워가 하나도 없는 경우 == 처음 실행시
+    if (towers == null) {
+      tower = createTower(Integer.toString(5));
+      tower.setX(320);
+      tower.setY(170);
+      towerList.add(tower);
+
+      // 타워가 저장되어 있는 경우 그대로 불러옴
+    } else {
+      String[] token = towers.split(",");
+      for (int i = 0; i < token.length; i = i + 3) {
+        tower = createTower(token[i]);
+        tower.setX(Integer.parseInt(token[i + 1]));
+        tower.setY(Integer.parseInt(token[i + 2]));
+        towerList.add(tower);
+      }
     }
+
+    GameState.getInstance().setUserData(userWave, userGold, userCoin, towerList);
     cursor.close();
     db.close();
   }
@@ -72,9 +90,11 @@ public class DataManager {
   public static void save() {
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
+    // 타워 목록을 가져와서 타워의 id와 x, y 좌표를 저장한다.
     StringBuilder towers = new StringBuilder();
     for (Tower tower : GameState.getInstance().getTowers()) {
-      towers.append(tower.getId()).append(',');
+      towers.append(tower.getId()).append(',').append((int) tower.getX()).append(',')
+          .append((int) tower.getY()).append(',');
     }
 
     ContentValues values = new ContentValues();
@@ -96,13 +116,12 @@ public class DataManager {
     db.close();
   }
 
-  public static Tower createTower(int towerId) {
+  public static Tower createTower(String towerId) {
     String[] columns = "id,name,tier,damage,attackspeed,range".split(",");
 
     SQLiteDatabase db = databaseHelper.getReadableDatabase();
     Cursor cursor =
-        db.query(TABLE_TOWERINFO, columns, "id=?", new String[] {String.valueOf(towerId)}, null,
-            null, null);
+        db.query(TABLE_TOWERINFO, columns, "id=?", new String[] {towerId}, null, null, null);
 
     cursor.moveToNext();
     int id = cursor.getInt(0);
