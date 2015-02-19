@@ -2,6 +2,8 @@ package hjsi.game;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.RectF;
 
 /**
  * Mob 클래스
@@ -51,6 +53,13 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   private int stationIndex;
   private Station station;
 
+  private Rect rect;
+  private int frameNum;
+  private int curFrame;
+  private long lastTime;
+
+  private int framePeriod;
+
   public Mob(int x, int y, Bitmap face, int wave) {
     super(Unit.TYPE_MOB, 0, x, y, face);
 
@@ -67,11 +76,20 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     vector = new Vector2d();
     stationIndex = 0;
     station = GameState.getInstance().stations.get(stationIndex);
+
+    curFrame = 0;
+    frameNum = 14;
+    width = face.getWidth() / frameNum;
+    height = face.getHeight();
+    rect = new Rect(0, 0, this.width, this.height);
+    framePeriod = 1000 / 14;
+    lastTime = 0l;
   }
 
   @Override
   public void draw(Canvas canvas) {
-    super.draw(canvas);
+    RectF destRect = new RectF(x, y, x + width, y + height);
+    canvas.drawBitmap(face, rect, destRect, null);
     showHealthBar(hpMax, hp, canvas);
   }
 
@@ -142,5 +160,17 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     destroyed = true;
     GameState.getInstance().curMob--;
     GameState.getInstance().deadMob++;
+  }
+
+  public void update(long gameTime) {
+    if (gameTime > lastTime + framePeriod) {
+      lastTime = gameTime;
+      curFrame++;
+      if (curFrame >= frameNum) {
+        curFrame = 0;
+      }
+    }
+    rect.left = curFrame * width;
+    rect.right = rect.left + width;
   }
 }
