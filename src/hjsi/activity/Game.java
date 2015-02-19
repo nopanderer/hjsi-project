@@ -23,7 +23,7 @@ import android.widget.ToggleButton;
 public class Game extends Base implements OnClickListener {
   private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
 
-  Button btnSetting, btnBook, btnStore, btnDeploy;
+  Button btnBook, btnStore, btnDeploy;
   ToggleButton btnPlay;
   Drawable drawableBtnPlay_Pause;
   Drawable drawableBtnPlay_Play;
@@ -62,8 +62,6 @@ public class Game extends Base implements OnClickListener {
     drawableBtnPlay_Pause = getResources().getDrawable(R.drawable.btn_pause);
     drawableBtnPlay_Play = getResources().getDrawable(R.drawable.btn_play);
 
-    btnSetting = (Button) findViewById(R.id.btn_setting);
-    btnSetting.setOnClickListener(this);
     btnBook = (Button) findViewById(R.id.btn_book);
     btnBook.setOnClickListener(this);
     btnPlay = (ToggleButton) findViewById(R.id.btn_play);
@@ -155,9 +153,7 @@ public class Game extends Base implements OnClickListener {
   public void onClick(View v) {
     AppManager.printDetailLog(v.toString());
 
-    if (v == btnSetting) {
-      showSettingMenu();
-    } else if (v == btnBook) {
+    if (v == btnBook) {
       Intent Book = new Intent(Game.this, RecipeBook.class);
       startActivity(Book);
     }
@@ -172,6 +168,7 @@ public class Game extends Base implements OnClickListener {
       } else {
         btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
         gameMaster.pauseGame();
+        showSettingMenu();
         TimeManager.pauseTime();
       }
     } else if (v == btnStore) {
@@ -190,15 +187,14 @@ public class Game extends Base implements OnClickListener {
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     /*
-     * 기본적인 View 객체에 대한 이벤트는 해당 객체가 먼저 이벤트를 받아서 처리하므로, 여기서는 카메라 및 유닛 등의 조작에 대해서만 고려한다. 다음은
-     * 터치 이벤트 중 스크롤 및 핀치줌 인/아웃에 관한 동작은 카메라가 처리하도록 한다.
+     * 기본적인 View 객체에 대한 이벤트는 해당 객체가 먼저 이벤트를 받아서 처리하므로, 여기서는 카메라 및 유닛 등의 조작에 대해서만 고려한다. 다음은 터치 이벤트 중
+     * 스크롤 및 핀치줌 인/아웃에 관한 동작은 카메라가 처리하도록 한다.
      */
     if (camera.touchHandler(event))
       return true;
 
     /*
-     * 카메라가 처리할 이벤트가 아닌 경우는 보통의 클릭 동작이며, 여러가지 게임 개체에 대한 동작을 수행한다. 가장 먼저, 화면 터치 좌표를 게임월드의
-     * 좌표로 변환한다.
+     * 카메라가 처리할 이벤트가 아닌 경우는 보통의 클릭 동작이며, 여러가지 게임 개체에 대한 동작을 수행한다. 가장 먼저, 화면 터치 좌표를 게임월드의 좌표로 변환한다.
      */
     int x = (int) ((event.getX() + camera.getX()) / camera.getScale());
     int y = (int) ((event.getY() + camera.getY()) / camera.getScale());
