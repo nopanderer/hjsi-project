@@ -29,23 +29,23 @@ public class Camera {
   private final float zoomStep = 0.01f; // 화면 배율 증감 단위 (+-1%)
 
   /*
-   * OUT_XXXX: 카메라가 worldRect + worldMargin을 벗어난 경우 그 방향을 표시하기 위한 상수들
+   * OUT_XXXX: 카메라가 screenLimit + screenMargin을 벗어난 경우 그 방향을 표시하기 위한 상수들
    */
   private static final int OUT_NONE = 0;
   /**
-   * position.x < worldRect.left - worldMargin.left
+   * position.x < screenLimit.left - screenMargin.left
    */
   private static final int OUT_LEFT = 1;
   /**
-   * position.x > worldRect.right + worldMargin.right
+   * position.x > screenLimit.right + screenMargin.right
    */
   private static final int OUT_RIGHT = 2;
   /**
-   * position.y < worldRect.top - worldMargin.top
+   * position.y < screenLimit.top - screenMargin.top
    */
   private static final int OUT_TOP = 4;
   /**
-   * position.y > worldRect.bottom + worldMargin.bottom
+   * position.y > screenLimit.bottom + screenMargin.bottom
    */
   private static final int OUT_BOTTOM = 8;
 
@@ -54,8 +54,8 @@ public class Camera {
    */
   private Point position; // 카메라의 현재 위치
   private Rect viewport; // 카메라 뷰 영역
-  private Rect worldRect; // 게임월드 영역
-  private Rect worldMargin; // 카메라가 게임월드를 벗어날 때 여백의 제한 값
+  private Rect screenLimit; // 게임월드 영역
+  private Rect screenMargin; // 카메라가 게임월드를 벗어날 때 여백의 제한 값
 
   /*
    * 카메라 스크롤에 필요한 변수
@@ -65,8 +65,8 @@ public class Camera {
   private int scrollStep = 40; // 한 프레임에 카메라가 움직이는 스크롤 이동거리(px)
   /**
    * 사용자가 카메라 이동속도보다 빠르게 스크롤 했을 때, 카메라를 최종적으로 스크롤 속도에 비례한 위치에 위치시키기 위한 값.<br/>
-   * 만약 카메라 이동속도를 20px이라하고 사용자가 1초만에 100px을 스크롤한 경우라면, 스크롤을 하는 1초 동안 20px까지
-   * 움직이고, 나머지 80px을 4초에 걸쳐 이동하기 위해 scrollRemain에 80만큼을 저장한다.
+   * 만약 카메라 이동속도를 20px이라하고 사용자가 1초만에 100px을 스크롤한 경우라면, 스크롤을 하는 1초 동안 20px까지 움직이고, 나머지 80px을 4초에 걸쳐
+   * 이동하기 위해 scrollRemain에 80만큼을 저장한다.
    */
   private Point scrollRemain = new Point();
 
@@ -99,9 +99,11 @@ public class Camera {
 
   public Camera(float factor) {
     position = new Point(0, 0);
-    worldRect = new Rect(0, 0, (int) (1920 * factor + 0.5f), (int) (1080 * factor + 0.5f));
+    screenLimit =
+        new Rect(0, 0, (int) (AppManager.STANDARD_WIDTH * factor + 0.5f),
+            (int) (AppManager.STANDARD_HEIGHT * factor + 0.5f));
     int margin = (int) (125 * factor + 0.5f);
-    worldMargin = new Rect(margin, margin, margin, margin);
+    screenMargin = new Rect(margin, margin, margin, margin);
   }
 
   public void setViewportSize(int width, int height) {
@@ -140,34 +142,34 @@ public class Camera {
     return zoom;
   }
 
-  public int getWorldWidth() {
-    return worldRect.right;
+  public int getLimitWidth() {
+    return screenLimit.right;
   }
 
-  public int getWorldHeight() {
-    return worldRect.bottom;
+  public int getLimitHeight() {
+    return screenLimit.bottom;
   }
 
   /**
-   * @return worldRect.left - (int) (worldMargin.left / zoom)
+   * @return screenLimit.left - (int) (screenMargin.left / zoom)
    */
   private int getLeftLimit() {
-    return worldRect.left - (int) (worldMargin.left / zoom);
+    return screenLimit.left - (int) (screenMargin.left / zoom);
   }
 
   /**
-   * @return worldRect.right + (int) (worldMargin.right / zoom)
+   * @return screenLimit.right + (int) (screenMargin.right / zoom)
    */
   private int getRightLimit() {
-    return worldRect.right + (int) (worldMargin.right / zoom);
+    return screenLimit.right + (int) (screenMargin.right / zoom);
   }
 
   private int getTopLimit() {
-    return worldRect.top - (int) (worldMargin.top / zoom);
+    return screenLimit.top - (int) (screenMargin.top / zoom);
   }
 
   private int getBottomLimit() {
-    return worldRect.bottom + (int) (worldMargin.bottom / zoom);
+    return screenLimit.bottom + (int) (screenMargin.bottom / zoom);
   }
 
   /*
@@ -197,8 +199,7 @@ public class Camera {
      */
       case MotionEvent.ACTION_DOWN:
         /*
-         * 스크롤 중임을 표시하고, 아직 덜 처리된 자동 스크롤이 남아있어도, 사용자가 직접 스크롤하려고 하는 경우므로 남아있는
-         * 스크롤을 초기화한다.
+         * 스크롤 중임을 표시하고, 아직 덜 처리된 자동 스크롤이 남아있어도, 사용자가 직접 스크롤하려고 하는 경우므로 남아있는 스크롤을 초기화한다.
          */
         scrollRemain.set(0, 0);
         keepTouching = true;
@@ -271,9 +272,8 @@ public class Camera {
                                                                  // 그지같음)
 
             /*
-             * 구 width와 신 width의 차이를 구하고, 처음 줌 터치할 때의 중점의 X 좌표 값을 화면에 대한 백분율로
-             * 환산한 값과 곱한다. 그 값만큼 카메라의 left, top을 이동시키면 확대/축소 지점에 적당한 방향으로 카메라가
-             * 이동
+             * 구 width와 신 width의 차이를 구하고, 처음 줌 터치할 때의 중점의 X 좌표 값을 화면에 대한 백분율로 환산한 값과 곱한다. 그 값만큼 카메라의
+             * left, top을 이동시키면 확대/축소 지점에 적당한 방향으로 카메라가 이동
              */
             float diff_width = getWidthScaled() - (viewport.right / freshZoom);
             // 이전 가로 크기와 새로운 가로 크기의 차이를 구함
@@ -284,8 +284,7 @@ public class Camera {
             moveCamera(dx, dy);
 
             /*
-             * 기존 zoom 값이 필요했던 연산(widthScaled()...)을 마쳤으니 이번에 새로 구한 freshZoom
-             * 값으로 업데이트
+             * 기존 zoom 값이 필요했던 연산(widthScaled()...)을 마쳤으니 이번에 새로 구한 freshZoom 값으로 업데이트
              */
             zoom = freshZoom;
           }
@@ -367,8 +366,7 @@ public class Camera {
   }
 
   /**
-   * 카메라가 가로, 세로 방향에 대해 게임월드를 벗어난 길이를 구한다. 해당 값은 hGapLength, vGapLength 필드에
-   * 저장된다.
+   * 카메라가 가로, 세로 방향에 대해 게임월드를 벗어난 길이를 구한다. 해당 값은 hGapLength, vGapLength 필드에 저장된다.
    */
   private void getCameraOutLength() {
     hGapLength = 0;
@@ -394,12 +392,13 @@ public class Camera {
     vScrollScale = (int) (vGapLength / speedScaleCell);
     vScrollScale = Math.max(minScrollScale, Math.min(maxScrollScale, vScrollScale));
 
-    AppManager.printDetailLog("gap level: " + hScrollScale + ", " + vScrollScale + "(per " + speedScaleCell + ")");
+    AppManager.printDetailLog("gap level: " + hScrollScale + ", " + vScrollScale + "(per "
+        + speedScaleCell + ")");
   }
 
   /**
-   * 카메라가 게임월드의 크기를 벗어났는지 검사한다. 벗어났다면 true를 반환하고, 한 방향도 벗어나지 않았으면 false를 반환한다.
-   * 만약, 좌/우/상/하 어디로든 벗어난 곳이 있다면 outDirection 필드에 벗어난 방향을 기록한다.
+   * 카메라가 게임월드의 크기를 벗어났는지 검사한다. 벗어났다면 true를 반환하고, 한 방향도 벗어나지 않았으면 false를 반환한다. 만약, 좌/우/상/하 어디로든 벗어난
+   * 곳이 있다면 outDirection 필드에 벗어난 방향을 기록한다.
    */
   private boolean checkCameraOut() {
     // 현재 상태를 초기화한다.

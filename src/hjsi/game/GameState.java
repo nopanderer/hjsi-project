@@ -33,15 +33,11 @@ public class GameState {
   /**
    * 아직 자리가 확정되지 않은 배치할 타워를 가리킨다. null이 아니라면 게임 화면이 배치모드로 표시된다.
    */
-  public Tower inHand = null;
+  private Tower inHand = null;
   /**
-   * 타워가 차지하는 자리 크기 가로
+   * 타워 배치를 완료하기 전에 배치모드를 끄면, 코인으로 되돌려 받는게 아니라 타워를 잠시 보관한다.
    */
-  private static final int TOWER_SPACE_WIDTH = 96;
-  /**
-   * 타워가 차지하는 자리 크기 세로
-   */
-  private static final int TOWER_SPACE_HEIGHT = 96;
+  private Tower keepingTower = null;
   /**
    * 현재 게임이 진행된 시간을 나타낸다.
    */
@@ -129,14 +125,45 @@ public class GameState {
   /**
    * 게임을 배치모드로 전환하고 랜덤으로 타워를 생성하여 반환한다.
    * 
-   * @returns 토큰이 충분하다면 true를 반환하고, 토큰이 부족하다면 false를 반환한다.
+   * @returns 토큰이 충분하다면 임의의 타워를 반환하고, 토큰이 부족하다면 null을 반환한다.
    */
-  public boolean intoDeployMode() {
-    // 1. 유저 정보에서 가지고 있는 토큰 수를 확인한다. 부족하면 false를 반환한다.
-    // 2. 토큰 수에 알맞은 등급의 임의의 타워를 생성한다.
-    // 타워 구매 도우미(팩토리 클래스)를 이용해서 타워를 생성한다.
-    inHand = DataManager.createTower(1);
-    return true;
+  public boolean onDeployMode() {
+    // 키핑해둔 타워가 있으면 다시 배치모드로 꺼낸다.
+    if (inHand == null && keepingTower != null) {
+      inHand = keepingTower;
+      keepingTower = null;
+      return true;
+
+      // 배치해야되는 타워가 있는대 배치버튼을 눌렀으면 타워를 없애지 않고 키핑한다.
+    } else if (inHand != null && keepingTower == null) {
+      keepingTower = inHand;
+      inHand = null;
+      return false;
+
+      // 유저 정보에서 가지고 있는 토큰 수를 확인한다. 부족하면 false를 반환한다.
+    } else if (getCoin() < 3) {
+      return false;
+
+    } else {
+      // 토큰 수에 알맞은 등급의 임의의 타워를 생성한다.
+      int spentCoin = 0;
+      int purchaseTier = 0;
+      if (getCoin() >= 7) {
+        spentCoin = 7;
+        purchaseTier = 2;
+      } else if (getCoin() >= 5) {
+        spentCoin = 5;
+        purchaseTier = 1;
+      } else if (getCoin() >= 3) {
+        spentCoin = 3;
+        purchaseTier = 0;
+      }
+      setCoin(getCoin() - spentCoin);
+
+      // 타워를 생성한다.
+      inHand = DataManager.createRandomTowerByTier(purchaseTier);
+      return true;
+    }
   }
 
   public void deployTower(int x, int y) {
@@ -210,6 +237,10 @@ public class GameState {
     if (towers.size() == 0)
       towers = null;
     return towers;
+  }
+
+  public void setCoin(int coin) {
+    userCoin = coin;
   }
 
   public void makeFace() {

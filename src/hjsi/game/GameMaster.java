@@ -130,6 +130,8 @@ public class GameMaster implements Runnable {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+
+    TimeManager.stopTime();
   }
 
   /**
@@ -143,6 +145,7 @@ public class GameMaster implements Runnable {
     running = true;
     waveDone = false;
     // workerThread.interrupt(); // 대기 중인 스레드 바로 깨우기 (되는지 모르겠음)
+    TimeManager.startTime();
   }
 
   /**
@@ -151,6 +154,7 @@ public class GameMaster implements Runnable {
   public void pauseGame() {
     AppManager.printSimpleLog();
     running = false;
+    TimeManager.pauseTime();
   }
 
 }

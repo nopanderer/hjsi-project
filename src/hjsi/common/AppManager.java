@@ -39,11 +39,11 @@ public class AppManager {
   /**
    * 기기의 해상도와 비교할 기준 해상도(가로)
    */
-  private static final float standardWidth = 1920f;
+  public static final float STANDARD_WIDTH = 1920f;
   /**
    * 기기의 해상도와 비교할 기준 해상도(세로)
    */
-  private static final float standardHeight = 1080f;
+  public static final float STANDARD_HEIGHT = 1080f;
   /**
    * 해상도 조정을 위한 비율 변수
    */
@@ -113,7 +113,8 @@ public class AppManager {
    * 메소드의 호출 여부를 확인하기 위해 사용한다.
    */
   public static void printSimpleLog() {
-    Log.v(getTagPrefix("메소드 호출"), getClassMethodName(true) + " --------> " + getClassMethodName(false) + " 호출되었음");
+    Log.v(getTagPrefix("메소드 호출"), getClassMethodName(true) + " --------> "
+        + getClassMethodName(false) + " 호출되었음");
   }
 
   public static void printEventLog(MotionEvent event) {
@@ -149,7 +150,8 @@ public class AppManager {
         logMsg.append("ACTION_HOVER_EXIT");
         break;
     }
-    int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+    int index =
+        (action & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
     switch (action & MotionEvent.ACTION_MASK) {
       case MotionEvent.ACTION_POINTER_DOWN:
         logMsg.append("ACTION_POINTER_DOWN(" + index + ")");
@@ -271,8 +273,8 @@ public class AppManager {
   }
 
   public void setDisplayFactor(int deviceWidth, int deviceHeight) {
-    float horizontalRatio = deviceWidth / standardWidth;
-    float verticalRatio = deviceHeight / standardHeight;
+    float horizontalRatio = deviceWidth / STANDARD_WIDTH;
+    float verticalRatio = deviceHeight / STANDARD_HEIGHT;
     displayRatioFactor = Math.max(horizontalRatio, verticalRatio);
     printDetailLog("비율 변수: " + displayRatioFactor);
   }
@@ -281,14 +283,18 @@ public class AppManager {
     return displayRatioFactor;
   }
 
+  public int getDisplayWidth() {
+    return (int) (STANDARD_WIDTH * displayRatioFactor);
+  }
+
   /**
    * 주어진 경로 아래의 모든 파일을 HashMap에 넣어서 반환한다.
    * 
    * @param findPath 의도한 결과를 얻기 위해서는 반드시 한 단계의 경로 정도는 입력해야 한다. ""과 같은 빈 문자열을 입력하면 안된다.
    * @param assetManager assets 폴더에 접근하기 위한 <strong>AssetManager</strong> 객체
    * 
-   * @return 경로 및 확장자를 제외한 파일 이름을 키로 하고, 전체 경로를 값으로 갖는 <strong>HashMap</strong> 객체, 아무 파일도
-   *         없다면 <strong>null</strong>
+   * @return 경로 및 확장자를 제외한 파일 이름을 키로 하고, 전체 경로를 값으로 갖는 <strong>HashMap</strong> 객체, 아무 파일도 없다면
+   *         <strong>null</strong>
    */
   public static HashMap<String, String> getPathMap(String findPath) {
     if (getInstance().assetManager == null) {
@@ -326,7 +332,8 @@ public class AppManager {
         if (subList.length == 0) {
           // 하위 목록 수가 0이면 현재 작업경로는 파일인 경우에 해당한다. (빈 폴더는 아예 list() 메소드에서 반환되지 않는 듯)
           // 부모 디렉토리 경로->(img/common/) background (.png)<-확장자
-          String fileName = workingPath.substring(workingPath.lastIndexOf('/') + 1, workingPath.indexOf('.'));
+          String fileName =
+              workingPath.substring(workingPath.lastIndexOf('/') + 1, workingPath.indexOf('.'));
 
           // 이미 fileName(동일한 key)에 해당하는 개체가 들어가 있는 경우에 대한 처리
           String old = pathMap.put(fileName, workingPath);
@@ -423,7 +430,8 @@ public class AppManager {
       printInfoLog("\"" + path + "\"", "원본 용량: " + convertByteUnit(is.available()));
       bm = BitmapFactory.decodeStream(is, null, opts);
       bm =
-          Bitmap.createScaledBitmap(bm, (int) (bm.getWidth() * getInstance().displayRatioFactor + 0.5f),
+          Bitmap.createScaledBitmap(bm,
+              (int) (bm.getWidth() * getInstance().displayRatioFactor + 0.5f),
               (int) (bm.getHeight() * getInstance().displayRatioFactor + 0.5f), false);
       is.close();
       printInfoLog("\"" + path + "\"", bitmapToString(bm) + " 읽기 성공");
