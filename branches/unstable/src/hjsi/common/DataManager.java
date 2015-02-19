@@ -124,4 +124,40 @@ public class DataManager {
     }
     return new Tower(id, name, tier, dmg, atkSpeed, range, face);
   }
+
+  /**
+   * 특정 등급의 타워들 중에 아무 타워를 랜덤으로 생성한다.
+   * 
+   * @param tierArg 랜덤으로 생성할 타워의 등급
+   * @return 지정한 등급의 임의의 타워 객체 혹은 null
+   */
+  public static Tower createRandomTowerByTier(int tierArg) {
+    String[] columns = "id,name,tier,damage,attackspeed,range".split(",");
+
+    SQLiteDatabase db = databaseHelper.getReadableDatabase();
+    Cursor cursor =
+        db.query(TABLE_TOWERINFO, columns, "tier=?", new String[] {String.valueOf(tierArg)}, null,
+            null, null);
+    // 지정된 티어의 전체 타워 범위 내에서 랜덤 넘버가 타워의 인덱스
+    cursor.moveToPosition((int) (Math.random() * cursor.getCount()));
+
+    int id = cursor.getInt(0);
+    String name = cursor.getString(1);
+    int tier = cursor.getInt(2);
+    int dmg = cursor.getInt(3);
+    int atkSpeed = cursor.getInt(4);
+    int range = cursor.getInt(5);
+
+    String fileName = "tower" + id;
+    Bitmap face = AppManager.getBitmap(fileName);
+    if (face == null) {
+      try {
+        face = AppManager.readImageFile("img/towers/" + fileName + ".png", null);
+        AppManager.addBitmap(fileName, face);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    return new Tower(id, name, tier, dmg, atkSpeed, range, face);
+  }
 }

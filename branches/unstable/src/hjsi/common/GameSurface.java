@@ -142,11 +142,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         /* 맵 배경을 그린다. */
         canvas.drawBitmap(AppManager.getBitmap("background"), 0, 0, null);
 
-        // 배치에 필요한 UI를 그린다.
+        // 배치모드 UI를 그린다.
         if (GameState.getInstance().checkDeployMode()) {
           int cellX = 96, cellY = 72;
-          for (int i = 0; i * cellX < 1920; i++) {
-            for (int j = 0; j * cellY < 1080; j++) {
+          for (int i = 0; i * cellX < AppManager.STANDARD_WIDTH; i++) {
+            for (int j = 0; j * cellY < AppManager.STANDARD_HEIGHT; j++) {
               canvas.drawRect(i * cellX, j * cellY, (i + 1) * cellX, (j + 1) * cellY, gridPaint);
             }
           }
