@@ -6,7 +6,6 @@ import hjsi.common.GameSurface;
 import hjsi.game.GameMaster;
 import hjsi.game.GameState;
 import hjsi.game.Unit;
-import hjsi.timer.TimeManager;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
@@ -99,7 +98,6 @@ public class Game extends Base implements OnClickListener {
 
     if (gameMaster != null) {
       gameMaster.pauseGame();
-      TimeManager.pauseTime();
       btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
     }
 
@@ -125,7 +123,6 @@ public class Game extends Base implements OnClickListener {
 
     if (gameMaster != null) {
       gameMaster.quitGame();
-      TimeManager.stopTime();
     }
 
     if (music != null) {
@@ -164,23 +161,15 @@ public class Game extends Base implements OnClickListener {
       if (btnPlay.isChecked()) {
         btnPlay.setBackgroundDrawable(drawableBtnPlay_Pause);
         gameMaster.playGame();
-        TimeManager.startTime();
       } else {
         btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
         gameMaster.pauseGame();
-        showSettingMenu();
-        TimeManager.pauseTime();
       }
     } else if (v == btnStore) {
       Intent Store = new Intent(Game.this, Store.class);
       startActivity(Store);
     } else if (v == btnDeploy) {
-      if (GameState.getInstance().checkDeployMode() == false) {
-        if (GameState.getInstance().intoDeployMode() == false) {
-          GameState.getInstance().inHand = null;
-        }
-      } else
-        GameState.getInstance().inHand = null;
+      GameState.getInstance().onDeployMode();
     }
   }
 
@@ -196,14 +185,14 @@ public class Game extends Base implements OnClickListener {
     /*
      * 카메라가 처리할 이벤트가 아닌 경우는 보통의 클릭 동작이며, 여러가지 게임 개체에 대한 동작을 수행한다. 가장 먼저, 화면 터치 좌표를 게임월드의 좌표로 변환한다.
      */
-    int x = (int) ((event.getX() + camera.getX()) / camera.getScale());
-    int y = (int) ((event.getY() + camera.getY()) / camera.getScale());
+    int logicalX = (int) ((event.getX() + camera.getX()) / camera.getScale());
+    int logicalY = (int) ((event.getY() + camera.getY()) / camera.getScale());
 
-    Unit unit = GameState.getInstance().getUnit(x, y);
+    Unit unit = GameState.getInstance().getUnit(logicalX, logicalY);
     if (unit != null) {
       AppManager.printInfoLog(unit.toString());
     } else if (GameState.getInstance().checkDeployMode()) {
-      GameState.getInstance().deployTower(x, y);
+      GameState.getInstance().deployTower(logicalX, logicalY);
     }
 
 
@@ -223,7 +212,6 @@ public class Game extends Base implements OnClickListener {
       btnPlay.setChecked(false);
       btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
       gameMaster.pauseGame();
-      TimeManager.pauseTime();
     }
   }
 }

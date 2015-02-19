@@ -46,6 +46,9 @@ public class Loader extends Base {
     // 앞으로 AppManager에서 사용할 AssetManager를 설정하고 미리 초기화한다.
     AppManager.getInstance().setAssetManager(getAssets());
 
+    /*
+     * 기기의 해상도를 구해서 AppManager에 비율 변수를 설정한다.
+     */
     Rect displayRect = new Rect();
     getWindowManager().getDefaultDisplay().getRectSize(displayRect);
     AppManager.getInstance().setDisplayFactor(displayRect.right, displayRect.bottom);
@@ -124,8 +127,8 @@ public class Loader extends Base {
         }
 
         /*
-         * 어플리케이션 최초 실행시, 사용할 데이터베이스를 구축해놓는다. TODO 이 부분을 로더에서 제일 먼저 실행해야 하는데, 현재 GameState
-         * 생성자에서는 위에서 로드하는 이미지를 사용해서 어쩔 수 없이 이걸 밑에서 실행함.
+         * 어플리케이션 최초 실행시, 사용할 데이터베이스를 구축해놓는다. TODO 이 부분을 로더에서 제일 먼저 실행해야 하는데, 현재 GameState 생성자에서는
+         * 위에서 로드하는 이미지를 사용해서 어쩔 수 없이 이걸 밑에서 실행함.
          */
         DataManager.loadDatabase(getApplicationContext(), 1);
 
