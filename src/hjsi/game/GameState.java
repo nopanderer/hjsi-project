@@ -214,7 +214,7 @@ public class GameState {
 
   public void makeFace() {
     Options option = new Options();
-    option.inSampleSize = 16;
+    // option.inSampleSize = 16;
     String key = "mob" + wave;
 
     try {
@@ -223,9 +223,9 @@ public class GameState {
       e.printStackTrace();
     }
 
-    if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64)) {
-      mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
-    }
+    // if ((mImgMob.getWidth() != 64) || (mImgMob.getHeight() != 64)) {
+    // mImgMob = Bitmap.createScaledBitmap(mImgMob, 64, 64, true);
+    // }
 
     AppManager.addBitmap(key, mImgMob);
   }
