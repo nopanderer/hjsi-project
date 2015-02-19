@@ -77,13 +77,17 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     stationIndex = 0;
     station = GameState.getInstance().stations.get(stationIndex);
 
+
     curFrame = 0;
-    frameNum = 14;
+    frameNum = 4;
     width = face.getWidth() / frameNum;
     height = face.getHeight();
     rect = new Rect(0, 0, this.width, this.height);
-    framePeriod = 1000 / 14;
+    framePeriod = 1000 / 4;
     lastTime = 0l;
+
+    setX(x);
+    setY(y);
   }
 
   @Override
