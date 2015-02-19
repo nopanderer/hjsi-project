@@ -79,11 +79,10 @@ public class GameState {
     TimeManager.registerCallbackTimer(1000, clock, -1).start();
 
     /*
-     * 동상 타워 추가
+     * 동상 추가
      */
     makeFace();
     units.add(new Statue(5, 5, AppManager.getBitmap("statue1")));
-    units.add(new Tower(1, 320, 170, AppManager.getBitmap("tower1")));
 
     /* 정류장 삽입 */
     stations.add(new Station(80, 580));
@@ -117,9 +116,7 @@ public class GameState {
     userWave = wave;
     userGold = gold;
     userCoin = coin;
-    for (Tower tower : towers) {
-      units.add(tower);
-    }
+    units.addAll(towers);
   }
 
   /**
