@@ -273,8 +273,12 @@ public class TimeManager implements Runnable {
         TimerRunnable callBack = timer.getCallBackTask();
         // 콜백 모드가 아닌 수동 타이머는 카운트 완료 리스트로 보낸다.
         if (callBack == null) {
-          getInstance().countList.remove(timer);
           addToCountDoneList(timer);
+        }
+      }
+      synchronized (countDoneList) {
+        for (Timer timer : countDoneList) {
+          countList.remove(timer);
         }
       }
     }
