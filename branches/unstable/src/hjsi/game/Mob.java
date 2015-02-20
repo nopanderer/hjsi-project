@@ -88,7 +88,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     lap = 0;
     this.wave = wave;
     moveTime = 0l;
-    attackTime = 0;
+    attackTime = 0l;
 
     hpMax = 100;
     hp = hpMax;
