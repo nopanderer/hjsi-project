@@ -11,9 +11,9 @@ import android.graphics.Bitmap;
 public class Projectile extends Unit implements Movable {
 
   /**
-   * 타겟 몹
+   * 타겟
    */
-  Mob targetMob;
+  Unit target;
   /**
    * 투사체 속도
    */
@@ -42,9 +42,9 @@ public class Projectile extends Unit implements Movable {
   private static final int ICED = 5;
   private static final int CHAIN = 6;
 
-  public Projectile(float x, float y, int damage, Mob targetMob, Bitmap face) {
+  public Projectile(float x, float y, int damage, Unit target, Bitmap face) {
     super(Unit.TYPE_ETC, 0, x, y, face);
-    this.targetMob = targetMob;
+    this.target = target;
 
     moveSpeed = 3;
     type = NORMAL;
@@ -62,35 +62,44 @@ public class Projectile extends Unit implements Movable {
     else
       return;
 
+    /* 충돌검사 */
+    if ((x >= target.x && x <= targetXWidth()) && y >= target.y && y <= targetYHeight()) {
+      destroyed = true;
+      ((Hittable) target).hit(damage);
+    }
+
     /* 투사체에서 몹까지의 벡터 */
-    vector.set(targetMob.cntrX - x, targetMob.cntrY - y);
+    vector.set(target.cntrX - x, target.cntrY - y);
     /* 벡터 정규화 */
     vector.nor();
     /* 투사체 이동속도 스칼라 곱 */
     vector.mul(moveSpeed);
 
-    /* 충돌검사 */
-    if ((x >= targetMob.x && x <= targetXWidth()) && y >= targetMob.y && y <= targetYHeight()) {
-      destroyed = true;
-      targetMob.hit(damage);
-    }
 
     /* 유도 알고리즘 */
+    if (target instanceof Mob) {
+      Mob mob = (Mob) target;
 
-    Vector2d desired = new Vector2d(targetMob.vector.x + vector.x, targetMob.vector.y + vector.y);
+      Vector2d desired = new Vector2d(mob.vector.x + vector.x, mob.vector.y + vector.y);
 
-    x += desired.x;
-    y += desired.y;
-    cntrX += desired.x;
-    cntrY += desired.y;
+      x += desired.x;
+      y += desired.y;
+      cntrX += desired.x;
+      cntrY += desired.y;
+    } else if (target instanceof Statue) {
+      x += vector.x;
+      y += vector.y;
+      cntrX += vector.x;
+      cntrY += vector.y;
+    }
   }
 
   private float targetXWidth() {
-    return targetMob.x + targetMob.width;
+    return target.x + target.width;
   }
 
   private float targetYHeight() {
-    return targetMob.y + targetMob.height;
+    return target.y + target.height;
   }
 
   @Override
