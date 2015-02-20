@@ -98,9 +98,9 @@ public class Tower extends Unit implements Attackable {
         if (mob == null)
           continue;
 
-        else if (inRange(this, mob)) {
+        else if (mob.destroyed == false && inRange(this, mob)) {
           GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, mob, AppManager
-              .getInstance().getBitmap("proj1")));
+              .getBitmap("proj1")));
           break;
         }
       }

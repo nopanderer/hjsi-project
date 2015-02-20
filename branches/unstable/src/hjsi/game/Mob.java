@@ -150,9 +150,9 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
           if (statue == null)
             continue;
 
-          else if (inRange(this, statue)) {
+          else if (statue.destroyed == false && inRange(this, statue)) {
             GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, statue,
-                AppManager.getInstance().getBitmap("proj1")));
+                AppManager.getBitmap("proj1")));
             break;
           }
         }
@@ -182,7 +182,6 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
       stationIndex++;
       if (stationIndex >= GameState.getInstance().stations.size()) {
         lap++;
-        GameState.getInstance().wave++;
         stationIndex = 0;
         station = GameState.getInstance().stations.get(stationIndex);
         return;
