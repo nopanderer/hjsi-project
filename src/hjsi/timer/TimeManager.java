@@ -243,6 +243,24 @@ public class TimeManager implements Runnable {
     timer.restart();
   }
 
+  /**
+   * 모든 수동 타이머에 대해서 카운트 완료 처리를 한다. (쿨타임 초기화)
+   */
+  private void allReadyPassiveTimer() {
+    synchronized (getInstance().countList) {
+      Iterator<Timer> timers = getInstance().countList.iterator();
+      while (timers.hasNext()) {
+        Timer timer = timers.next();
+        TimerRunnable callBack = timer.getCallBackTask();
+        // 콜백 모드가 아닌 수동 타이머는 카운트 완료 리스트로 보낸다.
+        if (callBack == null) {
+          getInstance().countList.remove(timer);
+          addToCountDoneList(timer);
+        }
+      }
+    }
+  }
+
   public static TimerRunnable nextTask() {
     synchronized (getInstance().taskQueue) {
       return getInstance().taskQueue.poll();
