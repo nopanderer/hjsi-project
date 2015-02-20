@@ -11,12 +11,16 @@ import java.util.LinkedList;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
+import android.graphics.Rect;
 
 /**
  * 게임에 필요한 정보를 저장한다.
  */
 public class GameState {
   private static GameState uniqueInstance;
+  public static final int WORLD_WIDTH = 3840;
+  public static final int WORLD_HEIGHT = 2160;
+
   /**
    * 마지막으로 클리어한 웨이브
    */
@@ -38,6 +42,17 @@ public class GameState {
    * 타워 배치를 완료하기 전에 배치모드를 끄면, 코인으로 되돌려 받는게 아니라 타워를 잠시 보관한다.
    */
   private Tower keepingTower = null;
+
+  private static final int AREA_LEFT = 800;
+  private static final int AREA_RIGHT = 3040;
+  private static final int AREA_TOP = 450;
+  private static final int AREA_BOTTOM = 1710;
+  /**
+   * 타워가 배치되는 구역
+   */
+  private Rect towersArea = new Rect(AREA_LEFT, AREA_TOP, AREA_RIGHT, AREA_BOTTOM);
+  public static final int TOWERS_WIDTH = (int) ((AREA_RIGHT - AREA_LEFT) / 10 + 0.5);
+  public static final int TOWERS_HEIGHT = (int) ((AREA_BOTTOM - AREA_TOP) / 8 + 0.5);
   /**
    * 현재 게임이 진행된 시간을 나타낸다.
    */
@@ -157,12 +172,17 @@ public class GameState {
       setCoin(getCoin() - spentCoin);
 
       // 타워를 생성한다.
-      inHand = DataManager.createRandomTowerByTier(purchaseTier);
+      inHand = DataManager.createRandomTowerByTier(0);
+      AppManager.printInfoLog(inHand.getId() + "번 타워 구매함.");
       return true;
     }
   }
 
   public void deployTower(int x, int y) {
+    // 1. 현재 터치한 좌표가 배치 가능한 구역인지 확인한다. (맵의 가운데)
+
+    // 2. 현재 터치한 좌표의 자리가 비어있는지 검사한다. (칸 단위로)
+
     inHand.setX(x);
     inHand.setY(y);
     units.add(inHand);
@@ -233,6 +253,21 @@ public class GameState {
     if (towers.size() == 0)
       towers = null;
     return towers;
+  }
+
+  public Rect getTowersArea() {
+    return towersArea;
+  }
+
+  /**
+   * 그릴 때만 호출하시오.
+   * 
+   * @param ratio
+   * @return
+   */
+  public Rect getTowersArea(float ratio) {
+    return new Rect((int) (towersArea.left * ratio), (int) (towersArea.top * ratio),
+        (int) (towersArea.right * ratio), (int) (towersArea.bottom * ratio));
   }
 
   public void setCoin(int coin) {
