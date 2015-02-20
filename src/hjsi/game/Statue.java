@@ -7,11 +7,10 @@ import hjsi.timer.TimeManager;
 import hjsi.timer.Timer;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 
 /**
- * 체력, 공격속도 등과 같은 능력치는 변수 타입은 정수형이지만 소수점으로 생각하고 다룬다. float 계산의 성능과 정확성 때문이다. 예를
- * 들면, 1초당 10.5의 체력을 회복할 경우 변수에 들어갈 값은 1050이다.
+ * 체력, 공격속도 등과 같은 능력치는 변수 타입은 정수형이지만 소수점으로 생각하고 다룬다. float 계산의 성능과 정확성 때문이다. 예를 들면, 1초당 10.5의 체력을
+ * 회복할 경우 변수에 들어갈 값은 1050이다.
  */
 public class Statue extends Unit implements Hittable {
 
@@ -32,10 +31,6 @@ public class Statue extends Unit implements Hittable {
    */
   private int armor;
 
-  /* 처리를 위한 변수 */
-  private Paint paintText;
-  private String hpText;
-
   /*
    * 쿨타임
    */
@@ -52,9 +47,6 @@ public class Statue extends Unit implements Hittable {
     hpMax = 1000000; // 1000.000
     hp = 100000; // 100.000
     armor = 10000; // 10.000
-
-    paintText = new Paint();
-    paintText.setTextSize(32);
 
     /*
      * 타이머 생성
@@ -83,12 +75,7 @@ public class Statue extends Unit implements Hittable {
   @Override
   public void draw(Canvas canvas) {
     super.draw(canvas);
-
-    int hpCur = this.hp / 1000;
-    int hpMax = this.hpMax / 1000;
-    hpText = hpCur + "/" + hpMax + "(" + (int) ((float) hpCur / (float) hpMax * 100f) + "%)";
-
-    canvas.drawText(hpText, (float) x, (float) (y + height + 42), paintText);
+    showHealthBar(hpMax, hp, canvas);
   }
 
   /*

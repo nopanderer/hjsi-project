@@ -78,9 +78,8 @@ public class Projectile extends Unit implements Movable {
 
     /* 유도 알고리즘 */
     if (target instanceof Mob) {
-      Mob mob = (Mob) target;
-
-      Vector2d desired = new Vector2d(mob.vector.x + vector.x, mob.vector.y + vector.y);
+      Vector2d desired =
+          new Vector2d(((Mob) target).vector.x + vector.x, ((Mob) target).vector.y + vector.y);
 
       x += desired.x;
       y += desired.y;
