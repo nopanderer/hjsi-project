@@ -1,5 +1,6 @@
 package hjsi.game;
 
+import hjsi.common.AppManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -45,8 +46,11 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
    */
   public int lap;
 
-  /* 리젠 */
-  private long beforeTime;
+  /* 이동 간격시간 */
+  private long movePeriod;
+  /* 공격 시간간격 */
+  private long attackPeriod;
+
   private int sleep = 10;
 
   public Vector2d vector;
@@ -83,11 +87,13 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
     lap = 0;
     this.wave = wave;
-    beforeTime = System.currentTimeMillis();
+    movePeriod = System.currentTimeMillis();
+    attackPeriod = System.currentTimeMillis();
 
     hpMax = 100;
     hp = hpMax;
 
+    attackSpeed = 2000;
     moveSpeed = 1;
     range = 400;
 
@@ -128,8 +134,31 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public void attack() {
-    // TODO Auto-generated method stub
+    if (lap == 1) {
+      if (System.currentTimeMillis() - attackPeriod > attackSpeed)
+        attackPeriod = System.currentTimeMillis();
+      else
+        return;
 
+      for (int i = 0; i < GameState.getInstance().units.size(); i++) {
+
+        if (GameState.getInstance().units.get(i) instanceof Statue) {
+
+          Statue statue;
+          statue = (Statue) GameState.getInstance().units.get(i);
+
+          if (statue == null)
+            continue;
+
+          else if (inRange(this, statue)) {
+            GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, statue,
+                AppManager.getInstance().getBitmap("proj1")));
+            break;
+          }
+        }
+      }
+    } else
+      return;
   }
 
   @Override
@@ -137,8 +166,8 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     // TODO Auto-generated method stub
     // 10밀리세컨드 마다 1 픽셀씩 이동
 
-    if (System.currentTimeMillis() - beforeTime > sleep)
-      beforeTime = System.currentTimeMillis();
+    if (System.currentTimeMillis() - movePeriod > sleep)
+      movePeriod = System.currentTimeMillis();
     else
       return;
 
@@ -155,6 +184,9 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
       stationIndex++;
       if (stationIndex >= GameState.getInstance().stations.size()) {
         lap++;
+        GameState.getInstance().wave++;
+        stationIndex = 0;
+        station = GameState.getInstance().stations.get(stationIndex);
         return;
       }
 
