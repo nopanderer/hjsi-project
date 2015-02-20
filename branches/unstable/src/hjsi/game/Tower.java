@@ -20,7 +20,7 @@ public class Tower extends Unit implements Attackable {
   private int tier;
   public String imgName;
 
-  private long beforeTime = System.currentTimeMillis();
+  private long beforeTime = 0l;
 
   private static final int PRIMITIVE = 1;
   private static final int BASIC = 2;
@@ -83,10 +83,11 @@ public class Tower extends Unit implements Attackable {
 
   @Override
   public void attack() {
-    if (System.currentTimeMillis() - beforeTime > attackSpeed)
-      beforeTime = System.currentTimeMillis();
+    if (GameMaster.gameTime > beforeTime + attackSpeed)
+      beforeTime = GameMaster.gameTime;
     else
       return;
+
     for (int i = 0; i < GameState.getInstance().units.size(); i++) {
 
       if (GameState.getInstance().units.get(i) instanceof Mob) {

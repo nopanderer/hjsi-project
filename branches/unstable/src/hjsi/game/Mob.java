@@ -46,10 +46,10 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
    */
   public int lap;
 
-  /* 이동 간격시간 */
-  private long movePeriod;
-  /* 공격 시간간격 */
-  private long attackPeriod;
+  /* 최근 이동 시간 */
+  private long moveTime;
+  /* 최근 공격 시간 */
+  private long attackTime;
 
   private int sleep = 10;
 
@@ -87,8 +87,8 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
     lap = 0;
     this.wave = wave;
-    movePeriod = System.currentTimeMillis();
-    attackPeriod = System.currentTimeMillis();
+    moveTime = 0l;
+    attackTime = 0;
 
     hpMax = 100;
     hp = hpMax;
@@ -135,8 +135,8 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   @Override
   public void attack() {
     if (lap == 1) {
-      if (System.currentTimeMillis() - attackPeriod > attackSpeed)
-        attackPeriod = System.currentTimeMillis();
+      if (GameMaster.gameTime > attackTime + attackSpeed)
+        attackTime = GameMaster.gameTime;
       else
         return;
 
@@ -163,11 +163,9 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public void move() {
-    // TODO Auto-generated method stub
     // 10밀리세컨드 마다 1 픽셀씩 이동
-
-    if (System.currentTimeMillis() - movePeriod > sleep)
-      movePeriod = System.currentTimeMillis();
+    if (GameMaster.gameTime > moveTime + sleep)
+      moveTime = GameMaster.gameTime;
     else
       return;
 
@@ -210,6 +208,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     }
   }
 
+  @Override
   public void dead() {
     destroyed = true;
     GameState.getInstance().curMob--;

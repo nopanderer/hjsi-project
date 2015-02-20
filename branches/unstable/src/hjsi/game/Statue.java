@@ -91,7 +91,15 @@ public class Statue extends Unit implements Hittable {
 
   @Override
   public void hit(int damage) {
-    // TODO Auto-generated method stub
+    if (destroyed == false) {
+      hp -= damage;
+      if (hp <= 0)
+        dead();
+    }
+  }
 
+  @Override
+  public void dead() {
+    destroyed = true;
   }
 }

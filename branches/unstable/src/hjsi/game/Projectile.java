@@ -52,7 +52,7 @@ public class Projectile extends Unit implements Movable {
 
     vector = new Vector2d();
 
-    beforeTime = System.currentTimeMillis();
+    beforeTime = 0l;
   }
 
   @Override
