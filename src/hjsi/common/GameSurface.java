@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Rect;
 import android.util.TypedValue;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -26,6 +27,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
    * 카메라 클래스
    */
   private Camera camera;
+  /**
+   * 화면 대 게임월드 비율
+   */
+  private float screenRatio;
 
   /*
    * 각종 정보를 출력하는데 사용함
@@ -47,6 +52,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   public GameSurface(Context context, Camera camera) {
     super(context);
     this.camera = camera;
+    screenRatio = camera.getScreenWidth() / (float) GameState.WORLD_WIDTH;
 
     // 게임 내 변수 출력용 페인트 객체 생성
     mPaintInfo = new Paint();
@@ -144,10 +150,13 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
 
         // 배치모드 UI를 그린다.
         if (GameState.getInstance().checkDeployMode()) {
-          int cellX = 96, cellY = 72;
-          for (int i = 0; i * cellX < AppManager.STANDARD_WIDTH; i++) {
-            for (int j = 0; j * cellY < AppManager.STANDARD_HEIGHT; j++) {
-              canvas.drawRect(i * cellX, j * cellY, (i + 1) * cellX, (j + 1) * cellY, gridPaint);
+          Rect area = GameState.getInstance().getTowersArea(screenRatio);
+          for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 8; j++) {
+              canvas.drawRect(area.left + i * GameState.TOWERS_WIDTH * screenRatio, area.top + j
+                  * GameState.TOWERS_HEIGHT * screenRatio, area.left + (i + 1)
+                  * GameState.TOWERS_WIDTH * screenRatio, area.top + (j + 1)
+                  * GameState.TOWERS_HEIGHT * screenRatio, gridPaint);
             }
           }
         }
@@ -194,7 +203,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
       {
         mFps = fps;
         fps = 0;
-        fpsElapsedTime = 0L;
+        fpsElapsedTime -= 1000L;
       }
     }
 

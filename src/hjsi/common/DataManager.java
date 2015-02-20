@@ -84,8 +84,6 @@ public class DataManager {
 
   /**
    * 게임의 정보를 저장한다.
-   * 
-   * @param state
    */
   public static void save() {
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
@@ -100,7 +98,7 @@ public class DataManager {
     ContentValues values = new ContentValues();
     values.put("wave", GameState.getInstance().getWave());
     values.put("gold", GameState.getInstance().getGold() + 100);
-    values.put("coin", GameState.getInstance().getCoin() + 1);
+    values.put("coin", GameState.getInstance().getCoin() + 3);
     values.put("towers", towers.toString());
     int affectedRows = db.update("user_data", values, "id=?", new String[] {"1"});
     AppManager.printDetailLog("db updated " + affectedRows + " row(s).");

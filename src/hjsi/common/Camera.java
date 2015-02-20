@@ -142,11 +142,11 @@ public class Camera {
     return zoom;
   }
 
-  public int getLimitWidth() {
+  public int getScreenWidth() {
     return screenLimit.right;
   }
 
-  public int getLimitHeight() {
+  public int getScreenHeight() {
     return screenLimit.bottom;
   }
 
@@ -218,6 +218,7 @@ public class Camera {
       case MotionEvent.ACTION_POINTER_DOWN:
         doNotScroll = true; // 두 손가락이 닿는 순간 줌은 시작된거므로 스크롤 금지
         oldDistance = getDistance(event); // 두 손가락의 터치 좌표 사이의 거리를 구함
+        sumMoveDistance.offset(1, 1);
 
         // 줌 터치의 중심점을 구한다
         PointF midpoint = new PointF();
