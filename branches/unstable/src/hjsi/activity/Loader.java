@@ -2,6 +2,7 @@ package hjsi.activity;
 
 import hjsi.common.AppManager;
 import hjsi.common.DataManager;
+import hjsi.game.GameState;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -130,7 +131,7 @@ public class Loader extends Base {
          * 어플리케이션 최초 실행시, 사용할 데이터베이스를 구축해놓는다. TODO 이 부분을 로더에서 제일 먼저 실행해야 하는데, 현재 GameState 생성자에서는
          * 위에서 로드하는 이미지를 사용해서 어쩔 수 없이 이걸 밑에서 실행함.
          */
-        DataManager.loadDatabase(getApplicationContext(), 1);
+        DataManager.loadDatabase(getApplicationContext(), 1, GameState.getInstance());
 
 
 

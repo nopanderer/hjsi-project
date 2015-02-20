@@ -3,6 +3,7 @@ package hjsi.game;
 import hjsi.common.AppManager;
 import hjsi.common.DataManager;
 import hjsi.timer.TimeManager;
+import hjsi.timer.Timer;
 import hjsi.timer.TimerRunnable;
 
 import java.io.IOException;
@@ -77,6 +78,15 @@ public class GameState {
 
   public ArrayList<Station> stations = new ArrayList<Station>();
 
+  private TimerRunnable spawnMob = new TimerRunnable() {
+    @Override
+    public void run() {
+      units.add(new Mob(80, 80, mImgMob, userWave));
+      usedMob++;
+      curMob++;
+    }
+  };
+
   private GameState() {
     AppManager.printSimpleLog();
 
@@ -87,7 +97,7 @@ public class GameState {
       @Override
       public void run() {
         worldTime++;
-        AppManager.printDetailLog("타이머 체크");
+        AppManager.printDetailLog("딸깍...");
       }
     };
     TimeManager.registerCallbackTimer(1000, clock, -1).start();
@@ -95,7 +105,6 @@ public class GameState {
     /*
      * 동상 추가
      */
-    makeFace();
     units.add(new Statue(5, 5, AppManager.getBitmap("statue1")));
 
     /* 정류장 삽입 */
@@ -121,7 +130,7 @@ public class GameState {
    */
   public void purgeGameState() {
     synchronized (GameState.class) {
-      DataManager.save();
+      DataManager.save(this);
       GameState.uniqueInstance = null;
     }
   }
@@ -239,9 +248,9 @@ public class GameState {
   }
 
   /**
-   * 전체 유닛 리스트에서 타워의 목록만 가져온다.
+   * 전체 유닛 목록에서 타워만 가져온다.
    * 
-   * @return 타워가 들어있는 연결리스트 혹은 타워가 아예 없으면 null
+   * @return 타워가 0개 이상 들어있는 연결리스트를 반환한다.
    */
   public LinkedList<Tower> getTowers() {
     LinkedList<Tower> towers = new LinkedList<Tower>();
@@ -250,9 +259,22 @@ public class GameState {
         towers.add((Tower) unit);
       }
     }
-    if (towers.size() == 0)
-      towers = null;
     return towers;
+  }
+
+  /**
+   * 전체 유닛 목록에서 동상만 가져온다.
+   * 
+   * @return 동상이 0개 이상 들어있는 연결리스트를 반환한다.
+   */
+  public LinkedList<Statue> getStatues() {
+    LinkedList<Statue> statues = new LinkedList<Statue>();
+    for (Unit unit : units) {
+      if (unit.getType() == Unit.TYPE_STATUE) {
+        statues.add((Statue) unit);
+      }
+    }
+    return statues;
   }
 
   public Rect getTowersArea() {
@@ -274,7 +296,11 @@ public class GameState {
     userCoin = coin;
   }
 
-  public void makeFace() {
+  public boolean isWaveDone() {
+    return deadMob >= MAX_MOB;
+  }
+
+  public void makeFace(int wave) {
     Options option = new Options();
     // option.inSampleSize = 16;
     String key = "mob" + wave;
@@ -292,20 +318,12 @@ public class GameState {
     AppManager.addBitmap(key, mImgMob);
   }
 
-  public void addMob() {
-    if (GameMaster.gameTime > beforeRegen + regen)
-      beforeRegen = GameMaster.gameTime;
-    else
-      return;
-
-    if (usedMob < MAX_MOB) {
-      units.add(new Mob(80, 80, mImgMob, wave));
-      usedMob++;
-      curMob++;
-    }
-  }
-
-  public void destroyMob() {
+  /**
+   * 지나간 웨이브의 몹은 지워버린다.
+   * 
+   * @param wave 웨이브 정수 값
+   */
+  public void destroyMob(int wave) {
     AppManager.getInstance().recycleBitmap("mob" + wave);
     for (int i = 0; i < units.size(); i++)
       if (units.get(i) instanceof Mob)
@@ -313,22 +331,18 @@ public class GameState {
 
   }
 
-  public boolean nextWave() {
-    if (deadMob == 10) {
-      destroyMob();
-      wave++;
-      // 새로운 비트맵 추가
-      makeFace();
+  public Timer waveReady() {
+    // 새로운 비트맵 추가
+    userWave++;
+    makeFace(userWave);
 
-      curMob = 0;
-      usedMob = 0;
-      deadMob = 0;
+    curMob = 0;
+    usedMob = 0;
+    deadMob = 0;
 
-      return true;
-    }
+    // 이전 웨이브의 몹은 폐기처분한다.
+    destroyMob(userWave - 1);
 
-    else
-      return false;
+    return TimeManager.registerCallbackTimer(1000, spawnMob, MAX_MOB);
   }
-
 }

@@ -266,7 +266,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 현재 웨이브
      */
     canvas.translate(0, yForText);
-    canvas.drawText("Wave: " + GameState.getInstance().wave, xForText, yForText, mPaintInfo);
+    canvas.drawText("Wave: " + GameState.getInstance().getWave(), xForText, yForText, mPaintInfo);
 
     canvas.restore();
   }
