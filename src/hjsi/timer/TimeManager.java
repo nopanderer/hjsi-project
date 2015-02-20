@@ -27,11 +27,18 @@ public class TimeManager implements Runnable {
   private volatile long startTime = 0L; // 시간 측정을 위한 변수
   private volatile long elapsedTime = 0L; // 시간 측정을 위한 변수
 
-  /*
-   * 타이머 목록
+  /**
+   * 카운트다운이 끝나기를 기다리는 타이머 리스트
    */
-  private LinkedList<Timer> countList; // 카운트다운이 끝나기를 기다리는 타이머 리스트
-  private LinkedList<Timer> countDoneList; // 카운트다운이 끝나서 언제든지 행동을 할 수 있는 타이머 리스트
+  private LinkedList<Timer> countList;
+  /**
+   * 카운트다운이 끝나서 언제든지 행동을 할 수 있는 타이머 리스트
+   */
+  private LinkedList<Timer> countDoneList;
+  /**
+   * 반복 횟수가 끝나서 삭제될 타이머 목록
+   */
+  private LinkedList<Timer> finishList;
   /**
    * 대기시간이 끝난 타이머의 작업을 가지고 있는 큐다. 작업을 수행하는 스레드(GameMaster)가 이 작업큐에 들어있는 작업을 꺼내서 수행하게 된다.
    */
@@ -43,6 +50,7 @@ public class TimeManager implements Runnable {
   private TimeManager() {
     countList = new LinkedList<Timer>();
     countDoneList = new LinkedList<Timer>();
+    finishList = new LinkedList<Timer>();
 
     taskQueue = new LinkedList<TimerRunnable>();
 
@@ -146,6 +154,7 @@ public class TimeManager implements Runnable {
            */
           synchronized (countList) {
             Iterator<Timer> timers = countList.iterator();
+
             while (timers.hasNext()) {
               Timer timer = timers.next();
               timer.countdown(elapsedTime);
@@ -156,22 +165,32 @@ public class TimeManager implements Runnable {
                 // CallBack 타이머일 경우
                 if (callBack != null) {
 
-                  // 지정된 반복횟수가 끝났을 경우
-                  if (timer.isFinish()) {
-                    countList.remove(timer); // 지정된 횟수만큼 작업을 반복했으므로 TimeManager의 count 리스트에서 제거
-                    AppManager.printDetailLog(timer + "'s callback is finished.");
-                  } else {
+                  // 지정된 반복 횟수가 남은 경우
+                  if (timer.isFinish() == false) {
                     addTaskQueue(callBack);
                     timer.restart();
+                  } else {
+                    finishList.add(timer);
                   }
 
-                } else {
                   // 콜백 모드가 아닌 수동 타이머는 카운트 완료 리스트로 보낸다.
-                  countList.remove(timer);
+                } else {
                   addToCountDoneList(timer);
                 }
               }
             }
+
+            synchronized (countDoneList) {
+              for (Timer timer : countDoneList) {
+                countList.remove(timer);
+              }
+            }
+
+            for (Timer timer : finishList) {
+              countList.remove(timer); // 지정된 횟수만큼 작업을 반복했으므로 TimeManager의 count 리스트에서 제거
+              AppManager.printDetailLog(timer + "'s callback is finished.");
+            }
+            finishList.clear();
           }
 
           startTime = currentTime;

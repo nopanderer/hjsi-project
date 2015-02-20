@@ -39,8 +39,10 @@ public class DataManager {
 
   /**
    * 유저 데이터를 로드한다. 파일로 저장되어 있는 DB의 버전보다 새로 입력된 DB의 버전이 더 최신일 경우 DB도우미 클래스에서 onUpdate를 호출한다.
+   * 
+   * @param gState 로드한 데이터를 채울 GameState 클래스
    */
-  public static void loadDatabase(Context context, int version) {
+  public static void loadDatabase(Context context, int version, GameState gState) {
     databaseHelper = new AppDatabaseHelper(context, DataManager.DB_NAME, null, version);
     // 최초 실행시 DB 생성도 같이 됨
     SQLiteDatabase db = databaseHelper.getReadableDatabase();
@@ -77,28 +79,31 @@ public class DataManager {
       }
     }
 
-    GameState.getInstance().setUserData(userWave, userGold, userCoin, towerList);
+    gState.setUserData(userWave, userGold, userCoin, towerList);
     cursor.close();
     db.close();
   }
 
   /**
    * 게임의 정보를 저장한다.
+   * 
+   * @param gState 게임 정보를 가지고 있는 GameState 객체
    */
-  public static void save() {
+  public static void save(GameState gState) {
     SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
     // 타워 목록을 가져와서 타워의 id와 x, y 좌표를 저장한다.
     StringBuilder towers = new StringBuilder();
-    for (Tower tower : GameState.getInstance().getTowers()) {
+    for (Tower tower : gState.getTowers()) {
       towers.append(tower.getId()).append(',').append((int) tower.getX()).append(',')
           .append((int) tower.getY()).append(',');
     }
 
     ContentValues values = new ContentValues();
-    values.put("wave", GameState.getInstance().getWave());
-    values.put("gold", GameState.getInstance().getGold() + 100);
-    values.put("coin", GameState.getInstance().getCoin() + 3);
+    // values.put("wave", gState.getWave());
+    values.put("wave", 0); // 테스트를 위해서 웨이브는 저장 안함
+    values.put("gold", gState.getGold() + 100);
+    values.put("coin", gState.getCoin() + 3);
     values.put("towers", towers.toString());
     int affectedRows = db.update("user_data", values, "id=?", new String[] {"1"});
     AppManager.printDetailLog("db updated " + affectedRows + " row(s).");

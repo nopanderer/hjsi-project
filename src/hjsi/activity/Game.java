@@ -87,6 +87,7 @@ public class Game extends Base implements OnClickListener {
 
     /* GameMaster 생성 */
     gameMaster = new GameMaster();
+    GameState.getInstance().waveReady().start();
 
     AppManager.printDetailLog(getClass().getSimpleName() + " 초기화 완료");
   }

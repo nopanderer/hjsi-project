@@ -2,6 +2,7 @@ package hjsi.game;
 
 import hjsi.common.AppManager;
 import hjsi.timer.TimeManager;
+import hjsi.timer.Timer;
 import hjsi.timer.TimerRunnable;
 
 /**
@@ -21,6 +22,9 @@ public class GameMaster implements Runnable {
    */
   private boolean running = false;
 
+  /**
+   * 현재 웨이브를 완료했는지 여부를 의미한다. false라면 웨이브가 진행 중이라는 뜻.
+   */
   private boolean waveDone = false;
 
   public static long gameTime;
@@ -43,22 +47,18 @@ public class GameMaster implements Runnable {
         gameTime = System.currentTimeMillis();
 
         /*
-         * 대기가 끝난 작업을 수행한다.
+         * 대기(쿨타임)가 끝난 작업을 수행한다.
          */
-        TimerRunnable task = TimeManager.nextTask();
-        while (task != null) {
+        TimerRunnable task;
+        while ((task = TimeManager.nextTask()) != null) {
           task.run();
-          task = TimeManager.nextTask();
         }
 
-        /* 최대 유닛까지 몹 생성 */
-        if (waveDone == false)
-          GameState.getInstance().addMob();
-
-        /* 몹이 전부 죽으면 다음 스테이지 준비 */
-        if (GameState.getInstance().nextWave()) {
+        // 웨이브가 종료되면 타이머를 멈추고 다음 웨이브를 준비한다.
+        if (GameState.getInstance().isWaveDone()) {
           TimeManager.pauseTime();
-          waveDone = true;
+          Timer spawnTimer = GameState.getInstance().waveReady();
+          spawnTimer.start();
         }
 
         /*
