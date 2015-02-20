@@ -23,6 +23,8 @@ public class GameMaster implements Runnable {
 
   private boolean waveDone = false;
 
+  public static long gameTime;
+
   public GameMaster() {
     workerThread = new Thread(this);
     workerThread.start();
@@ -32,14 +34,13 @@ public class GameMaster implements Runnable {
   public void run() {
     /* fps 계산을 위한 변수 */
     int fpsRealFps = 0;
-    long fpsStartTime;
     long fpsRealTime; // 프레임당 실제 소요 시간
     long fpsElapsedTime = 0L; // 1초 측정을 위한 변수
 
     while (!termination) {
       while (running) {
         // 프레임 시작 시간을 구한다.
-        fpsStartTime = System.currentTimeMillis();
+        gameTime = System.currentTimeMillis();
 
         /*
          * 대기가 끝난 작업을 수행한다.
@@ -100,7 +101,7 @@ public class GameMaster implements Runnable {
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
         fpsRealFps++;
-        fpsRealTime = (System.currentTimeMillis() - fpsStartTime);
+        fpsRealTime = (System.currentTimeMillis() - gameTime);
         fpsElapsedTime += fpsRealTime;
         if (fpsElapsedTime >= 1000) { // 1초마다 프레임율 갱신
           AppManager.getInstance().setLogicFps(fpsRealFps);

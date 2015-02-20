@@ -8,4 +8,6 @@ public interface Hittable {
    * @param damage 받은 데미지
    */
   void hit(int damage);
+
+  void dead();
 }

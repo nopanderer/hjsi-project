@@ -259,10 +259,11 @@ public class GameState {
   }
 
   public void addMob() {
-    if (System.currentTimeMillis() - beforeRegen > regen)
-      beforeRegen = System.currentTimeMillis();
+    if (GameMaster.gameTime > beforeRegen + regen)
+      beforeRegen = GameMaster.gameTime;
     else
       return;
+
     if (usedMob < MAX_MOB) {
       units.add(new Mob(80, 80, mImgMob, wave));
       usedMob++;
