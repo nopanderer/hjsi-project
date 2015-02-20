@@ -164,6 +164,7 @@ public class Game extends Base implements OnClickListener {
       } else {
         btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
         gameMaster.pauseGame();
+        showSettingMenu();
       }
     } else if (v == btnStore) {
       Intent Store = new Intent(Game.this, Store.class);

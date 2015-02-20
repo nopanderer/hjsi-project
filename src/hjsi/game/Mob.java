@@ -50,14 +50,32 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   private int sleep = 10;
 
   public Vector2d vector;
+  /**
+   * 정류소 번호
+   */
   private int stationIndex;
+  /**
+   * 정류소
+   */
   private Station station;
 
+  /* 스프라이트 이미지를 위한 임시 변수 */
   private Rect rect;
+  /**
+   * 프레임 갯수
+   */
   private int frameNum;
+  /**
+   * 현재 프레임
+   */
   private int curFrame;
+  /**
+   * 최근 업데이트된 시간
+   */
   private long lastTime;
-
+  /**
+   * 프레임 간격
+   */
   private int framePeriod;
 
   public Mob(int x, int y, Bitmap face, int wave) {
