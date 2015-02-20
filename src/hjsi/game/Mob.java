@@ -93,6 +93,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     hpMax = 100;
     hp = hpMax;
 
+    damage = 10;
     attackSpeed = 2000;
     moveSpeed = 1;
     range = 400;
