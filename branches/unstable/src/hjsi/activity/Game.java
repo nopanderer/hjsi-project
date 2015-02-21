@@ -23,7 +23,8 @@ public class Game extends Base implements OnClickListener {
   private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
 
   Button btnBook, btnStore, btnDeploy;
-  ToggleButton btnPlay;
+  public static Button btnGen;
+  ToggleButton btnPause, btnFF;
   Drawable drawableBtnPlay_Pause;
   Drawable drawableBtnPlay_Play;
   DlgSetting dlgSetting;
@@ -63,12 +64,16 @@ public class Game extends Base implements OnClickListener {
 
     btnBook = (Button) findViewById(R.id.btn_book);
     btnBook.setOnClickListener(this);
-    btnPlay = (ToggleButton) findViewById(R.id.btn_play);
-    btnPlay.setOnClickListener(this);
+    btnPause = (ToggleButton) findViewById(R.id.btn_pause);
+    btnPause.setOnClickListener(this);
     btnStore = (Button) findViewById(R.id.btn_store);
     btnStore.setOnClickListener(this);
     btnDeploy = (Button) findViewById(R.id.btn_deploy);
     btnDeploy.setOnClickListener(this);
+    btnGen = (Button) findViewById(R.id.btn_gen);
+    btnGen.setOnClickListener(this);
+    btnFF = (ToggleButton) findViewById(R.id.btn_ff);
+    btnFF.setOnClickListener(this);
 
     dlgSetting = new DlgSetting(Game.this);
     dlgSetting.setCanceledOnTouchOutside(false);
@@ -87,7 +92,7 @@ public class Game extends Base implements OnClickListener {
 
     /* GameMaster 생성 */
     gameMaster = new GameMaster();
-    GameState.getInstance().waveReady().start();
+    gameMaster.playGame();
 
     AppManager.printDetailLog(getClass().getSimpleName() + " 초기화 완료");
   }
@@ -99,7 +104,7 @@ public class Game extends Base implements OnClickListener {
 
     if (gameMaster != null) {
       gameMaster.pauseGame();
-      btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
+      btnPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
     }
 
     if (Game.music != null) {
@@ -158,20 +163,41 @@ public class Game extends Base implements OnClickListener {
     /*
      * play 버튼
      */
-    else if (v == btnPlay) {
-      if (btnPlay.isChecked()) {
-        btnPlay.setBackgroundDrawable(drawableBtnPlay_Pause);
-        gameMaster.playGame();
-      } else {
-        btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
+    else if (v == btnPause) {
+      /* 일시정지 -> 재생 */
+      if (btnPause.isChecked()) {
+        btnPause.setBackgroundDrawable(drawableBtnPlay_Play);
         gameMaster.pauseGame();
         showSettingMenu();
       }
-    } else if (v == btnStore) {
+      /* 재생 -> 일시정지 */
+      else {
+        btnPause.setBackgroundDrawable(drawableBtnPlay_Pause);
+        gameMaster.playGame();
+      }
+    }
+
+    else if (v == btnStore) {
       Intent Store = new Intent(Game.this, Store.class);
       startActivity(Store);
-    } else if (v == btnDeploy) {
+    }
+
+    else if (v == btnDeploy) {
       GameState.getInstance().onDeployMode();
+    }
+
+    else if (v == btnGen) {
+      btnGen.setVisibility(View.GONE);
+      GameState.getInstance().waveReady().start();
+      gameMaster.playGame();
+    }
+
+    else if (v == btnFF) {
+      if (btnFF.isChecked()) {
+        GameMaster.ff = 2;
+      } else {
+        GameMaster.ff = 1;
+      }
     }
   }
 
@@ -221,10 +247,12 @@ public class Game extends Base implements OnClickListener {
     AppManager.printSimpleLog();
     dlgSetting.show();
 
-    if (btnPlay.isChecked()) {
-      btnPlay.setChecked(false);
-      btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
+    /* 재생 중일 경우 */
+    if (!btnPause.isChecked()) {
+      btnPause.setChecked(true);
+      btnPause.setBackgroundDrawable(drawableBtnPlay_Play);
       gameMaster.pauseGame();
     }
   }
+
 }

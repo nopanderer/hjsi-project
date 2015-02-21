@@ -83,7 +83,7 @@ public class Tower extends Unit implements Attackable {
 
   @Override
   public void attack() {
-    if (GameMaster.gameTime > beforeTime + attackSpeed)
+    if (GameMaster.gameTime > beforeTime + attackSpeed * GameMaster.ff)
       beforeTime = GameMaster.gameTime;
     else
       return;
