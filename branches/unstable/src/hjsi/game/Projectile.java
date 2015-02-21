@@ -17,7 +17,7 @@ public class Projectile extends Unit implements Movable {
   /**
    * 투사체 속도
    */
-  public int moveSpeed;
+  private int moveSpeed;
   /**
    * 투사체 종류
    */

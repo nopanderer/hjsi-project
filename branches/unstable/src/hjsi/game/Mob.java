@@ -23,11 +23,11 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   /**
    * 이동속도
    */
-  public int moveSpeed;
+  private int moveSpeed;
   /**
    * 공격속도
    */
-  public float attackSpeed;
+  private float attackSpeed;
   /**
    * 공격력
    */
