@@ -181,14 +181,25 @@ public class Game extends Base implements OnClickListener {
      * 기본적인 View 객체에 대한 이벤트는 해당 객체가 먼저 이벤트를 받아서 처리하므로, 여기서는 카메라 및 유닛 등의 조작에 대해서만 고려한다. 다음은 터치 이벤트 중
      * 스크롤 및 핀치줌 인/아웃에 관한 동작은 카메라가 처리하도록 한다.
      */
-    if (camera.touchHandler(event))
+    if (camera.touchHandler(event)) {
+      AppManager.printEventLog(event);
       return true;
+    }
 
     /*
      * 카메라가 처리할 이벤트가 아닌 경우는 보통의 클릭 동작이며, 여러가지 게임 개체에 대한 동작을 수행한다. 가장 먼저, 화면 터치 좌표를 게임월드의 좌표로 변환한다.
      */
     int logicalX = (int) ((event.getX() + camera.getX()) / camera.getScale());
     int logicalY = (int) ((event.getY() + camera.getY()) / camera.getScale());
+
+    // 터치로 입력받은 화면상의 좌표를 게임월드 비율에 맞게 변환함
+    logicalX =
+        (int) (logicalX / (float) (camera.getScreenWidth() / (float) GameState.WORLD_WIDTH) + 0.5);
+    logicalY =
+        (int) (logicalY / (float) (camera.getScreenWidth() / (float) GameState.WORLD_WIDTH) + 0.5);
+
+    event.setLocation(logicalX, logicalY);
+    AppManager.printEventLog(event);
 
     Unit unit = GameState.getInstance().getUnit(logicalX, logicalY);
     if (unit != null) {
