@@ -189,7 +189,6 @@ public class Camera {
    * @return 카메라가 이벤트를 소모했으면 true, 아니면 false를 반환한다.
    */
   public boolean touchHandler(MotionEvent event) {
-    AppManager.printEventLog(event);
     boolean eventConsumed = true;
     float dx = 0f, dy = 0f; // 터치 이동 값
 
