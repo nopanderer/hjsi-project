@@ -17,7 +17,7 @@ public class Projectile extends Unit implements Movable {
   /**
    * 투사체 속도
    */
-  private int moveSpeed;
+  public int moveSpeed;
   /**
    * 투사체 종류
    */
@@ -73,7 +73,7 @@ public class Projectile extends Unit implements Movable {
     /* 벡터 정규화 */
     vector.nor();
     /* 투사체 이동속도 스칼라 곱 */
-    vector.mul(moveSpeed);
+    vector.mul(moveSpeed * GameMaster.ff);
 
 
     /* 유도 알고리즘 */

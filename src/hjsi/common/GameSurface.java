@@ -254,13 +254,13 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 현재 생성된 몹수
      */
     canvas.translate(0, yForText);
-    canvas.drawText("Mob: " + GameState.getInstance().curMob, xForText, yForText, mPaintInfo);
+    canvas.drawText("Mob: " + GameState.curMob, xForText, yForText, mPaintInfo);
 
     /*
      * 현재 죽은 몹수
      */
     canvas.translate(0, yForText);
-    canvas.drawText("Dead Mob: " + GameState.getInstance().deadMob, xForText, yForText, mPaintInfo);
+    canvas.drawText("Dead Mob: " + GameState.deadMob, xForText, yForText, mPaintInfo);
 
     /*
      * 현재 웨이브

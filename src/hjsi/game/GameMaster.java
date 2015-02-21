@@ -1,9 +1,12 @@
 package hjsi.game;
 
+import hjsi.activity.Game;
 import hjsi.common.AppManager;
 import hjsi.timer.TimeManager;
-import hjsi.timer.Timer;
 import hjsi.timer.TimerRunnable;
+import android.os.Handler;
+import android.os.Message;
+import android.view.View;
 
 /**
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
@@ -25,9 +28,10 @@ public class GameMaster implements Runnable {
   /**
    * 현재 웨이브를 완료했는지 여부를 의미한다. false라면 웨이브가 진행 중이라는 뜻.
    */
-  private boolean waveDone = false;
 
   public static long gameTime;
+
+  public static int ff = 1;
 
   public GameMaster() {
     workerThread = new Thread(this);
@@ -56,9 +60,13 @@ public class GameMaster implements Runnable {
 
         // 웨이브가 종료되면 타이머를 멈추고 다음 웨이브를 준비한다.
         if (GameState.getInstance().isWaveDone()) {
-          TimeManager.pauseTime();
-          Timer spawnTimer = GameState.getInstance().waveReady();
-          spawnTimer.start();
+          new Thread() {
+            public void run() {
+              Message msg = handler.obtainMessage();
+              handler.sendMessage(msg);
+            }
+          }.start();
+          // TimeManager.pauseTime();
         }
 
         /*
@@ -144,7 +152,6 @@ public class GameMaster implements Runnable {
      * 일시정지했다가 다시 시작하는건지, 한 웨이브가 끝난 후 새로운 웨이브를 시작하는건지 구별할 필요가 있다. (새로운 정보를 세팅하는 과정이 필요하니까)
      */
     running = true;
-    waveDone = false;
     // workerThread.interrupt(); // 대기 중인 스레드 바로 깨우기 (되는지 모르겠음)
     TimeManager.startTime();
   }
@@ -157,5 +164,14 @@ public class GameMaster implements Runnable {
     running = false;
     TimeManager.pauseTime();
   }
+
+  final Handler handler = new Handler() {
+    public void handleMessage(Message msg) {
+      Game.btnGen.setVisibility(View.VISIBLE);
+      GameState.usedMob = 0;
+      GameState.deadMob = 0;
+      GameState.curMob = 0;
+    }
+  };
 
 }

@@ -70,9 +70,9 @@ public class GameState {
   public Bitmap mImgMob; // 몹 비트맵
   public long beforeRegen = 0l; // 리젠하기 전 시간
   public long regen = 1000; // create mob per 1 sec
-  public int usedMob = 0; // 몹이 실제로 생성된(내부적 카운터 위해)
-  public int deadMob = 0; // 죽은 몹
-  public int curMob = 0; // 현재 몹
+  public static int usedMob = 0; // 몹이 실제로 생성된(내부적 카운터 위해)
+  public static int deadMob = 0; // 죽은 몹
+  public static int curMob = 0; // 현재 몹
 
   public static final int MAX_MOB = 10;
 

@@ -23,11 +23,11 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   /**
    * 이동속도
    */
-  private int moveSpeed;
+  public int moveSpeed;
   /**
    * 공격속도
    */
-  private float attackSpeed;
+  public float attackSpeed;
   /**
    * 공격력
    */
@@ -136,7 +136,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   @Override
   public void attack() {
     if (lap == 1) {
-      if (GameMaster.gameTime > attackTime + attackSpeed)
+      if (GameMaster.gameTime > attackTime + attackSpeed * GameMaster.ff)
         attackTime = GameMaster.gameTime;
       else
         return;
@@ -172,7 +172,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
     vector.set(station.x - x, station.y - y);
     vector.nor();
-    vector.mul(moveSpeed);
+    vector.mul(moveSpeed * GameMaster.ff);
 
     x += vector.x;
     y += vector.y;
@@ -211,8 +211,8 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   @Override
   public void dead() {
     destroyed = true;
-    GameState.getInstance().curMob--;
-    GameState.getInstance().deadMob++;
+    GameState.curMob--;
+    GameState.deadMob++;
   }
 
   public void update(long gameTime) {
