@@ -231,9 +231,11 @@ public class GameState {
    * @return 주어진 게임 좌표 위에 유닛이 있다면 해당 유닛, 없으면 null을 반환한다.
    */
   public Unit getUnit(int x, int y) {
-    for (Unit unit : units) {
-      if ((unit.x < x && x < unit.x + unit.width) && (unit.y < y && y < unit.y + unit.height))
-        return unit;
+    synchronized (units) {
+      for (Unit unit : units) {
+        if ((unit.x < x && x < unit.x + unit.width) && (unit.y < y && y < unit.y + unit.height))
+          return unit;
+      }
     }
     return null;
   }
@@ -254,9 +256,11 @@ public class GameState {
    */
   public LinkedList<Mob> getMobs() {
     LinkedList<Mob> mobs = new LinkedList<Mob>();
-    for (Unit unit : units) {
-      if (unit.getType() == Unit.TYPE_MOB) {
-        mobs.add((Mob) unit);
+    synchronized (units) {
+      for (Unit unit : units) {
+        if (unit.getType() == Unit.TYPE_MOB) {
+          mobs.add((Mob) unit);
+        }
       }
     }
     return mobs;
@@ -269,9 +273,11 @@ public class GameState {
    */
   public LinkedList<Tower> getTowers() {
     LinkedList<Tower> towers = new LinkedList<Tower>();
-    for (Unit unit : units) {
-      if (unit.getType() == Unit.TYPE_TOWER) {
-        towers.add((Tower) unit);
+    synchronized (units) {
+      for (Unit unit : units) {
+        if (unit.getType() == Unit.TYPE_TOWER) {
+          towers.add((Tower) unit);
+        }
       }
     }
     return towers;
@@ -284,9 +290,11 @@ public class GameState {
    */
   public LinkedList<Statue> getStatues() {
     LinkedList<Statue> statues = new LinkedList<Statue>();
-    for (Unit unit : units) {
-      if (unit.getType() == Unit.TYPE_STATUE) {
-        statues.add((Statue) unit);
+    synchronized (units) {
+      for (Unit unit : units) {
+        if (unit.getType() == Unit.TYPE_STATUE) {
+          statues.add((Statue) unit);
+        }
       }
     }
     return statues;

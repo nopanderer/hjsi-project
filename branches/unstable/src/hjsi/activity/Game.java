@@ -6,11 +6,11 @@ import hjsi.common.GameSurface;
 import hjsi.game.GameMaster;
 import hjsi.game.GameState;
 import hjsi.game.Unit;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,14 +21,16 @@ import android.widget.ToggleButton;
 public class Game extends Base implements OnClickListener {
   private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
 
-  Button btnBook, btnPause, btnStore, btnDeploy;
-  public static Button btnGen;
-  ToggleButton btnFF;
-  DlgSetting dlgSetting;
-  public static MediaPlayer music;
+  private Button btnBook, btnPause, btnStore, btnDeploy, btnGen;
+  private ToggleButton btnFF;
+  private DlgSetting dlgSetting;
 
+  /** bgm 재생 객체 */
+  private MediaPlayer bgMusic;
+  /** bgm 음소거 여부 */
+  private boolean bgmPlaying = true;
   /** 게임을 진행하는 인게임 스레드를 가진 개체 */
-  public GameMaster gameMaster;
+  private GameMaster gameMaster;
   /** 카메라 */
   private Camera camera;
 
@@ -69,23 +71,15 @@ public class Game extends Base implements OnClickListener {
     btnFF = (ToggleButton) findViewById(R.id.btn_ff);
     btnFF.setOnClickListener(this);
 
-    dlgSetting = new DlgSetting(Game.this);
+    dlgSetting = new DlgSetting(this, this);
     dlgSetting.setCanceledOnTouchOutside(false);
-    dlgSetting.setOnDismissListener(new OnDismissListener() {
-      @Override
-      public void onDismiss(DialogInterface arg0) {
-        AppManager.printSimpleLog();
-        quitExplicitly(); // 이번에 Game.onDestroy() 될 때 리소스 해제하라고 알림
-        AppManager.getInstance().quitApp();
-      }
-    });
 
-    Game.music = MediaPlayer.create(this, R.raw.bgm);
-    Game.music.setLooping(true);
-    Game.music.start();
+    bgMusic = MediaPlayer.create(this, R.raw.bgm);
+    bgMusic.setLooping(true);
+    bgMusic.start();
 
     /* GameMaster 생성 */
-    gameMaster = new GameMaster();
+    gameMaster = new GameMaster(this);
     gameMaster.playGame();
 
     AppManager.printDetailLog(getClass().getSimpleName() + " 초기화 완료");
@@ -100,8 +94,8 @@ public class Game extends Base implements OnClickListener {
       gameMaster.pauseGame();
     }
 
-    if (Game.music != null) {
-      Game.music.pause();
+    if (bgMusic != null) {
+      bgMusic.pause();
     }
   }
 
@@ -110,8 +104,8 @@ public class Game extends Base implements OnClickListener {
     AppManager.printSimpleLog();
     super.onResume();
 
-    if (Game.music != null) {
-      Game.music.start();
+    if (bgMusic != null) {
+      bgMusic.start();
     }
   }
 
@@ -124,9 +118,9 @@ public class Game extends Base implements OnClickListener {
       gameMaster.quitGame();
     }
 
-    if (music != null) {
-      music.stop();
-      music.release();
+    if (bgMusic != null) {
+      bgMusic.stop();
+      bgMusic.release();
     }
 
     if (explicitQuit) {
@@ -219,7 +213,6 @@ public class Game extends Base implements OnClickListener {
       GameState.getInstance().deployTower(logicalX, logicalY);
     }
 
-
     return super.onTouchEvent(event);
   }
 
@@ -234,4 +227,48 @@ public class Game extends Base implements OnClickListener {
     gameMaster.pauseGame();
   }
 
+  /**
+   * 다이얼로그의 메시지를 처리하는 메소드
+   */
+  public void handleDialog(int msg) {
+    AppManager.printSimpleLog();
+
+    switch (msg) {
+      case DlgSetting.DLG_BTN_RESUME:
+        gameMaster.playGame();
+        break;
+
+      case DlgSetting.DLG_BTN_SOUND:
+        if (bgmPlaying) {
+          bgmPlaying = false;
+          bgMusic.pause();
+        } else {
+          bgmPlaying = true;
+          bgMusic.start();
+        }
+        break;
+
+      case DlgSetting.DLG_BTN_QUIT:
+        bgMusic.stop();
+        bgMusic.release();
+        bgMusic = null;
+        quitExplicitly(); // 이번에 Game.onDestroy() 될 때 리소스 해제하라고 알림
+        AppManager.getInstance().quitApp();
+        break;
+
+      default:
+        AppManager.printErrorLog("Game 액티비티에 예외 메시지(" + msg + ")가 왔습니다.");
+        break;
+    }
+  }
+
+  final Handler handler = new Handler() {
+    public void handleMessage(Message msg) {
+      btnGen.setVisibility(View.VISIBLE);
+    }
+  };
+
+  public void readySpawnButton() {
+    handler.sendEmptyMessage(0);
+  }
 }
