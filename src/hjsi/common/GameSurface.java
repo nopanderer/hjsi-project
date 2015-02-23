@@ -120,6 +120,13 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     long fpsElapsedTime = 0L;
     int fps = 0;
 
+    /*
+     * 타워 배치 격자를 미리 준비한다.
+     */
+    Rect area = GameState.getInstance().getTowersArea(screenRatio);
+    int cellsWidth = GameState.getInstance().getTowersWidth(screenRatio);
+    int cellsHeight = GameState.getInstance().getTowersHeight(screenRatio);
+
     while (mIsRunning) {
       // 프레임 시작 시간을 구한다.
       fpsStartTime = System.currentTimeMillis();
@@ -150,13 +157,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
 
         // 배치모드 UI를 그린다.
         if (GameState.getInstance().checkDeployMode()) {
-          Rect area = GameState.getInstance().getTowersArea(screenRatio);
           for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 8; j++) {
-              canvas.drawRect(area.left + i * GameState.TOWERS_WIDTH * screenRatio, area.top + j
-                  * GameState.TOWERS_HEIGHT * screenRatio, area.left + (i + 1)
-                  * GameState.TOWERS_WIDTH * screenRatio, area.top + (j + 1)
-                  * GameState.TOWERS_HEIGHT * screenRatio, gridPaint);
+              canvas.drawRect(area.left + i * cellsWidth, area.top + j * cellsHeight, area.left
+                  + (i + 1) * cellsWidth, area.top + (j + 1) * cellsHeight, gridPaint);
             }
           }
         }
