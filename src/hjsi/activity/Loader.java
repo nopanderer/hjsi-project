@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -16,15 +15,10 @@ import android.graphics.BitmapFactory.Options;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class Loader extends Base {
-  private static final int LOGO_COMPLETE = 0;
-  private static final int LOADING_COMPLETE = 1;
-
   AnimationDrawable mAni;
 
   @Override
@@ -63,25 +57,7 @@ public class Loader extends Base {
     AppManager.printSimpleLog();
   }
 
-  @SuppressLint("HandlerLeak")
-  Handler mHandler = new Handler() {
-    @Override
-    public void handleMessage(Message msg) {
-      if (msg.what == LOADING_COMPLETE) {
-        mAni.stop();
-        mAni = null;
-
-        Intent lunchGame = new Intent(getApplicationContext(), Game.class);
-        startActivity(lunchGame); // Game 실행
-        finish(); // Loader 종료
-
-        AppManager.printDetailLog("로딩 완료");
-      }
-    }
-
-  };
-
-  Runnable loadingMethod = new Runnable() {
+  private Runnable loadingMethod = new Runnable() {
     @Override
     public void run() {
       try {
@@ -128,11 +104,9 @@ public class Loader extends Base {
         }
 
         /*
-         * 어플리케이션 최초 실행시, 사용할 데이터베이스를 구축해놓는다. TODO 이 부분을 로더에서 제일 먼저 실행해야 하는데, 현재 GameState 생성자에서는
-         * 위에서 로드하는 이미지를 사용해서 어쩔 수 없이 이걸 밑에서 실행함.
+         * 어플리케이션 최초 실행시, 사용할 데이터베이스를 구축해놓는다.
          */
         DataManager.loadDatabase(getApplicationContext(), 1, GameState.getInstance());
-
 
 
         Thread.sleep(2000); // 여기서 로딩 작업을 한다고 치고..
@@ -142,7 +116,14 @@ public class Loader extends Base {
         e.printStackTrace();
       }
 
-      mHandler.sendEmptyMessage(LOADING_COMPLETE);
+      mAni.stop();
+      mAni = null;
+
+      Intent lunchGame = new Intent(getApplicationContext(), Game.class);
+      startActivity(lunchGame); // Game 실행
+      finish(); // Loader 종료
+
+      AppManager.printDetailLog("로딩 완료");
     }
   };
 }
