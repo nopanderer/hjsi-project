@@ -248,6 +248,21 @@ public class GameState {
   }
 
   /**
+   * 전체 유닛 목록에서 몹만 가져온다.
+   * 
+   * @return 몹이 0개 이상 들어있는 연결리스트를 반환한다.
+   */
+  public LinkedList<Mob> getMobs() {
+    LinkedList<Mob> mobs = new LinkedList<Mob>();
+    for (Unit unit : units) {
+      if (unit.getType() == Unit.TYPE_MOB) {
+        mobs.add((Mob) unit);
+      }
+    }
+    return mobs;
+  }
+
+  /**
    * 전체 유닛 목록에서 타워만 가져온다.
    * 
    * @return 타워가 0개 이상 들어있는 연결리스트를 반환한다.

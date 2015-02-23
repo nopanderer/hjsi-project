@@ -107,7 +107,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     frameNum = 4;
     width = face.getWidth() / frameNum;
     height = face.getHeight();
-    rect = new Rect(0, 0, this.width, this.height);
+    rect = new Rect(0, 0, (int) this.width, (int) this.height);
     framePeriod = 1000 / 4;
     lastTime = 0l;
 
@@ -121,7 +121,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
         new RectF(x * screenRatio, y * screenRatio, x * screenRatio + width, y * screenRatio
             + height);
     canvas.drawBitmap(face, rect, destRect, null);
-    showHealthBar(hpMax, hp, canvas);
+    showHealthBar(hpMax, hp, canvas, screenRatio);
   }
 
   /*
@@ -136,32 +136,24 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   @Override
-  public void attack() {
+  public void attack(Unit unit) {
     if (lap == 1) {
       if (GameMaster.gameTime > attackTime + attackSpeed * GameMaster.ff)
         attackTime = GameMaster.gameTime;
       else
         return;
 
-      for (int i = 0; i < GameState.getInstance().units.size(); i++) {
+      Statue statue;
+      statue = (Statue) unit;
 
-        if (GameState.getInstance().units.get(i) instanceof Statue) {
+      if (statue == null)
+        return;
 
-          Statue statue;
-          statue = (Statue) GameState.getInstance().units.get(i);
-
-          if (statue == null)
-            continue;
-
-          else if (statue.destroyed == false && inRange(this, statue)) {
-            GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, statue,
-                AppManager.getBitmap("proj1")));
-            break;
-          }
-        }
+      else if (statue.destroyed == false && inRange(this, statue)) {
+        GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, statue, AppManager
+            .getBitmap("proj1")));
       }
-    } else
-      return;
+    }
   }
 
   @Override
@@ -225,7 +217,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
         curFrame = 0;
       }
     }
-    rect.left = curFrame * width;
-    rect.right = rect.left + width;
+    rect.left = curFrame * (int) width;
+    rect.right = rect.left + (int) width;
   }
 }

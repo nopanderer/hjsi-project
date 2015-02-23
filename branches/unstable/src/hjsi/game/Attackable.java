@@ -1,6 +1,5 @@
 package hjsi.game;
 
-public interface Attackable
-{
-    void attack();
+public interface Attackable {
+  void attack(Unit unit);
 }
