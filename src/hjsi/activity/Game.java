@@ -33,11 +33,15 @@ public class Game extends Base implements OnClickListener {
   private GameMaster gameMaster;
   /** 카메라 */
   private Camera camera;
+  /** 게임 정보 관리 객체 */
+  GameState gState = null;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
+
+    gState = AppManager.getInstance().getGameState();
 
     /*
      * 화면 비율을 구해서 카메라를 생성할 때 넘겨준다.
@@ -46,7 +50,7 @@ public class Game extends Base implements OnClickListener {
     /*
      * surfaceview 생성 및 등록
      */
-    GameSurface gameView = new GameSurface(getApplicationContext(), camera);
+    GameSurface gameView = new GameSurface(getApplicationContext(), camera, gState);
     setContentView(gameView);
 
     /*
@@ -79,7 +83,7 @@ public class Game extends Base implements OnClickListener {
     bgMusic.start();
 
     /* GameMaster 생성 */
-    gameMaster = new GameMaster(this);
+    gameMaster = new GameMaster(this, gState);
     gameMaster.playGame();
 
     AppManager.printDetailLog(getClass().getSimpleName() + " 초기화 완료");
@@ -126,7 +130,7 @@ public class Game extends Base implements OnClickListener {
     if (explicitQuit) {
       /* 사용했던 리소스를 해제한다. */
       AppManager.getInstance().allRecycle();
-      GameState.getInstance().purgeGameState(); // 게임 상태정보를 없앤다.
+      gState.purgeGameState(); // 게임 상태정보를 없앤다.
     }
   }
 
@@ -162,12 +166,12 @@ public class Game extends Base implements OnClickListener {
     }
 
     else if (v == btnDeploy) {
-      GameState.getInstance().onDeployMode();
+      gState.onDeployMode();
     }
 
     else if (v == btnGen) {
       btnGen.setVisibility(View.GONE);
-      GameState.getInstance().waveReady().start();
+      gState.waveReady().start();
       gameMaster.playGame();
     }
 
@@ -206,11 +210,11 @@ public class Game extends Base implements OnClickListener {
     event.setLocation(logicalX, logicalY);
     AppManager.printEventLog(event);
 
-    Unit unit = GameState.getInstance().getUnit(logicalX, logicalY);
+    Unit unit = gState.getUnit(logicalX, logicalY);
     if (unit != null) {
       AppManager.printInfoLog(unit.toString());
-    } else if (GameState.getInstance().checkDeployMode()) {
-      GameState.getInstance().deployTower(logicalX, logicalY);
+    } else if (gState.checkDeployMode()) {
+      gState.deployTower(logicalX, logicalY);
     }
 
     return super.onTouchEvent(event);
@@ -262,13 +266,16 @@ public class Game extends Base implements OnClickListener {
     }
   }
 
-  final Handler handler = new Handler() {
+  /**
+   * TODO handler leak 없도록 구현해야함
+   */
+  private final Handler spawnButtonHandler = new Handler() {
     public void handleMessage(Message msg) {
       btnGen.setVisibility(View.VISIBLE);
     }
   };
 
   public void readySpawnButton() {
-    handler.sendEmptyMessage(0);
+    spawnButtonHandler.sendEmptyMessage(0);
   }
 }

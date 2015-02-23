@@ -7,6 +7,7 @@ import hjsi.timer.Timer;
 import hjsi.timer.TimerRunnable;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -17,8 +18,12 @@ import android.graphics.Rect;
 /**
  * 게임에 필요한 정보를 저장한다.
  */
-public class GameState {
-  private static GameState uniqueInstance;
+public class GameState implements Serializable {
+  /**
+   * 액티비티 간 매개변수로 넘겨주기 위해 직렬화
+   */
+  private static final long serialVersionUID = 7636636440669784974L;
+
   public static final int WORLD_WIDTH = 3840;
   public static final int WORLD_HEIGHT = 2160;
 
@@ -81,13 +86,15 @@ public class GameState {
   private TimerRunnable spawnMob = new TimerRunnable() {
     @Override
     public void run() {
-      units.add(new Mob(80, 80, mImgMob, userWave));
+      synchronized (units) {
+        units.add(new Mob(80, 80, mImgMob, userWave, stations.get(0)));
+      }
       usedMob++;
       curMob++;
     }
   };
 
-  private GameState() {
+  public GameState() {
     AppManager.printSimpleLog();
 
     /*
@@ -114,24 +121,12 @@ public class GameState {
     stations.add(new Station(200, 140));
   }
 
-  public static GameState getInstance() {
-    if (GameState.uniqueInstance == null) {
-      synchronized (GameState.class) {
-        if (GameState.uniqueInstance == null) {
-          GameState.uniqueInstance = new GameState();
-        }
-      }
-    }
-    return GameState.uniqueInstance;
-  }
-
   /**
    * 현재의 게임 정보를 가지고 있는 GameState의 유일한 객체를 없애서 정보를 초기화한다.
    */
   public void purgeGameState() {
     synchronized (GameState.class) {
       DataManager.save(this);
-      GameState.uniqueInstance = null;
     }
   }
 
@@ -221,6 +216,15 @@ public class GameState {
 
   public long getWorldTime() {
     return worldTime;
+  }
+
+  public ArrayList<Station> getStations() {
+    return stations;
+  }
+
+  public Station nextStation(int index) {
+    index = (index + 1) % stations.size();
+    return stations.get(index);
   }
 
   /**
@@ -356,10 +360,10 @@ public class GameState {
    */
   public void destroyMob(int wave) {
     AppManager.getInstance().recycleBitmap("mob" + wave);
-    for (int i = 0; i < units.size(); i++)
-      if (units.get(i) instanceof Mob)
-        GameState.getInstance().units.remove(i);
-
+    synchronized (units) {
+      for (Mob mob : getMobs())
+        units.remove(mob);
+    }
   }
 
   public Timer waveReady() {

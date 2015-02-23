@@ -19,7 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class Loader extends Base {
-  AnimationDrawable mAni;
+  private AnimationDrawable mAni;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -103,11 +103,13 @@ public class Loader extends Base {
           AppManager.addBitmap("proj1", bitmap);
         }
 
+
         /*
          * 어플리케이션 최초 실행시, 사용할 데이터베이스를 구축해놓는다.
          */
-        DataManager.loadDatabase(getApplicationContext(), 1, GameState.getInstance());
-
+        GameState gState = new GameState();
+        AppManager.getInstance().putGameState(gState);
+        DataManager.loadDatabase(getApplicationContext(), 1, gState);
 
         Thread.sleep(2000); // 여기서 로딩 작업을 한다고 치고..
       } catch (InterruptedException e) {
