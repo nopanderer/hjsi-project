@@ -1,6 +1,9 @@
 package hjsi.game;
 
 import hjsi.common.AppManager;
+
+import java.util.ArrayList;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -44,7 +47,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   /**
    * 몇 바퀴 돌았나
    */
-  public int lap;
+  private int lap;
 
   /* 최근 이동 시간 */
   private long moveTime;
@@ -82,10 +85,10 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
    */
   private int framePeriod;
 
-  public Mob(int x, int y, Bitmap face, int wave) {
+  public Mob(int x, int y, Bitmap face, int wave, Station dest) {
     super(Unit.TYPE_MOB, 0, x, y, face);
 
-    lap = 0;
+    setLap(0);
     this.wave = wave;
     moveTime = 0l;
     attackTime = 0l;
@@ -100,8 +103,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
     vector = new Vector2d();
     stationIndex = 0;
-    station = GameState.getInstance().stations.get(stationIndex);
-
+    station = dest;
 
     curFrame = 0;
     frameNum = 4;
@@ -136,24 +138,23 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   @Override
-  public void attack(Unit unit) {
-    if (lap == 1) {
+  public Projectile attack(Unit target) {
+    if (getLap() == 1) {
       if (GameMaster.gameTime > attackTime + attackSpeed / GameMaster.ff)
         attackTime = GameMaster.gameTime;
       else
-        return;
+        return null;
 
-      Statue statue;
-      statue = (Statue) unit;
+      Statue statue = (Statue) target;
 
       if (statue == null)
-        return;
-
+        return null;
       else if (statue.destroyed == false && inRange(this, statue)) {
-        GameState.getInstance().units.add(new Projectile(cntrX, cntrY, damage, statue, AppManager
-            .getBitmap("proj1")));
+        return new Projectile(cntrX, cntrY, damage, statue, AppManager.getBitmap("proj1"));
       }
     }
+
+    return null;
   }
 
   @Override
@@ -172,19 +173,6 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     y += vector.y;
     cntrX += vector.x;
     cntrY += vector.y;
-
-    if (station.arrive(this)) {
-      stationIndex++;
-      if (stationIndex >= GameState.getInstance().stations.size()) {
-        lap++;
-        stationIndex = 0;
-        station = GameState.getInstance().stations.get(stationIndex);
-        return;
-      }
-
-      station = GameState.getInstance().stations.get(stationIndex);
-    }
-
   }
 
   @Override
@@ -209,6 +197,18 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     GameState.deadMob++;
   }
 
+  public boolean isArrive() {
+    return station.arrive(this);
+  }
+
+  public void nextStation(ArrayList<Station> stations) {
+    stationIndex = (stationIndex + 1) % stations.size();
+    if (stationIndex == 0)
+      setLap(getLap() + 1);
+
+    station = stations.get(stationIndex);
+  }
+
   public void update(long gameTime) {
     if (gameTime > lastTime + framePeriod / GameMaster.ff) {
       lastTime = gameTime;
@@ -219,5 +219,13 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     }
     rect.left = curFrame * (int) width;
     rect.right = rect.left + (int) width;
+  }
+
+  public int getLap() {
+    return lap;
+  }
+
+  public void setLap(int lap) {
+    this.lap = lap;
   }
 }

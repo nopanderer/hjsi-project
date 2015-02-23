@@ -14,6 +14,10 @@ public class GameMaster implements Runnable {
    */
   private Game gameAct = null;
   /**
+   * GameState
+   */
+  private GameState gState = null;
+  /**
    * 게임을 진행시키는 스레드
    */
   private Thread workerThread;
@@ -33,8 +37,9 @@ public class GameMaster implements Runnable {
 
   public static int ff = 1;
 
-  public GameMaster(Game gameAct) {
+  public GameMaster(Game gameAct, GameState gameState) {
     this.gameAct = gameAct;
+    gState = gameState;
 
     workerThread = new Thread(this);
     workerThread.start();
@@ -61,7 +66,7 @@ public class GameMaster implements Runnable {
         }
 
         // 웨이브가 종료되면 타이머를 멈추고 다음 웨이브를 준비한다.
-        if (GameState.getInstance().isWaveDone()) {
+        if (gState.isWaveDone()) {
           gameAct.readySpawnButton();
           GameState.usedMob = 0;
           GameState.deadMob = 0;
@@ -69,21 +74,29 @@ public class GameMaster implements Runnable {
         }
 
         /*
+         * 각각의 스테이션은 자신에게 도달한 몹을 다음 스테이션으로 향하도록 설정한다.
+         */
+        for (Mob mob : gState.getMobs()) {
+          if (mob.isArrive()) {
+            mob.nextStation(gState.stations);
+          }
+        }
+
+        /*
          * 유닛 루프 시작
          */
-        for (int i = 0; i < GameState.getInstance().getUnits().size(); i++) {
+        for (int i = 0; i < gState.getUnits().size(); i++) {
           /* 임시유닛 */
-          Unit unit = GameState.getInstance().getUnits().get(i);
+          Unit unit = gState.getUnits().get(i);
 
           if (unit.destroyed) {
-            GameState.getInstance().units.remove(unit);
+            gState.units.remove(unit);
             continue;
           }
 
           if (unit instanceof Mob) {
-            Mob mob;
-            mob = (Mob) unit;
-            if (mob.lap == 2) {
+            Mob mob = (Mob) unit;
+            if (mob.getLap() == 2) {
               mob.dead();
               continue;
             }
@@ -98,13 +111,18 @@ public class GameMaster implements Runnable {
           }
 
           if (unit instanceof Tower)
-            for (Mob mob : GameState.getInstance().getMobs())
-              ((Tower) unit).attack(mob);
+            for (Mob mob : gState.getMobs()) {
+              Projectile proj = ((Tower) unit).attack(mob);
+              if (proj != null)
+                gState.getUnits().add(proj);
+            }
+
           else if (unit instanceof Mob)
-            for (Statue statue : GameState.getInstance().getStatues())
-              ((Mob) unit).attack(statue);
-
-
+            for (Statue statue : gState.getStatues()) {
+              Projectile proj = ((Mob) unit).attack(statue);
+              if (proj != null)
+                gState.getUnits().add(proj);
+            }
         }
         /*
          * 유닛 루프 끝

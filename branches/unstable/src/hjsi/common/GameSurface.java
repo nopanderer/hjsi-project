@@ -31,6 +31,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
    * 화면 대 게임월드 비율
    */
   private float screenRatio;
+  /**
+   * GameState
+   */
+  private GameState gState;
 
   /*
    * 각종 정보를 출력하는데 사용함
@@ -49,10 +53,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
    * @param context getApplicationContext()를 이용하여 컨텍스트 객체를 넣어주셈
    * @param camera 카메라
    */
-  public GameSurface(Context context, Camera camera) {
+  public GameSurface(Context context, Camera camera, GameState gameState) {
     super(context);
     this.camera = camera;
     screenRatio = camera.getScreenWidth() / (float) GameState.WORLD_WIDTH;
+    gState = gameState;
 
     // 게임 내 변수 출력용 페인트 객체 생성
     mPaintInfo = new Paint();
@@ -123,9 +128,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     /*
      * 타워 배치 격자를 미리 준비한다.
      */
-    Rect area = GameState.getInstance().getTowersArea(screenRatio);
-    int cellsWidth = GameState.getInstance().getTowersWidth(screenRatio);
-    int cellsHeight = GameState.getInstance().getTowersHeight(screenRatio);
+    Rect area = gState.getTowersArea(screenRatio);
+    int cellsWidth = gState.getTowersWidth(screenRatio);
+    int cellsHeight = gState.getTowersHeight(screenRatio);
 
     while (mIsRunning) {
       // 프레임 시작 시간을 구한다.
@@ -156,7 +161,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         canvas.drawBitmap(AppManager.getBitmap("background"), 0, 0, null);
 
         // 배치모드 UI를 그린다.
-        if (GameState.getInstance().checkDeployMode()) {
+        if (gState.checkDeployMode()) {
           for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 8; j++) {
               canvas.drawRect(area.left + i * cellsWidth, area.top + j * cellsHeight, area.left
@@ -170,8 +175,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
          */
 
         // 게임의 유닛들을 그린다.
-        for (int i = 0; i < GameState.getInstance().getUnits().size(); i++) {
-          Unit unit = GameState.getInstance().getUnits().get(i);
+        for (int i = 0; i < gState.getUnits().size(); i++) {
+          Unit unit = gState.getUnits().get(i);
           /* 파괴되었는지 검사 */
           if (unit.destroyed)
             continue;
@@ -250,8 +255,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 게임 시계 출력
      */
     canvas.translate(0, yForText);
-    String min = String.format("%02d", (int) (GameState.getInstance().getWorldTime() / 60));
-    String sec = String.format("%02d", (int) (GameState.getInstance().getWorldTime() % 60));
+    String min = String.format("%02d", (int) (gState.getWorldTime() / 60));
+    String sec = String.format("%02d", (int) (gState.getWorldTime() % 60));
     canvas.drawText("World Time: " + min + ":" + sec, xForText, yForText, mPaintInfo);
 
     /*
@@ -270,7 +275,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 현재 웨이브
      */
     canvas.translate(0, yForText);
-    canvas.drawText("Wave: " + GameState.getInstance().getWave(), xForText, yForText, mPaintInfo);
+    canvas.drawText("Wave: " + gState.getWave(), xForText, yForText, mPaintInfo);
 
     canvas.restore();
   }

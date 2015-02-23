@@ -1,6 +1,7 @@
 package hjsi.common;
 
 import hjsi.activity.Base;
+import hjsi.game.GameState;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,12 +53,15 @@ public class AppManager {
    * TODO 제거 대상
    */
   private volatile int logicFps;
+  /**
+   * Loader에서 Game 액티비티로 GameState를 넘겨주기 위한 변수
+   */
+  private GameState gState = null;
 
   /*
    * 
    * Methods 시작
    */
-
   private AppManager() {
     runningActivities = new LinkedList<Base>();
     loadedBitmap = new HashMap<String, Bitmap>();
@@ -484,6 +488,15 @@ public class AppManager {
     printDetailLog(msg);
   }
 
+  public void putGameState(GameState gameState) {
+    gState = gameState;
+  }
+
+  public GameState getGameState() {
+    GameState g = gState;
+    gState = null;
+    return g;
+  }
 
   public int getLogicFps() {
     return logicFps;
