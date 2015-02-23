@@ -116,8 +116,10 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   @Override
-  public void draw(Canvas canvas) {
-    RectF destRect = new RectF(x, y, x + width, y + height);
+  public void draw(Canvas canvas, float screenRatio) {
+    RectF destRect =
+        new RectF(x * screenRatio, y * screenRatio, x * screenRatio + width, y * screenRatio
+            + height);
     canvas.drawBitmap(face, rect, destRect, null);
     showHealthBar(hpMax, hp, canvas);
   }

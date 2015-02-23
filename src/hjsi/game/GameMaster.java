@@ -23,7 +23,7 @@ public class GameMaster implements Runnable {
   /**
    * GameMaster의 스레드를 재생하려면 true로 설정하고, 일시적으로 멈추려면 false로 설정한다.
    */
-  private boolean running = false;
+  private static boolean running = false;
 
   /**
    * 현재 웨이브를 완료했는지 여부를 의미한다. false라면 웨이브가 진행 중이라는 뜻.
@@ -146,7 +146,7 @@ public class GameMaster implements Runnable {
   /**
    * 게임을 시작한다.
    */
-  public void playGame() {
+  public static void playGame() {
     AppManager.printSimpleLog();
     /*
      * 일시정지했다가 다시 시작하는건지, 한 웨이브가 끝난 후 새로운 웨이브를 시작하는건지 구별할 필요가 있다. (새로운 정보를 세팅하는 과정이 필요하니까)

@@ -76,9 +76,9 @@ public class Tower extends Unit implements Attackable {
   }
 
   @Override
-  public void draw(Canvas canvas) {
-    super.draw(canvas);
-    showRange(range, canvas);
+  public void draw(Canvas canvas, float screenRatio) {
+    super.draw(canvas, screenRatio);
+    showRange(range, canvas, screenRatio);
   }
 
   @Override

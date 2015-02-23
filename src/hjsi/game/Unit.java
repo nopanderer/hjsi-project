@@ -126,9 +126,9 @@ public abstract class Unit {
    * 
    * @param canvas 그림이 출력될 캔버스.
    */
-  public void draw(Canvas canvas) {
+  public void draw(Canvas canvas, float screenRatio) {
     if (face != null) {
-      canvas.drawBitmap(face, x, y, paint);
+      canvas.drawBitmap(face, x * screenRatio, y * screenRatio, paint);
     }
   }
 
@@ -148,13 +148,13 @@ public abstract class Unit {
    * @param range 타격 범위
    * @param canvas
    */
-  public void showRange(float range, Canvas canvas) {
+  public void showRange(float range, Canvas canvas, float screenRatio) {
     Paint circle = new Paint();
     circle.setAntiAlias(true);
     circle.setStyle(Paint.Style.STROKE); // 원의 윤곽선만 그림
     circle.setStrokeWidth(3); // 윤곽선 두께
     circle.setColor(Color.GREEN); // 윤곽선은 초록색
-    canvas.drawCircle(cntrX, cntrY, range, circle);
+    canvas.drawCircle(cntrX * screenRatio, cntrY * screenRatio, range * screenRatio, circle);
   }
 
   /**

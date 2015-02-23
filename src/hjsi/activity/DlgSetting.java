@@ -1,12 +1,12 @@
 package hjsi.activity;
 
 import hjsi.common.AppManager;
+import hjsi.game.GameMaster;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -48,6 +48,8 @@ public class DlgSetting extends Dialog implements OnClickListener {
 
     if (v == resume) {
       hide();
+      GameMaster.playGame();
+
     } else if (v == sound) {
       if (sound.isChecked()) {
         sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
