@@ -75,7 +75,7 @@ public class Statue extends Unit implements Hittable {
   @Override
   public void draw(Canvas canvas, float screenRatio) {
     super.draw(canvas, screenRatio);
-    showHealthBar(hpMax, hp, canvas);
+    showHealthBar(hpMax, hp, canvas, screenRatio);
   }
 
   /*

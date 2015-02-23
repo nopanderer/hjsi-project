@@ -34,8 +34,8 @@ public abstract class Unit {
    * 유닛 정중앙
    */
   protected float cntrX, cntrY;
-  protected int width;
-  protected int height;
+  protected float width;
+  protected float height;
 
   /**
    * 사정거리
@@ -87,12 +87,12 @@ public abstract class Unit {
 
   public final void setX(float x) {
     this.x = x;
-    cntrX = x + (width / 2);
+    cntrX = x + width * 0.5f;
   }
 
   public final void setY(float y) {
     this.y = y;
-    cntrY = y + (height / 2);
+    cntrY = y + height * 0.5f;
   }
 
   /**
@@ -148,13 +148,14 @@ public abstract class Unit {
    * @param range 타격 범위
    * @param canvas
    */
-  public void showRange(float range, Canvas canvas, float screenRatio) {
+  public void showRange(Canvas canvas, float screenRatio) {
     Paint circle = new Paint();
     circle.setAntiAlias(true);
     circle.setStyle(Paint.Style.STROKE); // 원의 윤곽선만 그림
     circle.setStrokeWidth(3); // 윤곽선 두께
     circle.setColor(Color.GREEN); // 윤곽선은 초록색
-    canvas.drawCircle(cntrX * screenRatio, cntrY * screenRatio, range * screenRatio, circle);
+    canvas.drawCircle(x * screenRatio + width * 0.5f, y * screenRatio + height * 0.5f, range
+        * screenRatio, circle);
   }
 
   /**
@@ -164,7 +165,7 @@ public abstract class Unit {
    * @param hp
    * @param canvas
    */
-  public void showHealthBar(int hpMax, int hp, Canvas canvas) {
+  public void showHealthBar(int hpMax, int hp, Canvas canvas, float screenRatio) {
     Paint paint = new Paint();
 
     /* 체력량에 따라 체력바 길이가 결정 */
@@ -177,7 +178,8 @@ public abstract class Unit {
     else if (healthScale < 0.4)
       paint.setColor(Color.RED);
 
-    canvas.drawRect(x, y - 10, x + width * healthScale, y - 5, paint);
+    canvas.drawRect(x * screenRatio, y * screenRatio - 10, x * screenRatio + width * healthScale, y
+        * screenRatio - 5, paint);
   }
 
   /**

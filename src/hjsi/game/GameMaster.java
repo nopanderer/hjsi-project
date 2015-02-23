@@ -98,9 +98,13 @@ public class GameMaster implements Runnable {
             ((Movable) unit).move();
           }
 
-          if (unit instanceof Attackable) {
-            ((Attackable) unit).attack();
-          }
+          if (unit instanceof Tower)
+            for (Mob mob : GameState.getInstance().getMobs())
+              ((Tower) unit).attack(mob);
+          else if (unit instanceof Mob)
+            for (Statue statue : GameState.getInstance().getStatues())
+              ((Mob) unit).attack(statue);
+
 
         }
         /*
