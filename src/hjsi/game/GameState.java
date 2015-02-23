@@ -7,7 +7,6 @@ import hjsi.timer.Timer;
 import hjsi.timer.TimerRunnable;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -18,12 +17,7 @@ import android.graphics.Rect;
 /**
  * 게임에 필요한 정보를 저장한다.
  */
-public class GameState implements Serializable {
-  /**
-   * 액티비티 간 매개변수로 넘겨주기 위해 직렬화
-   */
-  private static final long serialVersionUID = 7636636440669784974L;
-
+public class GameState {
   public static final int WORLD_WIDTH = 3840;
   public static final int WORLD_HEIGHT = 2160;
 
@@ -216,15 +210,6 @@ public class GameState implements Serializable {
 
   public long getWorldTime() {
     return worldTime;
-  }
-
-  public ArrayList<Station> getStations() {
-    return stations;
-  }
-
-  public Station nextStation(int index) {
-    index = (index + 1) % stations.size();
-    return stations.get(index);
   }
 
   /**

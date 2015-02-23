@@ -108,8 +108,8 @@ public class Loader extends Base {
          * 어플리케이션 최초 실행시, 사용할 데이터베이스를 구축해놓는다.
          */
         GameState gState = new GameState();
-        AppManager.getInstance().putGameState(gState);
         DataManager.loadDatabase(getApplicationContext(), 1, gState);
+        AppManager.getInstance().putGameState(gState);
 
         Thread.sleep(2000); // 여기서 로딩 작업을 한다고 치고..
       } catch (InterruptedException e) {
