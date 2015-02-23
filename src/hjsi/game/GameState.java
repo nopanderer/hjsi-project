@@ -366,6 +366,6 @@ public class GameState {
     // 이전 웨이브의 몹은 폐기처분한다.
     destroyMob(userWave - 1);
 
-    return TimeManager.registerCallbackTimer(1000, spawnMob, MAX_MOB);
+    return TimeManager.registerCallbackTimer(1000 / GameMaster.ff, spawnMob, MAX_MOB);
   }
 }

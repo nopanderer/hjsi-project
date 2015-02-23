@@ -138,7 +138,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   @Override
   public void attack(Unit unit) {
     if (lap == 1) {
-      if (GameMaster.gameTime > attackTime + attackSpeed * GameMaster.ff)
+      if (GameMaster.gameTime > attackTime + attackSpeed / GameMaster.ff)
         attackTime = GameMaster.gameTime;
       else
         return;
@@ -210,7 +210,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   public void update(long gameTime) {
-    if (gameTime > lastTime + framePeriod) {
+    if (gameTime > lastTime + framePeriod / GameMaster.ff) {
       lastTime = gameTime;
       curFrame++;
       if (curFrame >= frameNum) {

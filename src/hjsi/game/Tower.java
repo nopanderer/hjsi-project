@@ -13,7 +13,7 @@ public class Tower extends Unit implements Attackable {
   /**
    * 공격속도
    */
-  public int attackSpeed = 2000;
+  public int attackSpeed;
   /**
    * 등급
    */
@@ -83,7 +83,7 @@ public class Tower extends Unit implements Attackable {
 
   @Override
   public void attack(Unit unit) {
-    if (GameMaster.gameTime > beforeTime + attackSpeed * GameMaster.ff)
+    if (GameMaster.gameTime > beforeTime + attackSpeed / GameMaster.ff)
       beforeTime = GameMaster.gameTime;
     else
       return;
