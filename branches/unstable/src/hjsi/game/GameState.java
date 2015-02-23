@@ -108,10 +108,10 @@ public class GameState {
     units.add(new Statue(5, 5, AppManager.getBitmap("statue1")));
 
     /* 정류장 삽입 */
-    stations.add(new Station(80, 580));
-    stations.add(new Station(1100, 580));
-    stations.add(new Station(1100, 80));
-    stations.add(new Station(80, 80));
+    stations.add(new Station(200, WORLD_HEIGHT - 140));
+    stations.add(new Station(WORLD_WIDTH - 200, WORLD_HEIGHT - 140));
+    stations.add(new Station(WORLD_WIDTH - 200, 140));
+    stations.add(new Station(200, 140));
   }
 
   public static GameState getInstance() {
@@ -290,6 +290,14 @@ public class GameState {
   public Rect getTowersArea(float ratio) {
     return new Rect((int) (towersArea.left * ratio), (int) (towersArea.top * ratio),
         (int) (towersArea.right * ratio), (int) (towersArea.bottom * ratio));
+  }
+
+  public int getTowersWidth(float ratio) {
+    return (int) (TOWERS_WIDTH * ratio + 0.5);
+  }
+
+  public int getTowersHeight(float ratio) {
+    return (int) (TOWERS_HEIGHT * ratio + 0.5);
   }
 
   public void setCoin(int coin) {
