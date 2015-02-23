@@ -9,7 +9,6 @@ import hjsi.game.Unit;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -22,16 +21,14 @@ import android.widget.ToggleButton;
 public class Game extends Base implements OnClickListener {
   private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
 
-  Button btnBook, btnStore, btnDeploy;
+  Button btnBook, btnPause, btnStore, btnDeploy;
   public static Button btnGen;
-  ToggleButton btnPause, btnFF;
-  Drawable drawableBtnPlay_Pause;
-  Drawable drawableBtnPlay_Play;
+  ToggleButton btnFF;
   DlgSetting dlgSetting;
   public static MediaPlayer music;
 
   /** 게임을 진행하는 인게임 스레드를 가진 개체 */
-  private GameMaster gameMaster;
+  public GameMaster gameMaster;
   /** 카메라 */
   private Camera camera;
 
@@ -59,12 +56,9 @@ public class Game extends Base implements OnClickListener {
     /*
      * 버튼 뷰 참조자 및 드로블 가져옴
      */
-    drawableBtnPlay_Pause = getResources().getDrawable(R.drawable.btn_pause);
-    drawableBtnPlay_Play = getResources().getDrawable(R.drawable.btn_play);
-
     btnBook = (Button) findViewById(R.id.btn_book);
     btnBook.setOnClickListener(this);
-    btnPause = (ToggleButton) findViewById(R.id.btn_pause);
+    btnPause = (Button) findViewById(R.id.btn_pause);
     btnPause.setOnClickListener(this);
     btnStore = (Button) findViewById(R.id.btn_store);
     btnStore.setOnClickListener(this);
@@ -104,7 +98,6 @@ public class Game extends Base implements OnClickListener {
 
     if (gameMaster != null) {
       gameMaster.pauseGame();
-      btnPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
     }
 
     if (Game.music != null) {
@@ -164,18 +157,10 @@ public class Game extends Base implements OnClickListener {
      * play 버튼
      */
     else if (v == btnPause) {
-      /* 일시정지 -> 재생 */
-      if (btnPause.isChecked()) {
-        btnPause.setBackgroundDrawable(drawableBtnPlay_Play);
-        gameMaster.pauseGame();
-        showSettingMenu();
-      }
-      /* 재생 -> 일시정지 */
-      else {
-        btnPause.setBackgroundDrawable(drawableBtnPlay_Pause);
-        gameMaster.playGame();
-      }
+      gameMaster.pauseGame();
+      showSettingMenu();
     }
+    /* 재생 -> 일시정지 */
 
     else if (v == btnStore) {
       Intent Store = new Intent(Game.this, Store.class);
@@ -246,13 +231,7 @@ public class Game extends Base implements OnClickListener {
   private void showSettingMenu() {
     AppManager.printSimpleLog();
     dlgSetting.show();
-
-    /* 재생 중일 경우 */
-    if (!btnPause.isChecked()) {
-      btnPause.setChecked(true);
-      btnPause.setBackgroundDrawable(drawableBtnPlay_Play);
-      gameMaster.pauseGame();
-    }
+    gameMaster.pauseGame();
   }
 
 }
