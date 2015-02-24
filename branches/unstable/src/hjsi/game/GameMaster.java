@@ -85,12 +85,41 @@ public class GameMaster implements Runnable {
         }
 
         /*
-         * 유닛 루프 시작
+         * 파괴된 유닛 삭제
          */
-        LinkedList<Mob> mobs = gState.getMobs();
+        LinkedList<Unit> clone = new LinkedList<Unit>(gState.getUnits());
 
+        for (Unit unit : clone) {
+          if (unit.destroyed)
+            gState.removeUnit(unit);
+        }
+
+        /*
+         * Mob 루프
+         */
+        for (Mob mob : gState.getMobs()) {
+          if (mob.getLap() == 2) {
+            mob.dead();
+            continue;
+          }
+
+          else if (mob.getLap() == 1) {
+            for (Statue statue : gState.getStatues()) {
+              if (statue.destroyed == false && mob.inRange(mob, statue)) {
+                Projectile proj = ((Mob) mob).attack(statue);
+                if (proj != null)
+                  gState.addUnit(proj);
+              }
+            }
+          }
+          mob.move();
+        }
+
+        /*
+         * Tower 루프
+         */
         for (Tower tower : gState.getTowers()) {
-          for (Mob mob : mobs) {
+          for (Mob mob : gState.getMobs()) {
             if (mob.destroyed == false && tower.inRange(tower, mob)) {
               Projectile proj = tower.attack(mob);
               if (proj != null)
@@ -99,42 +128,21 @@ public class GameMaster implements Runnable {
           }
         }
 
-        for (int i = 0; i < gState.getUnits().size(); i++) {
-          /* 임시유닛 */
-          Unit unit = gState.getUnits().get(i);
-
-          if (unit.destroyed) {
-            // TODO 리스트에서 remove 할 때는 해당 리스트에 대한 for문 내에서 하면 안됨
-            gState.units.remove(unit);
-            continue;
-          }
-
-          if (unit instanceof Mob) {
-            Mob mob = (Mob) unit;
-            if (mob.getLap() == 2) {
-              mob.dead();
-              continue;
-            }
-          }
-
-          else if (unit instanceof Statue) {
-            unit.action();
-          }
-
-          if (unit instanceof Movable) {
-            ((Movable) unit).move();
-          }
-
-          if (unit instanceof Mob)
-            for (Statue statue : gState.getStatues()) {
-              Projectile proj = ((Mob) unit).attack(statue);
-              if (proj != null)
-                gState.getUnits().add(proj);
-            }
-        }
         /*
-         * 유닛 루프 끝
+         * Projectile 루프
          */
+        for (Projectile proj : gState.getProjs()) {
+          proj.move();
+        }
+
+        /*
+         * Statue 루프
+         */
+        for (Statue statue : gState.getStatues()) {
+          statue.action();
+        }
+
+
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
         fpsRealFps++;

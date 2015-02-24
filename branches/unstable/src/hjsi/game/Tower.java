@@ -87,8 +87,8 @@ public class Tower extends Unit implements Attackable {
       beforeTime = GameMaster.gameTime;
 
       Mob target = (Mob) unit;
-      if (target.destroyed == false && inRange(this, target))
-        return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
+
+      return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
     }
 
     return null;
