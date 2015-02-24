@@ -60,16 +60,7 @@ public class DataManager {
 
     LinkedList<Tower> towerList = new LinkedList<Tower>();
     Tower tower = null;
-
-    // 타워가 하나도 없는 경우 == 처음 실행시
-    if (towers == null) {
-      tower = createTower(Integer.toString(5));
-      tower.setX(320);
-      tower.setY(170);
-      towerList.add(tower);
-
-      // 타워가 저장되어 있는 경우 그대로 불러옴
-    } else {
+    if (towers != null) {
       String[] token = towers.split(",");
       for (int i = 0; i < token.length; i = i + 3) {
         tower = createTower(token[i]);

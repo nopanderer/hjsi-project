@@ -370,15 +370,17 @@ public class GameState {
    * 타워를 설치할 수 있는 격자에 타워가 있는지, 없는지 갱신한다. 배치 격자를 표시하기 전에만 호출해주면 된다.
    */
   public void refreshArea() {
+    // 배열 초기화
     for (int row = 0; row < TOWERS_ROWS; row++) {
       for (int col = 0; col < TOWERS_COLUMNS; col++) {
-        Tower tower = getTower(row, col);
-
-        if (tower != null)
-          areaUsedCells[row][col] = true;
-        else
-          areaUsedCells[row][col] = false;
+        areaUsedCells[row][col] = false;
       }
+    }
+    // 타워가 있는 칸만 true
+    for (Tower tower : getTowers()) {
+      int row = getRow((int) tower.getY());
+      int col = getColumn((int) tower.getX());
+      areaUsedCells[row][col] = true;
     }
   }
 
