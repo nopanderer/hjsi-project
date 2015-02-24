@@ -176,6 +176,8 @@ public class GameState {
       inHand = DataManager.createRandomTowerByTier(0);
       AppManager.printInfoLog(inHand.getId() + "번 타워 구매함.");
     }
+
+    // TODO inHand 변수에 타워가 들어있으면 Game activity에 표시해줘야한다.
   }
 
   public void deployTower(int x, int y) {
@@ -390,6 +392,13 @@ public class GameState {
     return (int) (TOWERS_HEIGHT * ratio + 0.5);
   }
 
+  /**
+   * 해당 좌표가 배치 영역 내부인지 아닌지를 검사한다.
+   * 
+   * @param x 좌표 형태 값
+   * @param y 좌표 형태 값
+   * @return x, y 좌표가 배치 영역 내부에 있다면 true, 벗어난다면 false를 반환한다.
+   */
   public boolean inArea(int x, int y) {
     if (x >= towersArea.left && x <= towersArea.right && y >= towersArea.top
         && y <= towersArea.bottom) {
@@ -400,7 +409,7 @@ public class GameState {
   }
 
   /**
-   * 타워를 설치할 수 있는 격자에 타워가 있는지, 없는지 갱신한다. 배치 격자를 표시하기 전에만 호출해주면 된다.
+   * 타워를 설치할 수 있는 격자 칸마다 타워가 있는지, 없는지 갱신한다. 배치 격자를 표시하기 전에만 호출해주면 된다.
    */
   public void refreshArea() {
     // 배열 초기화
@@ -417,10 +426,23 @@ public class GameState {
     }
   }
 
+  /**
+   * 지정된 row, column 위치를 타워가 사용 중인지 반환한다. 사용 전에는 refreshArea() 메소드를 호출해주는 것이 좋다.
+   * 
+   * @param row 0번 인덱스부터 시작하는 행 번호
+   * @param column 0번 인덱스부터 시작하는 열 번호
+   * @return 해당 배치 격자 칸에 타워가 존재하면 true, 빈 공간이면 false를 반환한다.
+   */
   public boolean isUsedCell(int row, int column) {
     return areaUsedCells[row][column];
   }
 
+  /**
+   * 입력한 좌표 형태 y 값을 배치영역의 행 번호로 변환한다.
+   * 
+   * @param y 좌표 형태의 세로 위치 값
+   * @return y 좌표 값이 배치 영역 내에 속한다면 그에 알맞는 행 번호를 반환하고, 범위를 벗어난다면 -1을 반환한다.
+   */
   public static int getRow(int y) {
     int retValue = -1;
     if (y >= towersArea.top && y <= towersArea.bottom) {
@@ -430,6 +452,12 @@ public class GameState {
     return retValue;
   }
 
+  /**
+   * 입력한 좌표 형태 x 값을 배치영역의 열 번호로 변환한다.
+   * 
+   * @param x 좌표 형태의 가로 위치 값
+   * @return x 좌표 값이 배치 영역 내에 속한다면 그에 알맞는 열 번호를 반환하고, 범위를 벗어난다면 -1을 반환한다.
+   */
   public static int getColumn(int x) {
     int retValue = -1;
     if (x >= towersArea.left && x <= towersArea.right) {
@@ -443,6 +471,9 @@ public class GameState {
     userCoin = coin;
   }
 
+  /**
+   * @return deadMob >= MAX_MOB
+   */
   public boolean isWaveDone() {
     return deadMob >= MAX_MOB;
   }
