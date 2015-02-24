@@ -7,14 +7,16 @@ import hjsi.timer.TimerRunnable;
 
 import java.util.LinkedList;
 
+import android.os.Handler;
+
 /**
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
  */
 public class GameMaster implements Runnable {
   /**
-   * Game 액티비티
+   * Game 액티비티와 통신하기 위한 핸들러
    */
-  private Game gameAct = null;
+  private Handler gameActHandler = null;
   /**
    * GameState
    */
@@ -39,8 +41,8 @@ public class GameMaster implements Runnable {
 
   public static int ff = 1;
 
-  public GameMaster(Game gameAct, GameState gameState) {
-    this.gameAct = gameAct;
+  public GameMaster(Handler handler, GameState gameState) {
+    gameActHandler = handler;
     gState = gameState;
 
     workerThread = new Thread(this);
@@ -69,7 +71,7 @@ public class GameMaster implements Runnable {
 
         // 웨이브가 종료되면 타이머를 멈추고 다음 웨이브를 준비한다.
         if (gState.isWaveDone()) {
-          gameAct.readySpawnButton();
+          gameActHandler.sendEmptyMessage(Game.HANDLER_SHOW_SPAWN_BTN);
           GameState.usedMob = 0;
           GameState.deadMob = 0;
           GameState.curMob = 0;

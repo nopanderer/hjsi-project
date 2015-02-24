@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -17,20 +18,13 @@ public class DlgSetting extends Dialog implements OnClickListener {
   private ToggleButton sound;
 
   /**
-   * 부모 액티비티와 통신하기 위한 레퍼런스
+   * 통신을 위한 부모 액티비티의 핸들러
    */
-  private Game gameAct = null;;
+  private Handler gameActHandler = null;
 
-  /*
-   * 상수 목록
-   */
-  public static final int DLG_BTN_RESUME = 0;
-  public static final int DLG_BTN_SOUND = 1;
-  public static final int DLG_BTN_QUIT = 2;
-
-  public DlgSetting(Context context, Game gameAct) {
+  public DlgSetting(Context context, Handler handler) {
     super(context);
-    this.gameAct = gameAct;
+    gameActHandler = handler;
   }
 
   @Override
@@ -60,10 +54,10 @@ public class DlgSetting extends Dialog implements OnClickListener {
 
     if (v == resume) {
       hide();
-      gameAct.handleDialog(DLG_BTN_RESUME);
+      gameActHandler.sendEmptyMessage(Game.HANDLER_DLG_RESUME);
 
     } else if (v == sound) {
-      gameAct.handleDialog(DLG_BTN_SOUND);
+      gameActHandler.sendEmptyMessage(Game.HANDLER_DLG_SOUND);
       if (sound.isChecked())
         sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
       else
@@ -71,13 +65,16 @@ public class DlgSetting extends Dialog implements OnClickListener {
 
     } else if (v == quit) {
       dismiss();
-      gameAct.handleDialog(DLG_BTN_QUIT);
+      gameActHandler.sendEmptyMessage(Game.HANDLER_DLG_QUIT);
     }
   }
 
+  /**
+   * 뒤로가기 버튼을 누르면 resume과 똑같은 명령을 수행하도록 기존 메소드를 덮어썼다.
+   */
   @Override
   public void onBackPressed() {
     AppManager.printSimpleLog();
-    hide();
+    onClick(resume);
   }
 }

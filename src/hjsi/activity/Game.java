@@ -19,8 +19,28 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.ToggleButton;
 
-public class Game extends Base implements OnClickListener {
-  private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
+public class Game extends Base implements OnClickListener, Handler.Callback {
+  /**
+   * 게임을 재개하도록 요청한다.
+   */
+  public static final int HANDLER_DLG_RESUME = 0;
+  /**
+   * 사운드를 on/off 하도록 요청한다.
+   */
+  public static final int HANDLER_DLG_SOUND = 1;
+  /**
+   * 게임을 종료하도록 요청한다.
+   */
+  public static final int HANDLER_DLG_QUIT = 2;
+  /**
+   * 몹 생성 버튼을 표시하도록 요청한다.
+   */
+  public static final int HANDLER_SHOW_SPAWN_BTN = 3;
+
+  /**
+   * 게임에서 사용한 리소스 해제 타이밍을 위한 변수
+   */
+  private boolean explicitQuit = false;
 
   private Button btnBook, btnPause, btnStore, btnDeploy, btnGen;
   private ToggleButton btnFF;
@@ -36,6 +56,8 @@ public class Game extends Base implements OnClickListener {
   private Camera camera;
   /** 게임 정보 관리 객체 */
   GameState gState = null;
+
+  private final Handler gameHandler = new Handler(this);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +98,7 @@ public class Game extends Base implements OnClickListener {
     btnFF = (ToggleButton) findViewById(R.id.btn_ff);
     btnFF.setOnClickListener(this);
 
-    dlgSetting = new DlgSetting(this, this);
+    dlgSetting = new DlgSetting(Game.this, gameHandler);
     dlgSetting.setCanceledOnTouchOutside(false);
 
     bgMusic = MediaPlayer.create(this, R.raw.bgm);
@@ -84,7 +106,7 @@ public class Game extends Base implements OnClickListener {
     bgMusic.start();
 
     /* GameMaster 생성 */
-    gameMaster = new GameMaster(this, gState);
+    gameMaster = new GameMaster(gameHandler, gState);
     gameMaster.playGame();
 
     AppManager.printDetailLog(getClass().getSimpleName() + " 초기화 완료");
@@ -249,11 +271,23 @@ public class Game extends Base implements OnClickListener {
     AppManager.printSimpleLog();
 
     switch (msg) {
-      case DlgSetting.DLG_BTN_RESUME:
+
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see android.os.Handler.Callback#handleMessage(android.os.Message)
+   */
+  @Override
+  public boolean handleMessage(Message msg) {
+    switch (msg.what) {
+      case Game.HANDLER_DLG_RESUME:
         gameMaster.playGame();
         break;
 
-      case DlgSetting.DLG_BTN_SOUND:
+      case Game.HANDLER_DLG_SOUND:
         if (bgmPlaying) {
           bgmPlaying = false;
           bgMusic.pause();
@@ -263,7 +297,7 @@ public class Game extends Base implements OnClickListener {
         }
         break;
 
-      case DlgSetting.DLG_BTN_QUIT:
+      case Game.HANDLER_DLG_QUIT:
         bgMusic.stop();
         bgMusic.release();
         bgMusic = null;
@@ -271,22 +305,14 @@ public class Game extends Base implements OnClickListener {
         AppManager.getInstance().quitApp();
         break;
 
+      case Game.HANDLER_SHOW_SPAWN_BTN:
+        btnGen.setVisibility(View.VISIBLE);
+        break;
+
       default:
         AppManager.printErrorLog("Game 액티비티에 예외 메시지(" + msg + ")가 왔습니다.");
         break;
     }
-  }
-
-  /**
-   * TODO handler leak 없도록 구현해야함
-   */
-  private final Handler spawnButtonHandler = new Handler() {
-    public void handleMessage(Message msg) {
-      btnGen.setVisibility(View.VISIBLE);
-    }
-  };
-
-  public void readySpawnButton() {
-    spawnButtonHandler.sendEmptyMessage(0);
+    return false;
   }
 }
