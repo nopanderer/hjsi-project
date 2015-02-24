@@ -6,7 +6,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -17,8 +16,21 @@ public class DlgSetting extends Dialog implements OnClickListener {
   private Button resume, help, credits, quit;
   private ToggleButton sound;
 
-  public DlgSetting(Context context) {
+  /**
+   * 부모 액티비티와 통신하기 위한 레퍼런스
+   */
+  private Game gameAct = null;;
+
+  /*
+   * 상수 목록
+   */
+  public static final int DLG_BTN_RESUME = 0;
+  public static final int DLG_BTN_SOUND = 1;
+  public static final int DLG_BTN_QUIT = 2;
+
+  public DlgSetting(Context context, Game gameAct) {
     super(context);
+    this.gameAct = gameAct;
   }
 
   @Override
@@ -48,20 +60,18 @@ public class DlgSetting extends Dialog implements OnClickListener {
 
     if (v == resume) {
       hide();
-    } else if (v == sound) {
-      if (sound.isChecked()) {
-        sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
-        Game.music.pause();
-      } else {
-        sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundon));
-        Game.music.start();
-      }
-    } else if (v == quit) {
-      Game.music.stop();
-      Game.music.release();
-      Game.music = null;
+      gameAct.handleDialog(DLG_BTN_RESUME);
 
+    } else if (v == sound) {
+      gameAct.handleDialog(DLG_BTN_SOUND);
+      if (sound.isChecked())
+        sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
+      else
+        sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundon));
+
+    } else if (v == quit) {
       dismiss();
+      gameAct.handleDialog(DLG_BTN_QUIT);
     }
   }
 

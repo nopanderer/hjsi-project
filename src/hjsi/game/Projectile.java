@@ -11,9 +11,9 @@ import android.graphics.Bitmap;
 public class Projectile extends Unit implements Movable {
 
   /**
-   * 목표로 한 몹의 인덱스
+   * 타겟
    */
-  private int target;
+  Unit target;
   /**
    * 투사체 속도
    */
@@ -26,15 +26,14 @@ public class Projectile extends Unit implements Movable {
    * 타워의 공격 데미지
    */
   private int damage;
-  /**
-   * 몹과 충돌했는지
-   */
-  public boolean isHit;
+
   /**
    * 임시 타이머 변수
    */
   private long beforeTime;
-  private int sleep = 15;
+  private int sleep = 10;
+
+  private Vector2d vector;
 
   private static final int NORMAL = 1;
   private static final int SLOW = 2;
@@ -43,14 +42,17 @@ public class Projectile extends Unit implements Movable {
   private static final int ICED = 5;
   private static final int CHAIN = 6;
 
-  public Projectile(int x, int y, int damage, int target, Bitmap face) {
-    super(x, y, face);
+  public Projectile(float x, float y, int damage, Unit target, Bitmap face) {
+    super(Unit.TYPE_ETC, 0, x, y, face);
     this.target = target;
 
     moveSpeed = 3;
-    isHit = false;
+    type = NORMAL;
+    this.damage = damage;
 
-    beforeTime = System.currentTimeMillis();
+    vector = new Vector2d();
+
+    beforeTime = 0l;
   }
 
   @Override
@@ -61,59 +63,42 @@ public class Projectile extends Unit implements Movable {
       return;
 
     /* 충돌검사 */
-    if ((x >= targetX() && x <= targetXWidth()) && y >= targetY() && y <= targetYHeight()) {
-      isHit = true;
-      GameState.getInstance().Mobs.get(target).hit(damage);
+    if ((x >= target.x && x <= targetXWidth()) && y >= target.y && y <= targetYHeight()) {
+      destroyed = true;
+      ((Hittable) target).hit(damage);
     }
+
+    /* 투사체에서 몹까지의 벡터 */
+    vector.set(target.cntrX - x, target.cntrY - y);
+    /* 벡터 정규화 */
+    vector.nor();
+    /* 투사체 이동속도 스칼라 곱 */
+    vector.mul(moveSpeed * GameMaster.ff);
+
 
     /* 유도 알고리즘 */
-    if (targetCntrX() < x) {
-      x -= moveSpeed;
-      if (targetCntrY() < y)
-        y -= moveSpeed;
-      else if (targetCntrY() > y)
-        y += moveSpeed;
+    if (target instanceof Mob) {
+      Vector2d desired =
+          new Vector2d(((Mob) target).vector.x + vector.x, ((Mob) target).vector.y + vector.y);
+
+      x += desired.x;
+      y += desired.y;
+      cntrX += desired.x;
+      cntrY += desired.y;
+    } else if (target instanceof Statue) {
+      x += vector.x;
+      y += vector.y;
+      cntrX += vector.x;
+      cntrY += vector.y;
     }
-    if (targetCntrX() > x) {
-      x += moveSpeed;
-      if (targetCntrY() < y)
-        y -= moveSpeed;
-      else if (targetCntrY() > y)
-        y += moveSpeed;
-    }
-    if (targetCntrX() == x) {
-      if (targetCntrY() < y)
-        y -= moveSpeed;
-      else if (targetCntrY() > y)
-        y += moveSpeed;
-    }
-
   }
 
-  private int targetX() {
-    return GameState.getInstance().Mobs.get(target).x;
+  private float targetXWidth() {
+    return target.x + target.width;
   }
 
-  private int targetY() {
-    return GameState.getInstance().Mobs.get(target).y;
-  }
-
-  private int targetCntrX() {
-    return GameState.getInstance().Mobs.get(target).cntrX;
-  }
-
-  private int targetCntrY() {
-    return GameState.getInstance().Mobs.get(target).cntrY;
-  }
-
-  private int targetXWidth() {
-    return GameState.getInstance().Mobs.get(target).x
-        + GameState.getInstance().Mobs.get(target).width;
-  }
-
-  private int targetYHeight() {
-    return GameState.getInstance().Mobs.get(target).y
-        + GameState.getInstance().Mobs.get(target).height;
+  private float targetYHeight() {
+    return target.y + target.height;
   }
 
   @Override

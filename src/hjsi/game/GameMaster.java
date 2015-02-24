@@ -1,5 +1,6 @@
 package hjsi.game;
 
+import hjsi.activity.Game;
 import hjsi.common.AppManager;
 import hjsi.timer.TimeManager;
 import hjsi.timer.TimerRunnable;
@@ -8,6 +9,14 @@ import hjsi.timer.TimerRunnable;
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
  */
 public class GameMaster implements Runnable {
+  /**
+   * Game 액티비티
+   */
+  private Game gameAct = null;
+  /**
+   * GameState
+   */
+  private GameState gState = null;
   /**
    * 게임을 진행시키는 스레드
    */
@@ -21,7 +30,17 @@ public class GameMaster implements Runnable {
    */
   private boolean running = false;
 
-  public GameMaster() {
+  /**
+   * 현재 웨이브를 완료했는지 여부를 의미한다. false라면 웨이브가 진행 중이라는 뜻.
+   */
+  public static long gameTime;
+
+  public static int ff = 1;
+
+  public GameMaster(Game gameAct, GameState gameState) {
+    this.gameAct = gameAct;
+    gState = gameState;
+
     workerThread = new Thread(this);
     workerThread.start();
   }
@@ -30,74 +49,89 @@ public class GameMaster implements Runnable {
   public void run() {
     /* fps 계산을 위한 변수 */
     int fpsRealFps = 0;
-    long fpsStartTime;
     long fpsRealTime; // 프레임당 실제 소요 시간
     long fpsElapsedTime = 0L; // 1초 측정을 위한 변수
 
     while (!termination) {
       while (running) {
         // 프레임 시작 시간을 구한다.
-        fpsStartTime = System.currentTimeMillis();
+        gameTime = System.currentTimeMillis();
 
         /*
-         * 대기가 끝난 작업을 수행한다.
+         * 대기(쿨타임)가 끝난 작업을 수행한다.
          */
-        TimerRunnable task = TimeManager.nextTask();
-        while (task != null) {
+        TimerRunnable task;
+        while ((task = TimeManager.nextTask()) != null) {
           task.run();
-          task = TimeManager.nextTask();
+        }
+
+        // 웨이브가 종료되면 타이머를 멈추고 다음 웨이브를 준비한다.
+        if (gState.isWaveDone()) {
+          gameAct.readySpawnButton();
+          GameState.usedMob = 0;
+          GameState.deadMob = 0;
+          GameState.curMob = 0;
         }
 
         /*
-         * 게임 로직 실행
+         * 각각의 스테이션은 자신에게 도달한 몹을 다음 스테이션으로 향하도록 설정한다.
          */
-        for (Unit unit : GameState.getInstance().getUnits()) {
-          unit.action();
+        for (Mob mob : gState.getMobs()) {
+          if (mob.isArrive()) {
+            mob.nextStation(gState.stations);
+          }
         }
 
-        if (GameState.getInstance().usedMob < 10) {
-          GameState.getInstance().addMob();
-        }
-        // 몹이 다 죽으면 새로운 웨이브 시작 및 정지
-        else if (GameState.getInstance().deadMob == 10) {
-          nextWave();
-          TimeManager.pauseTime();
-          pauseGame();
-          break;
-        }
+        /*
+         * 유닛 루프 시작
+         */
+        for (int i = 0; i < gState.getUnits().size(); i++) {
+          /* 임시유닛 */
+          Unit unit = gState.getUnits().get(i);
 
-        for (Mob mob : GameState.getInstance().getMobs()) {
-          // 몹이 죽지 않았고 1바퀴 돌았으면
-          if (mob.lap == 2 && mob.dead == false) {
-            mob.dead = true;
-            GameState.getInstance().curMob--;
-            GameState.getInstance().deadMob++;
+          if (unit.destroyed) {
+            // TODO 리스트에서 remove 할 때는 해당 리스트에 대한 for문 내에서 하면 안됨
+            gState.units.remove(unit);
             continue;
           }
 
-          // 몹이 생성되어 있다면 이동
-          else if (mob.created)
-            mob.move();
-        }
+          if (unit instanceof Mob) {
+            Mob mob = (Mob) unit;
+            if (mob.getLap() == 2) {
+              mob.dead();
+              continue;
+            }
+          }
 
-        /*
-         * 몹이 타워 사정거리에 들어오면 일정 시간마다 투사체 생성
-         */
-        GameState.getInstance().tower.attack();
-        /*
-         * 투사체 전체 돌면서 몹을 향해 이동. 맞으면 사라짐
-         */
-        for (Projectile proj : GameState.getInstance().getProjs()) {
-          proj.move();
-          /* 투사체가 몹과 충돌한다면 */
-          if (proj.isHit)
-            GameState.getInstance().projs.remove(proj);
+          else if (unit instanceof Statue) {
+            unit.action();
+          }
+
+          if (unit instanceof Movable) {
+            ((Movable) unit).move();
+          }
+
+          if (unit instanceof Tower)
+            for (Mob mob : gState.getMobs()) {
+              Projectile proj = ((Tower) unit).attack(mob);
+              if (proj != null)
+                gState.getUnits().add(proj);
+            }
+
+          else if (unit instanceof Mob)
+            for (Statue statue : gState.getStatues()) {
+              Projectile proj = ((Mob) unit).attack(statue);
+              if (proj != null)
+                gState.getUnits().add(proj);
+            }
         }
-        // TODO Auto-generated method stub
+        /*
+         * 유닛 루프 끝
+         */
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
         fpsRealFps++;
-        fpsRealTime = (System.currentTimeMillis() - fpsStartTime);
+        fpsRealTime = (System.currentTimeMillis() - gameTime);
         fpsElapsedTime += fpsRealTime;
         if (fpsElapsedTime >= 1000) { // 1초마다 프레임율 갱신
           AppManager.getInstance().setLogicFps(fpsRealFps);
@@ -106,9 +140,10 @@ public class GameMaster implements Runnable {
         }
       }
 
-      // 게임이 일시정지 중일 땐 인게임 스레드의 cpu time을 양보시킨다.
-      Thread.yield();
     }
+
+    // 게임이 일시정지 중일 땐 인게임 스레드의 cpu time을 양보시킨다.
+    Thread.yield();
     AppManager.printDetailLog("GameMaster 스레드 종료.");
   }
 
@@ -126,6 +161,8 @@ public class GameMaster implements Runnable {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+
+    TimeManager.stopTime();
   }
 
   /**
@@ -138,6 +175,7 @@ public class GameMaster implements Runnable {
      */
     running = true;
     // workerThread.interrupt(); // 대기 중인 스레드 바로 깨우기 (되는지 모르겠음)
+    TimeManager.startTime();
   }
 
   /**
@@ -146,20 +184,6 @@ public class GameMaster implements Runnable {
   public void pauseGame() {
     AppManager.printSimpleLog();
     running = false;
-  }
-
-  public void nextWave() {
-    GameState gameState = GameState.getInstance();
-
-    gameState.destroyMob();
-    gameState.wave++;
-    // 새로운 비트맵 추가
-    gameState.makeFace();
-    // 새로운 몹 생성
-    gameState.createMobs();
-    // init(임시)
-    gameState.curMob = 0;
-    gameState.usedMob = 0;
-    gameState.deadMob = 0;
+    TimeManager.pauseTime();
   }
 }

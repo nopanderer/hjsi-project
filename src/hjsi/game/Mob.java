@@ -1,6 +1,13 @@
 package hjsi.game;
 
+import hjsi.common.AppManager;
+
+import java.util.ArrayList;
+
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.RectF;
 
 /**
  * Mob 클래스
@@ -33,50 +40,90 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
    */
   private int armor;
   /**
-   * 사정거리
-   */
-  private int range;
-  /**
    * 웨이브 번호
    */
   private int wave;
 
   /**
-   * 몹이 생성 되었는가
-   */
-  public boolean created;
-  /**
-   * 몹이 죽었는가
-   */
-  public boolean dead;
-  /**
    * 몇 바퀴 돌았나
    */
-  public int lap;
+  private int lap;
 
-  /* 리젠 */
-  private long beforeTime;
+  /* 최근 이동 시간 */
+  private long moveTime;
+  /* 최근 공격 시간 */
+  private long attackTime;
+
   private int sleep = 10;
+
+  public Vector2d vector;
   /**
-   * 초기 생성 위치
+   * 정류소 번호
    */
-  private int oldX, oldY;
+  private int stationIndex;
+  /**
+   * 정류소
+   */
+  private Station station;
 
-  public Mob(int x, int y, Bitmap face, int wave) {
-    super(x, y, face);
+  /* 스프라이트 이미지를 위한 임시 변수 */
+  private Rect rect;
+  /**
+   * 프레임 갯수
+   */
+  private int frameNum;
+  /**
+   * 현재 프레임
+   */
+  private int curFrame;
+  /**
+   * 최근 업데이트된 시간
+   */
+  private long lastTime;
+  /**
+   * 프레임 간격
+   */
+  private int framePeriod;
 
-    created = false;
-    dead = false;
-    lap = 0;
+  public Mob(int x, int y, Bitmap face, int wave, Station dest) {
+    super(Unit.TYPE_MOB, 0, x, y, face);
+
+    setLap(0);
     this.wave = wave;
-    beforeTime = System.currentTimeMillis();
+    moveTime = 0l;
+    attackTime = 0l;
 
+    hpMax = 100;
+    hp = hpMax;
+
+    damage = 10;
+    attackSpeed = 2000;
     moveSpeed = 1;
     range = 400;
 
-    oldX = x;
-    oldY = y;
+    vector = new Vector2d();
+    stationIndex = 0;
+    station = dest;
 
+    curFrame = 0;
+    frameNum = 4;
+    width = face.getWidth() / frameNum;
+    height = face.getHeight();
+    rect = new Rect(0, 0, (int) this.width, (int) this.height);
+    framePeriod = 1000 / 4;
+    lastTime = 0l;
+
+    setX(x);
+    setY(y);
+  }
+
+  @Override
+  public void draw(Canvas canvas, float screenRatio) {
+    RectF destRect =
+        new RectF(x * screenRatio, y * screenRatio, x * screenRatio + width, y * screenRatio
+            + height);
+    canvas.drawBitmap(face, rect, destRect, null);
+    showHealthBar(hpMax, hp, canvas, screenRatio);
   }
 
   /*
@@ -91,45 +138,41 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   @Override
-  public void attack() {
-    // TODO Auto-generated method stub
+  public Projectile attack(Unit target) {
+    if (getLap() == 1) {
+      if (GameMaster.gameTime > attackTime + attackSpeed / GameMaster.ff)
+        attackTime = GameMaster.gameTime;
+      else
+        return null;
 
+      Statue statue = (Statue) target;
+
+      if (statue == null)
+        return null;
+      else if (statue.destroyed == false && inRange(this, statue)) {
+        return new Projectile(cntrX, cntrY, damage, statue, AppManager.getBitmap("proj1"));
+      }
+    }
+
+    return null;
   }
 
   @Override
   public void move() {
-    // TODO Auto-generated method stub
-    // 10밀리세컨드 마다 5 픽셀씩 이동
-
-    if (System.currentTimeMillis() - beforeTime > sleep)
-      beforeTime = System.currentTimeMillis();
+    // 10밀리세컨드 마다 1 픽셀씩 이동
+    if (GameMaster.gameTime > moveTime + sleep)
+      moveTime = GameMaster.gameTime;
     else
       return;
 
-    if (x == oldX && y == oldY)
-      lap++;
+    vector.set(station.x - x, station.y - y);
+    vector.nor();
+    vector.mul(moveSpeed * GameMaster.ff);
 
-    // 아래로
-    if (x == oldX && y + moveSpeed <= 2160 - 900) {
-      y += moveSpeed;
-      cntrY += moveSpeed;
-    }
-    // 오른쪽
-    else if (x + moveSpeed <= 3840 - 1500 && y == 2160 - 900) {
-      x += moveSpeed;
-      cntrX += moveSpeed;
-    }
-    // 위로
-    else if (x == 3840 - 1500 && y - moveSpeed >= oldY) {
-      y -= moveSpeed;
-      cntrY -= moveSpeed;
-    }
-    // 왼쪽
-    else if (x - moveSpeed >= oldX && y == oldY) {
-      x -= moveSpeed;
-      cntrX -= moveSpeed;
-    }
-
+    x += vector.x;
+    y += vector.y;
+    cntrX += vector.x;
+    cntrY += vector.y;
   }
 
   @Override
@@ -140,7 +183,49 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public void hit(int damage) {
-    // TODO Auto-generated method stub
+    if (destroyed == false) {
+      hp -= damage;
+      if (hp <= 0)
+        dead();
+    }
+  }
 
+  @Override
+  public void dead() {
+    destroyed = true;
+    GameState.curMob--;
+    GameState.deadMob++;
+  }
+
+  public boolean isArrive() {
+    return station.arrive(this);
+  }
+
+  public void nextStation(ArrayList<Station> stations) {
+    stationIndex = (stationIndex + 1) % stations.size();
+    if (stationIndex == 0)
+      setLap(getLap() + 1);
+
+    station = stations.get(stationIndex);
+  }
+
+  public void update(long gameTime) {
+    if (gameTime > lastTime + framePeriod / GameMaster.ff) {
+      lastTime = gameTime;
+      curFrame++;
+      if (curFrame >= frameNum) {
+        curFrame = 0;
+      }
+    }
+    rect.left = curFrame * (int) width;
+    rect.right = rect.left + (int) width;
+  }
+
+  public int getLap() {
+    return lap;
+  }
+
+  public void setLap(int lap) {
+    this.lap = lap;
   }
 }

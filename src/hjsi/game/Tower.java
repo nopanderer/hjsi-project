@@ -13,18 +13,14 @@ public class Tower extends Unit implements Attackable {
   /**
    * 공격속도
    */
-  public int attackSpeed = 2000;
-  /**
-   * 사정거리
-   */
-  public int range;
+  public int attackSpeed;
   /**
    * 등급
    */
-  private int type;
+  private int tier;
   public String imgName;
 
-  private long beforeTime = System.currentTimeMillis();
+  private long beforeTime = 0l;
 
   private static final int PRIMITIVE = 1;
   private static final int BASIC = 2;
@@ -37,15 +33,34 @@ public class Tower extends Unit implements Attackable {
   public Tower() {
     super();
     name = "불";
-    type = 0;
+    tier = 0;
     damage = 5;
     imgName = "element_match";
 
   }
 
-  public Tower(int x, int y, Bitmap face) {
-    super(x, y, face);
-    range = 400;
+  /**
+   * @param id 타워 식별자
+   * @param name 게임에 표시될 타워 이름
+   * @param tier 타워 등급
+   * @param damage 타워 데미지
+   * @param attackSpeed 타워의 공격속도
+   * @param range 타워 사정거리
+   * @param face 타워 이미지
+   */
+  public Tower(int id, String name, int tier, int damage, int attackSpeed, int range, Bitmap face) {
+    super(Unit.TYPE_TOWER, id, face);
+    this.name = name;
+    this.tier = tier;
+    this.damage = damage;
+    this.attackSpeed = attackSpeed;
+    this.range = range;
+  }
+
+  public Tower(int id, int x, int y, Bitmap face) {
+    super(Unit.TYPE_TOWER, id, x, y, face);
+    damage = 50;
+    range = 300;
   }
 
   @Override
@@ -61,29 +76,24 @@ public class Tower extends Unit implements Attackable {
   }
 
   @Override
-  public void draw(Canvas canvas) {
-    super.draw(canvas);
-    showRange(range, canvas);
+  public void draw(Canvas canvas, float screenRatio) {
+    super.draw(canvas, screenRatio);
+    showRange(canvas, screenRatio);
   }
 
   @Override
-  public void attack() {
-    // TODO Auto-generated method stub
-    if (System.currentTimeMillis() - beforeTime > attackSpeed)
-      beforeTime = System.currentTimeMillis();
+  public Projectile attack(Unit target) {
+    if (GameMaster.gameTime > beforeTime + attackSpeed / GameMaster.ff)
+      beforeTime = GameMaster.gameTime;
     else
-      return;
-    for (int i = 0; i < GameState.getInstance().Mobs.size(); i++) {
-      if (GameState.getInstance().Mobs.get(i).created == false)
-        continue;
+      return null;
 
-      else if ((int) Math.sqrt(Math.pow(GameState.getInstance().Mobs.get(i).cntrX - this.cntrX, 2)
-          + Math.pow(GameState.getInstance().Mobs.get(i).cntrY - this.cntrY, 2)) <= range) {
-        GameState.getInstance().projs.add(new Projectile(cntrX, cntrY, damage, i, AppManager
-            .getInstance().getBitmap("proj1")));
-        break;
-      }
-    }
+    Mob mob = (Mob) target;
+    if (mob == null)
+      return null;
+    else if (mob.destroyed == false && inRange(this, mob))
+      return new Projectile(cntrX, cntrY, damage, mob, AppManager.getBitmap("proj1"));
 
+    return null;
   }
 }
