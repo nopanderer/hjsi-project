@@ -5,6 +5,8 @@ import hjsi.common.AppManager;
 import hjsi.timer.TimeManager;
 import hjsi.timer.TimerRunnable;
 
+import java.util.LinkedList;
+
 /**
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
  */
@@ -85,6 +87,18 @@ public class GameMaster implements Runnable {
         /*
          * 유닛 루프 시작
          */
+        LinkedList<Mob> mobs = gState.getMobs();
+
+        for (Tower tower : gState.getTowers()) {
+          for (Mob mob : mobs) {
+            if (mob.destroyed == false && tower.inRange(tower, mob)) {
+              Projectile proj = tower.attack(mob);
+              if (proj != null)
+                gState.addUnit(proj);
+            }
+          }
+        }
+
         for (int i = 0; i < gState.getUnits().size(); i++) {
           /* 임시유닛 */
           Unit unit = gState.getUnits().get(i);
@@ -111,14 +125,7 @@ public class GameMaster implements Runnable {
             ((Movable) unit).move();
           }
 
-          if (unit instanceof Tower)
-            for (Mob mob : gState.getMobs()) {
-              Projectile proj = ((Tower) unit).attack(mob);
-              if (proj != null)
-                gState.getUnits().add(proj);
-            }
-
-          else if (unit instanceof Mob)
+          if (unit instanceof Mob)
             for (Statue statue : gState.getStatues()) {
               Projectile proj = ((Mob) unit).attack(statue);
               if (proj != null)

@@ -82,17 +82,14 @@ public class Tower extends Unit implements Attackable {
   }
 
   @Override
-  public Projectile attack(Unit target) {
-    if (GameMaster.gameTime > beforeTime + attackSpeed / GameMaster.ff)
+  public Projectile attack(Hittable unit) {
+    if (GameMaster.gameTime > beforeTime + (attackSpeed / GameMaster.ff)) {
       beforeTime = GameMaster.gameTime;
-    else
-      return null;
 
-    Mob mob = (Mob) target;
-    if (mob == null)
-      return null;
-    else if (mob.destroyed == false && inRange(this, mob))
-      return new Projectile(cntrX, cntrY, damage, mob, AppManager.getBitmap("proj1"));
+      Mob target = (Mob) unit;
+      if (target.destroyed == false && inRange(this, target))
+        return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
+    }
 
     return null;
   }

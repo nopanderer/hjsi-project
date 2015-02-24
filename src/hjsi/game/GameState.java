@@ -287,6 +287,12 @@ public class GameState {
     return units;
   }
 
+  public void addUnit(Unit newbie) {
+    synchronized (units) {
+      units.add(newbie);
+    }
+  }
+
   /**
    * 전체 유닛 목록에서 몹만 가져온다.
    * 

@@ -1,5 +1,6 @@
 package hjsi.game;
 
+
 public interface Attackable {
-  Projectile attack(Unit unit);
+  Projectile attack(Hittable units);
 }
