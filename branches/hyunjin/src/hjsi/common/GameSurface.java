@@ -188,7 +188,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
 
           /* 살아있으면 그리기 */
           else
-            unit.draw(canvas, screenRatio);
+            unit.draw(canvas);
 
           /*
            * 스레드 종료가 필요한 경우 최대한 빨리 끝내기 위해 그림을 그리는 도중에도 스레드 종료 조건을 검사한다.
