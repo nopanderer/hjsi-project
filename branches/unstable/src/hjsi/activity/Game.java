@@ -5,6 +5,7 @@ import hjsi.common.Camera;
 import hjsi.common.GameSurface;
 import hjsi.game.GameMaster;
 import hjsi.game.GameState;
+import hjsi.game.Tower;
 import hjsi.game.Unit;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -166,6 +167,7 @@ public class Game extends Base implements OnClickListener {
     }
 
     else if (v == btnDeploy) {
+      gState.refreshArea();
       gState.onDeployMode();
     }
 
@@ -207,8 +209,17 @@ public class Game extends Base implements OnClickListener {
     logicalY =
         (int) (logicalY / (float) (camera.getScreenWidth() / (float) GameState.WORLD_WIDTH) + 0.5);
 
+    /* 로그 출력용 코드 */
     event.setLocation(logicalX, logicalY);
     AppManager.printEventLog(event);
+
+    int row = gState.getRow(logicalY);
+    int col = gState.getColumn(logicalX);
+    Tower tower = gState.getTower(row, col);
+    if (tower != null) {
+      AppManager.printDetailLog("타워" + tower.getId() + " 클릭 됨.");
+    }
+    /* 로그 출력용 코드 끝 */
 
     Unit unit = gState.getUnit(logicalX, logicalY);
     if (unit != null) {

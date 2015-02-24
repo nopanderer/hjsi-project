@@ -51,8 +51,11 @@ public class GameState {
    * 타워가 배치되는 구역
    */
   private Rect towersArea = new Rect(AREA_LEFT, AREA_TOP, AREA_RIGHT, AREA_BOTTOM);
-  public static final int TOWERS_WIDTH = (int) ((AREA_RIGHT - AREA_LEFT) / 10 + 0.5);
-  public static final int TOWERS_HEIGHT = (int) ((AREA_BOTTOM - AREA_TOP) / 8 + 0.5);
+  private static final int TOWERS_COLUMNS = 10;
+  private static final int TOWERS_ROWS = 8;
+  public static final int TOWERS_WIDTH = (int) ((AREA_RIGHT - AREA_LEFT) / TOWERS_COLUMNS + 0.5);
+  public static final int TOWERS_HEIGHT = (int) ((AREA_BOTTOM - AREA_TOP) / TOWERS_ROWS + 0.5);
+  private boolean[][] areaUsedCells = new boolean[TOWERS_ROWS][TOWERS_COLUMNS];
   /**
    * 현재 게임이 진행된 시간을 나타낸다.
    */
@@ -133,25 +136,21 @@ public class GameState {
 
   /**
    * 게임을 배치모드로 전환하고 랜덤으로 타워를 생성하여 반환한다.
-   * 
-   * @returns 토큰이 충분하다면 임의의 타워를 반환하고, 토큰이 부족하다면 null을 반환한다.
    */
-  public boolean onDeployMode() {
+  public void onDeployMode() {
     // 키핑해둔 타워가 있으면 다시 배치모드로 꺼낸다.
     if (inHand == null && keepingTower != null) {
       inHand = keepingTower;
       keepingTower = null;
-      return true;
 
       // 배치해야되는 타워가 있는대 배치버튼을 눌렀으면 타워를 없애지 않고 키핑한다.
     } else if (inHand != null && keepingTower == null) {
       keepingTower = inHand;
       inHand = null;
-      return false;
 
-      // 유저 정보에서 가지고 있는 토큰 수를 확인한다. 부족하면 false를 반환한다.
+      // 유저 정보에서 가지고 있는 토큰 수를 확인한다.
     } else if (getCoin() < 3) {
-      return false;
+      // TODO 토큰이 모자랄 때를 표현한다
 
     } else {
       // 토큰 수에 알맞은 등급의 임의의 타워를 생성한다.
@@ -172,19 +171,41 @@ public class GameState {
       // 타워를 생성한다.
       inHand = DataManager.createRandomTowerByTier(0);
       AppManager.printInfoLog(inHand.getId() + "번 타워 구매함.");
-      return true;
     }
   }
 
   public void deployTower(int x, int y) {
     // 1. 현재 터치한 좌표가 배치 가능한 구역인지 확인한다. (맵의 가운데)
+    if (inArea(x, y)) {
+      /*
+       * 날좌표를 행렬 인덱스로 변환한다.
+       */
+      int row = getRow(y);
+      int col = getColumn(x);
+      if (row == -1 || col == -1) {
+        AppManager.printErrorLog("배치격자 안을 클릭했을 텐데 행렬 인덱스에 에러가 있다니...");
+      }
+      AppManager.printInfoLog((row + 1) + "행 " + (col + 1) + "열을 클릭했다.");
 
-    // 2. 현재 터치한 좌표의 자리가 비어있는지 검사한다. (칸 단위로)
+      // 2. 현재 터치한 좌표의 자리가 비어있는지 검사한다. (칸 단위임)
+      if (areaUsedCells[row][col] == false) {
+        /*
+         * 행렬 인덱스를 배치격자 칸의 가운데 값으로 일종의 정규화한다.
+         */
+        x = towersArea.left + (TOWERS_WIDTH * col) + (int) (TOWERS_WIDTH / 2.0 + 0.5);
+        y = towersArea.top + (TOWERS_HEIGHT * row) + (int) (TOWERS_HEIGHT / 2.0 + 0.5);
 
-    inHand.setX(x);
-    inHand.setY(y);
-    units.add(inHand);
-    inHand = null;
+        // 3. 정규화한 좌표에 타워를 설치한다.
+        inHand.setX(x);
+        inHand.setY(y);
+        synchronized (units) {
+          units.add(inHand);
+        }
+        inHand = null;
+      } else {
+        AppManager.printDetailLog("이미 타워가 배치되어 있다.");
+      }
+    }
   }
 
   /**
@@ -222,11 +243,35 @@ public class GameState {
   public Unit getUnit(int x, int y) {
     synchronized (units) {
       for (Unit unit : units) {
-        if ((unit.x < x && x < unit.x + unit.width) && (unit.y < y && y < unit.y + unit.height))
+        if ((unit.x <= x && x <= unit.x + unit.width) && (unit.y <= y && y <= unit.y + unit.height))
           return unit;
       }
     }
     return null;
+  }
+
+  /**
+   * 배치모드에서 표시되는 격자 칸의 첨자(2차원 배열처럼 생각하면 됨)를 주면 해당 칸에 있는 타워를 반환한다. 당장은 쓸 일이 없을 것 같다.
+   * 
+   * @param row
+   * @param column
+   * @return
+   */
+  public Tower getTower(int row, int column) {
+    int cellsCenterX = (int) (TOWERS_WIDTH / 2.0 + 0.5);
+    int cellsCenterY = (int) (TOWERS_HEIGHT / 2.0 + 0.5);
+
+    int x = towersArea.left + (TOWERS_WIDTH * column) + cellsCenterX;
+    int y = towersArea.top + (TOWERS_HEIGHT * row) + cellsCenterY;
+
+    Unit unit = getUnit(x, y);
+    if (unit == null) {
+      return null;
+    } else if (unit instanceof Tower == false) {
+      AppManager.printErrorLog("왜 타워가 아닌게 여기 있냐");
+      return null;
+    } else
+      return (Tower) unit;
   }
 
   /**
@@ -310,6 +355,53 @@ public class GameState {
 
   public int getTowersHeight(float ratio) {
     return (int) (TOWERS_HEIGHT * ratio + 0.5);
+  }
+
+  public boolean inArea(int x, int y) {
+    if (x >= towersArea.left && x <= towersArea.right && y >= towersArea.top
+        && y <= towersArea.bottom) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * 타워를 설치할 수 있는 격자에 타워가 있는지, 없는지 갱신한다. 배치 격자를 표시하기 전에만 호출해주면 된다.
+   */
+  public void refreshArea() {
+    for (int row = 0; row < TOWERS_ROWS; row++) {
+      for (int col = 0; col < TOWERS_COLUMNS; col++) {
+        Tower tower = getTower(row, col);
+
+        if (tower != null)
+          areaUsedCells[row][col] = true;
+        else
+          areaUsedCells[row][col] = false;
+      }
+    }
+  }
+
+  public boolean isUsedCell(int row, int column) {
+    return areaUsedCells[row][column];
+  }
+
+  public int getRow(int y) {
+    int retValue = -1;
+    if (y >= towersArea.top && y <= towersArea.bottom) {
+      y = y - towersArea.top;
+      retValue = y / TOWERS_HEIGHT;
+    }
+    return retValue;
+  }
+
+  public int getColumn(int x) {
+    int retValue = -1;
+    if (x >= towersArea.left && x <= towersArea.right) {
+      x = x - towersArea.left;
+      retValue = x / TOWERS_WIDTH;
+    }
+    return retValue;
   }
 
   public void setCoin(int coin) {

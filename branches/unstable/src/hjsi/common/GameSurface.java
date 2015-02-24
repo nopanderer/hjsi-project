@@ -164,6 +164,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         if (gState.checkDeployMode()) {
           for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 8; j++) {
+              if (gState.isUsedCell(j, i)) {
+                gridPaint.setStyle(Style.FILL_AND_STROKE);
+              } else {
+                gridPaint.setStyle(Style.STROKE);
+              }
               canvas.drawRect(area.left + i * cellsWidth, area.top + j * cellsHeight, area.left
                   + (i + 1) * cellsWidth, area.top + (j + 1) * cellsHeight, gridPaint);
             }
