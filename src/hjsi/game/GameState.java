@@ -2,9 +2,7 @@ package hjsi.game;
 
 import hjsi.common.AppManager;
 import hjsi.common.DataManager;
-import hjsi.timer.TimeManager;
-import hjsi.timer.Timer;
-import hjsi.timer.TimerRunnable;
+import hjsi.common.Timer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,6 +59,14 @@ public class GameState {
    */
   private volatile long worldTime = 0L;
   /**
+   * 게임 시간을 재는 타이머
+   */
+  private Timer worldTimer;
+  /**
+   * 몹 생성 시간을 재는 타이머
+   */
+  private Timer spawnTimer;
+  /**
    * 현재 단계
    */
   public int wave = 1;
@@ -69,42 +75,16 @@ public class GameState {
    */
   LinkedList<Unit> units = new LinkedList<Unit>();
 
-  public Bitmap mImgMob; // 몹 비트맵
-  public long beforeRegen = 0l; // 리젠하기 전 시간
-  public long regen = 1000; // create mob per 1 sec
-  public static int usedMob = 0; // 몹이 실제로 생성된(내부적 카운터 위해)
+  private Bitmap mImgMob; // 몹 비트맵
   public static int deadMob = 0; // 죽은 몹
   public static int curMob = 0; // 현재 몹
 
-  public static final int MAX_MOB = 10;
+  private static final int MAX_MOB = 10;
 
-  public ArrayList<Station> stations = new ArrayList<Station>();
-
-  private TimerRunnable spawnMob = new TimerRunnable() {
-    @Override
-    public void run() {
-      synchronized (units) {
-        units.add(new Mob(80, 80, mImgMob, userWave, stations.get(0)));
-      }
-      usedMob++;
-      curMob++;
-    }
-  };
+  ArrayList<Station> stations = new ArrayList<Station>();
 
   public GameState() {
     AppManager.printSimpleLog();
-
-    /*
-     * 게임 진행 시간 측정을 위한 타이머를 생성해서 등록해둔다.
-     */
-    TimerRunnable clock = new TimerRunnable() {
-      @Override
-      public void run() {
-        worldTime++;
-        AppManager.printDetailLog("딸깍...");
-      }
-    };
-    TimeManager.registerCallbackTimer(1000, clock, -1).start();
 
     /*
      * 동상 추가
@@ -118,6 +98,11 @@ public class GameState {
     stations.add(new Station(WORLD_WIDTH - 200, WORLD_HEIGHT - 140));
     stations.add(new Station(WORLD_WIDTH - 200, 140));
     stations.add(new Station(200, 140));
+
+
+    worldTimer = Timer.create("월드시계", 1000);
+    spawnTimer = Timer.create("몹 생성 시계", 1000, MAX_MOB);
+    spawnTimer.stop();
   }
 
   /**
@@ -237,6 +222,16 @@ public class GameState {
 
   public long getWorldTime() {
     return worldTime;
+  }
+
+  /**
+   * 1초 증가
+   */
+  public void passWorldTime() {
+    if (worldTimer.isAvailable()) {
+      worldTime++;
+      AppManager.printInfoLog("딸깍...");
+    }
   }
 
   /**
@@ -471,13 +466,6 @@ public class GameState {
     userCoin = coin;
   }
 
-  /**
-   * @return deadMob >= MAX_MOB
-   */
-  public boolean isWaveDone() {
-    return deadMob >= MAX_MOB;
-  }
-
   public void makeFace(int wave) {
     Options option = new Options();
     // option.inSampleSize = 16;
@@ -509,18 +497,40 @@ public class GameState {
     }
   }
 
-  public Timer waveReady() {
+  /**
+   * @return deadMob >= MAX_MOB
+   */
+  public boolean isWaveDone() {
+    return deadMob >= MAX_MOB;
+  }
+
+  public void finishWave() {
+    deadMob = 0;
+    curMob = 0;
+
+    spawnTimer.stop();
+  }
+
+  public void waveReady() {
     // 새로운 비트맵 추가
     userWave++;
     makeFace(userWave);
 
     curMob = 0;
-    usedMob = 0;
     deadMob = 0;
 
     // 이전 웨이브의 몹은 폐기처분한다.
     destroyMob(userWave - 1);
 
-    return TimeManager.registerCallbackTimer(1000 / GameMaster.ff, spawnMob, MAX_MOB);
+    // 몹 리스폰 타이머를 리필함.
+    spawnTimer.refill();
+    spawnTimer.start();
+  }
+
+  public void spawnMob() {
+    if (spawnTimer.isAvailable()) {
+      addUnit(new Mob(80, 80, mImgMob, userWave, stations.get(0)));
+      curMob++;
+    }
   }
 }

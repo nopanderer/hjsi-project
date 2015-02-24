@@ -3,8 +3,7 @@
  */
 package hjsi.game;
 
-import hjsi.timer.TimeManager;
-import hjsi.timer.Timer;
+import hjsi.common.Timer;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
@@ -34,7 +33,6 @@ public class Statue extends Unit implements Hittable {
   /*
    * 쿨타임
    */
-  private static final int HP_REGEN = 0;
   private Timer timerHpRegen;
 
   /**
@@ -51,7 +49,7 @@ public class Statue extends Unit implements Hittable {
     /*
      * 타이머 생성
      */
-    timerHpRegen = TimeManager.registerPassiveTimer(HP_REGEN, 10);
+    timerHpRegen = Timer.create("동상 체력재생", 100);
   }
 
   /*
@@ -61,9 +59,8 @@ public class Statue extends Unit implements Hittable {
    */
   @Override
   public void action() {
-    if (timerHpRegen.isCountDone()) {
+    if (timerHpRegen.isAvailable()) {
       hp = Math.min(hp + hpRegen, hpMax);
-      TimeManager.resetPassiveTimer(timerHpRegen);
     }
   }
 

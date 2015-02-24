@@ -1,5 +1,6 @@
 package hjsi.game;
 
+import hjsi.common.Timer;
 import android.graphics.Bitmap;
 
 /**
@@ -27,11 +28,7 @@ public class Projectile extends Unit implements Movable {
    */
   private int damage;
 
-  /**
-   * 임시 타이머 변수
-   */
-  private long beforeTime;
-  private int sleep = 10;
+  private Timer moveTimer;
 
   private Vector2d vector;
 
@@ -52,44 +49,40 @@ public class Projectile extends Unit implements Movable {
 
     vector = new Vector2d();
 
-    beforeTime = 0l;
+    moveTimer = Timer.create("투사체", 10);
   }
 
   @Override
   public void move() {
-    if (System.currentTimeMillis() - beforeTime > sleep)
-      beforeTime = System.currentTimeMillis();
-    else
-      return;
+    if (moveTimer.isAvailable()) {
+      /* 충돌검사 */
+      if ((x >= target.x && x <= targetXWidth()) && y >= target.y && y <= targetYHeight()) {
+        destroyed = true;
+        ((Hittable) target).hit(damage);
+      }
 
-    /* 충돌검사 */
-    if ((x >= target.x && x <= targetXWidth()) && y >= target.y && y <= targetYHeight()) {
-      destroyed = true;
-      ((Hittable) target).hit(damage);
-    }
+      /* 투사체에서 몹까지의 벡터 */
+      vector.set(target.cntrX - x, target.cntrY - y);
+      /* 벡터 정규화 */
+      vector.nor();
+      /* 투사체 이동속도 스칼라 곱 */
+      vector.mul(moveSpeed);
 
-    /* 투사체에서 몹까지의 벡터 */
-    vector.set(target.cntrX - x, target.cntrY - y);
-    /* 벡터 정규화 */
-    vector.nor();
-    /* 투사체 이동속도 스칼라 곱 */
-    vector.mul(moveSpeed * GameMaster.ff);
+      /* 유도 알고리즘 */
+      if (target instanceof Mob) {
+        Vector2d desired =
+            new Vector2d(((Mob) target).vector.x + vector.x, ((Mob) target).vector.y + vector.y);
 
-
-    /* 유도 알고리즘 */
-    if (target instanceof Mob) {
-      Vector2d desired =
-          new Vector2d(((Mob) target).vector.x + vector.x, ((Mob) target).vector.y + vector.y);
-
-      x += desired.x;
-      y += desired.y;
-      cntrX += desired.x;
-      cntrY += desired.y;
-    } else if (target instanceof Statue) {
-      x += vector.x;
-      y += vector.y;
-      cntrX += vector.x;
-      cntrY += vector.y;
+        x += desired.x;
+        y += desired.y;
+        cntrX += desired.x;
+        cntrY += desired.y;
+      } else if (target instanceof Statue) {
+        x += vector.x;
+        y += vector.y;
+        cntrX += vector.x;
+        cntrY += vector.y;
+      }
     }
   }
 

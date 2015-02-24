@@ -2,8 +2,7 @@ package hjsi.game;
 
 import hjsi.activity.Game;
 import hjsi.common.AppManager;
-import hjsi.timer.TimeManager;
-import hjsi.timer.TimerRunnable;
+import hjsi.common.Timer;
 
 import java.util.LinkedList;
 
@@ -34,13 +33,6 @@ public class GameMaster implements Runnable {
    */
   private boolean running = false;
 
-  /**
-   * 현재 웨이브를 완료했는지 여부를 의미한다. false라면 웨이브가 진행 중이라는 뜻.
-   */
-  public static long gameTime;
-
-  public static int ff = 1;
-
   public GameMaster(Handler handler, GameState gameState) {
     gameActHandler = handler;
     gState = gameState;
@@ -59,22 +51,19 @@ public class GameMaster implements Runnable {
     while (!termination) {
       while (running) {
         // 프레임 시작 시간을 구한다.
-        gameTime = System.currentTimeMillis();
+        Timer.timestamp();
 
-        /*
-         * 대기(쿨타임)가 끝난 작업을 수행한다.
-         */
-        TimerRunnable task;
-        while ((task = TimeManager.nextTask()) != null) {
-          task.run();
-        }
+        // 게임월드 시간을 측정한다
+        gState.passWorldTime();
 
         // 웨이브가 종료되면 타이머를 멈추고 다음 웨이브를 준비한다.
         if (gState.isWaveDone()) {
           gameActHandler.sendEmptyMessage(Game.HANDLER_SHOW_SPAWN_BTN);
-          GameState.usedMob = 0;
-          GameState.deadMob = 0;
-          GameState.curMob = 0;
+          gState.finishWave();
+
+          // 웨이브가 종료되면 몹 생성은 할 필요가 없다.
+        } else {
+          gState.spawnMob();
         }
 
         /*
@@ -144,11 +133,15 @@ public class GameMaster implements Runnable {
           statue.action();
         }
 
+        /*
+         * 사용되지 않는 타이머를 찾아서 제거한다.
+         */
+        Timer.removeUnusedTimer();
 
 
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
         fpsRealFps++;
-        fpsRealTime = (System.currentTimeMillis() - gameTime);
+        fpsRealTime = (System.currentTimeMillis() - Timer.NOW);
         fpsElapsedTime += fpsRealTime;
         if (fpsElapsedTime >= 1000) { // 1초마다 프레임율 갱신
           AppManager.getInstance().setLogicFps(fpsRealFps);
@@ -178,8 +171,6 @@ public class GameMaster implements Runnable {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-
-    TimeManager.stopTime();
   }
 
   /**
@@ -192,7 +183,7 @@ public class GameMaster implements Runnable {
      */
     running = true;
     // workerThread.interrupt(); // 대기 중인 스레드 바로 깨우기 (되는지 모르겠음)
-    TimeManager.startTime();
+    Timer.resume();
   }
 
   /**
@@ -201,6 +192,6 @@ public class GameMaster implements Runnable {
   public void pauseGame() {
     AppManager.printSimpleLog();
     running = false;
-    TimeManager.pauseTime();
+    Timer.pause();
   }
 }

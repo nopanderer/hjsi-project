@@ -1,6 +1,7 @@
 package hjsi.game;
 
 import hjsi.common.AppManager;
+import hjsi.common.Timer;
 
 import java.util.ArrayList;
 
@@ -49,10 +50,9 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
    */
   private int lap;
 
-  /* 최근 이동 시간 */
-  private long moveTime;
-  /* 최근 공격 시간 */
-  private long attackTime;
+  private Timer moveTimer;
+  private Timer attackTimer;
+  private Timer spriteTimer;
 
   private int sleep = 10;
 
@@ -77,21 +77,15 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
    */
   private int curFrame;
   /**
-   * 최근 업데이트된 시간
-   */
-  private long lastTime;
-  /**
    * 프레임 간격
    */
-  private int framePeriod;
+  private long framePeriod;
 
   public Mob(int x, int y, Bitmap face, int wave, Station dest) {
     super(Unit.TYPE_MOB, 0, x, y, face);
 
     setLap(0);
     this.wave = wave;
-    moveTime = 0l;
-    attackTime = 0l;
 
     hpMax = 100;
     hp = hpMax;
@@ -107,14 +101,17 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
     curFrame = 0;
     frameNum = 4;
+    framePeriod = 1000 / frameNum;
     width = face.getWidth() / frameNum;
     height = face.getHeight();
     rect = new Rect(0, 0, (int) this.width, (int) this.height);
-    framePeriod = 1000 / 4;
-    lastTime = 0l;
 
     setX(x);
     setY(y);
+
+    moveTimer = Timer.create("몹 이동", 10);
+    attackTimer = Timer.create("몹 공격", (long) (attackSpeed + 0.5));
+    spriteTimer = Timer.create("몹 프레임", framePeriod);
   }
 
   @Override
@@ -139,9 +136,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public Projectile attack(Hittable unit) {
-    if (GameMaster.gameTime > attackTime + (attackSpeed / GameMaster.ff)) {
-      attackTime = GameMaster.gameTime;
-
+    if (attackTimer.isAvailable()) {
       Statue target = (Statue) unit;
       return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
     }
@@ -152,19 +147,16 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   @Override
   public void move() {
     // 10밀리세컨드 마다 1 픽셀씩 이동
-    if (GameMaster.gameTime > moveTime + sleep)
-      moveTime = GameMaster.gameTime;
-    else
-      return;
+    if (moveTimer.isAvailable()) {
+      vector.set(station.x - x, station.y - y);
+      vector.nor();
+      vector.mul(moveSpeed);
 
-    vector.set(station.x - x, station.y - y);
-    vector.nor();
-    vector.mul(moveSpeed * GameMaster.ff);
-
-    x += vector.x;
-    y += vector.y;
-    cntrX += vector.x;
-    cntrY += vector.y;
+      x += vector.x;
+      y += vector.y;
+      cntrX += vector.x;
+      cntrY += vector.y;
+    }
   }
 
   @Override
@@ -202,8 +194,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   public void update(long gameTime) {
-    if (gameTime > lastTime + framePeriod / GameMaster.ff) {
-      lastTime = gameTime;
+    if (spriteTimer.isAvailable()) {
       curFrame++;
       if (curFrame >= frameNum) {
         curFrame = 0;
