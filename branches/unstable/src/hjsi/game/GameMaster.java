@@ -90,6 +90,7 @@ public class GameMaster implements Runnable {
           Unit unit = gState.getUnits().get(i);
 
           if (unit.destroyed) {
+            // TODO 리스트에서 remove 할 때는 해당 리스트에 대한 for문 내에서 하면 안됨
             gState.units.remove(unit);
             continue;
           }

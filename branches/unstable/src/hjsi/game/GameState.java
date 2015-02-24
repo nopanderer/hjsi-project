@@ -109,7 +109,9 @@ public class GameState {
     /*
      * 동상 추가
      */
-    units.add(new Statue(5, 5, AppManager.getBitmap("statue1")));
+    synchronized (units) {
+      units.add(new Statue(5, 5, AppManager.getBitmap("statue1")));
+    }
 
     /* 정류장 삽입 */
     stations.add(new Station(200, WORLD_HEIGHT - 140));
@@ -131,7 +133,9 @@ public class GameState {
     userWave = wave;
     userGold = gold;
     userCoin = coin;
-    units.addAll(towers);
+    synchronized (units) {
+      units.addAll(towers);
+    }
   }
 
   /**
