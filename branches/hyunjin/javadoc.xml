@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="public" additionalparam="-locale ko_KR -encoding UTF-8 -charset UTF-8 -docencoding UTF-8 -bootclasspath D:\Android\android-sdk\platforms\android-16\android.jar" author="true" classpath="libs/android-support-v4.jar" destdir="doc" doctitle="Android Project Documentation" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="exam.customwidget,exam.game,hjsi.timer" source="1.6" sourcefiles="src/exam/androidproject/DlgStore.java,src/exam/androidproject/Map.java,src/exam/androidproject/NewGame.java,src/exam/androidproject/BaseActivity.java,src/exam/androidproject/Setting.java,src/exam/androidproject/Continue.java,src/exam/androidproject/Store.java,src/exam/androidproject/MainActivity.java,src/exam/androidproject/GameSurface.java,src/exam/androidproject/Picturebook.java" sourcepath="src;gen" splitindex="true" use="true" version="true"/>
+    </target>
+</project>

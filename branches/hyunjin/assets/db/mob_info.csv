@@ -1,0 +1,5 @@
+id,maxhp,armor,damage,movespeed,attackspeed,range
+integer,integer,integer,integer,integer,integer,integer
+1,100,0,10,20,1200,100
+2,150,0,10,20,1200,300
+3,180,5,20,20,1400,100
