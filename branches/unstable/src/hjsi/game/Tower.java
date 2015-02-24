@@ -1,6 +1,7 @@
 package hjsi.game;
 
 import hjsi.common.AppManager;
+import hjsi.common.Timer;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
@@ -20,7 +21,7 @@ public class Tower extends Unit implements Attackable {
   private int tier;
   public String imgName;
 
-  private long beforeTime = 0l;
+  private Timer attackTimer;
 
   private static final int PRIMITIVE = 1;
   private static final int BASIC = 2;
@@ -55,12 +56,8 @@ public class Tower extends Unit implements Attackable {
     this.damage = damage;
     this.attackSpeed = attackSpeed;
     this.range = range;
-  }
 
-  public Tower(int id, int x, int y, Bitmap face) {
-    super(Unit.TYPE_TOWER, id, x, y, face);
-    damage = 50;
-    range = 300;
+    attackTimer = Timer.create(name, attackSpeed);
   }
 
   @Override
@@ -83,14 +80,10 @@ public class Tower extends Unit implements Attackable {
 
   @Override
   public Projectile attack(Hittable unit) {
-    if (GameMaster.gameTime > beforeTime + (attackSpeed / GameMaster.ff)) {
-      beforeTime = GameMaster.gameTime;
-
+    if (attackTimer.isAvailable()) {
       Mob target = (Mob) unit;
-
       return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
     }
-
     return null;
   }
 }

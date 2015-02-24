@@ -3,6 +3,7 @@ package hjsi.activity;
 import hjsi.common.AppManager;
 import hjsi.common.Camera;
 import hjsi.common.GameSurface;
+import hjsi.common.Timer;
 import hjsi.game.GameMaster;
 import hjsi.game.GameState;
 import hjsi.game.Tower;
@@ -195,16 +196,11 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
 
     else if (v == btnGen) {
       btnGen.setVisibility(View.GONE);
-      gState.waveReady().start();
-      gameMaster.playGame();
+      gState.waveReady();
     }
 
     else if (v == btnFF) {
-      if (btnFF.isChecked()) {
-        GameMaster.ff = 2;
-      } else {
-        GameMaster.ff = 1;
-      }
+      Timer.fastForward();
     }
   }
 
@@ -253,28 +249,6 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     return super.onTouchEvent(event);
   }
 
-  public void quitExplicitly() {
-    AppManager.printSimpleLog();
-    explicitQuit = true;
-  }
-
-  private void showSettingMenu() {
-    AppManager.printSimpleLog();
-    dlgSetting.show();
-    gameMaster.pauseGame();
-  }
-
-  /**
-   * 다이얼로그의 메시지를 처리하는 메소드
-   */
-  public void handleDialog(int msg) {
-    AppManager.printSimpleLog();
-
-    switch (msg) {
-
-    }
-  }
-
   /*
    * (non-Javadoc)
    * 
@@ -314,5 +288,16 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
         break;
     }
     return false;
+  }
+
+  public void quitExplicitly() {
+    AppManager.printSimpleLog();
+    explicitQuit = true;
+  }
+
+  private void showSettingMenu() {
+    AppManager.printSimpleLog();
+    dlgSetting.show();
+    gameMaster.pauseGame();
   }
 }
