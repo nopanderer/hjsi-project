@@ -139,14 +139,11 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public Projectile attack(Hittable unit) {
-    if (getLap() == 1) {
-      if (GameMaster.gameTime > attackTime + (attackSpeed / GameMaster.ff)) {
-        attackTime = GameMaster.gameTime;
+    if (GameMaster.gameTime > attackTime + (attackSpeed / GameMaster.ff)) {
+      attackTime = GameMaster.gameTime;
 
-        Statue target = (Statue) unit;
-        if (target.destroyed == false && inRange(this, target))
-          return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
-      }
+      Statue target = (Statue) unit;
+      return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
     }
 
     return null;

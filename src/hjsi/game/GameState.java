@@ -293,6 +293,12 @@ public class GameState {
     }
   }
 
+  public void removeUnit(Unit trash) {
+    synchronized (units) {
+      units.remove(trash);
+    }
+  }
+
   /**
    * 전체 유닛 목록에서 몹만 가져온다.
    * 
@@ -342,6 +348,23 @@ public class GameState {
       }
     }
     return statues;
+  }
+
+  /**
+   * 전체 유닛 목록에서 투사체만 가져온다.
+   * 
+   * @return 투사체가 0개 이상 들어있는 연결리스트를 반환한다.
+   */
+  public LinkedList<Projectile> getProjs() {
+    LinkedList<Projectile> projs = new LinkedList<Projectile>();
+    synchronized (units) {
+      for (Unit unit : units) {
+        if (unit.getType() == Unit.TYPE_ETC) {
+          projs.add((Projectile) unit);
+        }
+      }
+    }
+    return projs;
   }
 
   public Rect getTowersArea() {
