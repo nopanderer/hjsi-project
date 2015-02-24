@@ -213,8 +213,8 @@ public class Game extends Base implements OnClickListener {
     event.setLocation(logicalX, logicalY);
     AppManager.printEventLog(event);
 
-    int row = gState.getRow(logicalY);
-    int col = gState.getColumn(logicalX);
+    int row = GameState.getRow(logicalY);
+    int col = GameState.getColumn(logicalX);
     Tower tower = gState.getTower(row, col);
     if (tower != null) {
       AppManager.printDetailLog("타워" + tower.getId() + " 클릭 됨.");

@@ -1,6 +1,5 @@
 package hjsi.game;
 
-import android.util.FloatMath;
 
 public class Vector2d {
   public float x, y;
@@ -32,15 +31,15 @@ public class Vector2d {
   }
 
   public void nor() {
-    float len = len();
+    double len = len();
     if (len != 0) {
       x /= len;
       y /= len;
     }
   }
 
-  public float len() {
-    return FloatMath.sqrt(x * x + y * y);
+  public double len() {
+    return Math.sqrt(x * x + y * y);
   }
 
 
@@ -58,12 +57,12 @@ public class Vector2d {
 
   public Vector2d rotate(float angle) {
     float rad = angle * TO_RADIANS;
-    float cos = FloatMath.cos(rad);
-    float sin = FloatMath.sin(rad);
-    float newX = this.x * cos - this.y * sin;
-    float newY = this.x * sin + this.y * cos;
-    this.x = newX;
-    this.y = newY;
+    double cos = Math.cos(rad);
+    double sin = Math.sin(rad);
+    double newX = this.x * cos - this.y * sin;
+    double newY = this.x * sin + this.y * cos;
+    this.x = (float) newX;
+    this.y = (float) newY;
     return this;
   }
 }
