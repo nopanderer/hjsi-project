@@ -359,11 +359,11 @@ public class GameState {
         (int) (towersArea.right * ratio), (int) (towersArea.bottom * ratio));
   }
 
-  public int getTowersWidth(float ratio) {
+  public static int getTowersWidth(float ratio) {
     return (int) (TOWERS_WIDTH * ratio + 0.5);
   }
 
-  public int getTowersHeight(float ratio) {
+  public static int getTowersHeight(float ratio) {
     return (int) (TOWERS_HEIGHT * ratio + 0.5);
   }
 
