@@ -50,7 +50,7 @@ public class GameState {
   /**
    * 타워가 배치되는 구역
    */
-  private Rect towersArea = new Rect(AREA_LEFT, AREA_TOP, AREA_RIGHT, AREA_BOTTOM);
+  private static Rect towersArea = new Rect(AREA_LEFT, AREA_TOP, AREA_RIGHT, AREA_BOTTOM);
   private static final int TOWERS_COLUMNS = 10;
   private static final int TOWERS_ROWS = 8;
   public static final int TOWERS_WIDTH = (int) ((AREA_RIGHT - AREA_LEFT) / TOWERS_COLUMNS + 0.5);
@@ -398,7 +398,7 @@ public class GameState {
     return areaUsedCells[row][column];
   }
 
-  public int getRow(int y) {
+  public static int getRow(int y) {
     int retValue = -1;
     if (y >= towersArea.top && y <= towersArea.bottom) {
       y = y - towersArea.top;
@@ -407,7 +407,7 @@ public class GameState {
     return retValue;
   }
 
-  public int getColumn(int x) {
+  public static int getColumn(int x) {
     int retValue = -1;
     if (x >= towersArea.left && x <= towersArea.right) {
       x = x - towersArea.left;
