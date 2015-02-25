@@ -41,6 +41,10 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
    * 몹 생성 버튼을 표시하도록 요청한다.
    */
   public static final int HANDLER_SHOW_SPAWN_BTN = 4;
+  /**
+   * 몹 생성을 하도록 요청한다.
+   */
+  public static final int HANDLER_SPAWN_MOBS = 5;
 
   /**
    * 게임에서 사용한 리소스 해제 타이밍을 위한 변수
@@ -193,8 +197,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     }
 
     else if (v == btnGen) {
-      btnGen.setVisibility(View.GONE);
-      gState.waveReady();
+      gameHandler.sendEmptyMessage(HANDLER_SPAWN_MOBS);
     }
 
     else if (v == btnFF) {
@@ -287,6 +290,11 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
 
       case Game.HANDLER_SHOW_SPAWN_BTN:
         btnGen.setVisibility(View.VISIBLE);
+        break;
+
+      case Game.HANDLER_SPAWN_MOBS:
+        btnGen.setVisibility(View.GONE);
+        gState.waveReady();
         break;
 
       default:
