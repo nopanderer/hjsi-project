@@ -53,16 +53,16 @@ public class GameMaster implements Runnable {
         // 프레임 시작 시간을 구한다.
         Timer.timestamp();
 
-        // 게임월드 시간을 측정한다
-        gState.passWorldTime();
+        // 게임월드 시간이 1초마다 1씩 증가한다.
+        gState.ticktock();
 
         // 웨이브가 종료되면 타이머를 멈추고 다음 웨이브를 준비한다.
         if (gState.isWaveDone()) {
           gameActHandler.sendEmptyMessage(Game.HANDLER_SHOW_SPAWN_BTN);
           gState.finishWave();
-
-          // 웨이브가 종료되면 몹 생성은 할 필요가 없다.
-        } else {
+        }
+        // 웨이브가 아직 진행 중이면 몹 생성을 시도한다.
+        else {
           gState.spawnMob();
         }
 
@@ -133,12 +133,6 @@ public class GameMaster implements Runnable {
           statue.action();
         }
 
-        /*
-         * 사용되지 않는 타이머를 찾아서 제거한다.
-         */
-        Timer.removeUnusedTimer();
-
-
         /* 프레임 한 번의 소요 시간을 구해서 fps를 계산한다. */
         fpsRealFps++;
         fpsRealTime = (System.currentTimeMillis() - Timer.NOW);
@@ -146,10 +140,9 @@ public class GameMaster implements Runnable {
         if (fpsElapsedTime >= 1000) { // 1초마다 프레임율 갱신
           AppManager.getInstance().setLogicFps(fpsRealFps);
           fpsRealFps = 0;
-          fpsElapsedTime = 0L;
+          fpsElapsedTime -= 1000;
         }
       }
-
     }
 
     // 게임이 일시정지 중일 땐 인게임 스레드의 cpu time을 양보시킨다.
@@ -178,12 +171,8 @@ public class GameMaster implements Runnable {
    */
   public void playGame() {
     AppManager.printSimpleLog();
-    /*
-     * 일시정지했다가 다시 시작하는건지, 한 웨이브가 끝난 후 새로운 웨이브를 시작하는건지 구별할 필요가 있다. (새로운 정보를 세팅하는 과정이 필요하니까)
-     */
     running = true;
-    // workerThread.interrupt(); // 대기 중인 스레드 바로 깨우기 (되는지 모르겠음)
-    Timer.resume();
+    gState.resumeTimers();
   }
 
   /**
@@ -192,6 +181,6 @@ public class GameMaster implements Runnable {
   public void pauseGame() {
     AppManager.printSimpleLog();
     running = false;
-    Timer.pause();
+    gState.pauseTimers();
   }
 }

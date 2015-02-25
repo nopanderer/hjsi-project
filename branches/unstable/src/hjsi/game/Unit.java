@@ -122,6 +122,16 @@ public abstract class Unit {
   }
 
   /**
+   * 타이머를 다시 작동시켜서 해당 유닛도 작동하게 한다.
+   */
+  abstract public void unfreeze();
+
+  /**
+   * 타이머를 멈춰서 해당 유닛이 모든 행동을 멈추게 한다.
+   */
+  abstract public void freeze();
+
+  /**
    * 단순히 멤버로 가지고 있는 비트맵 이미지를 출력해서 객체 자기 자신을 나타낸다.
    * 
    * @param canvas 그림이 출력될 캔버스.

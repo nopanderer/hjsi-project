@@ -53,8 +53,7 @@ public class DlgSetting extends Dialog implements OnClickListener {
     AppManager.printDetailLog(v.toString());
 
     if (v == resume) {
-      hide();
-      gameActHandler.sendEmptyMessage(Game.HANDLER_DLG_RESUME);
+      gameActHandler.sendEmptyMessage(Game.HANDLER_GAME_RESUME);
 
     } else if (v == sound) {
       gameActHandler.sendEmptyMessage(Game.HANDLER_DLG_SOUND);
@@ -64,8 +63,8 @@ public class DlgSetting extends Dialog implements OnClickListener {
         sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundon));
 
     } else if (v == quit) {
-      dismiss();
       gameActHandler.sendEmptyMessage(Game.HANDLER_DLG_QUIT);
+      dismiss();
     }
   }
 

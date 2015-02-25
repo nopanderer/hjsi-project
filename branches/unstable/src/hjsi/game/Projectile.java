@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
  *
  */
 public class Projectile extends Unit implements Movable {
-
   /**
    * 타겟
    */
@@ -28,7 +27,7 @@ public class Projectile extends Unit implements Movable {
    */
   private int damage;
 
-  private Timer moveTimer;
+  private Timer timerMovement;
 
   private Vector2d vector;
 
@@ -49,12 +48,15 @@ public class Projectile extends Unit implements Movable {
 
     vector = new Vector2d();
 
-    moveTimer = Timer.create("투사체", 10);
+    timerMovement = Timer.create("투사체", 10);
+    timerMovement.start();
   }
 
   @Override
   public void move() {
-    if (moveTimer.isAvailable()) {
+    if (timerMovement.isUsable()) {
+      timerMovement.consumeTimer();
+
       /* 충돌검사 */
       if ((x >= target.x && x <= targetXWidth()) && y >= target.y && y <= targetYHeight()) {
         destroyed = true;
@@ -103,5 +105,25 @@ public class Projectile extends Unit implements Movable {
   @Override
   public void touch() {
     // TODO Auto-generated method stub
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#unfreeze()
+   */
+  @Override
+  public void unfreeze() {
+    timerMovement.resume();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#freeze()
+   */
+  @Override
+  public void freeze() {
+    timerMovement.pause();
   }
 }

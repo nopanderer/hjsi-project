@@ -15,7 +15,6 @@ import android.graphics.RectF;
  * 
  */
 public class Mob extends Unit implements Movable, Attackable, Hittable {
-
   /**
    * 최대 체력
    */
@@ -50,9 +49,9 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
    */
   private int lap;
 
-  private Timer moveTimer;
-  private Timer attackTimer;
-  private Timer spriteTimer;
+  private Timer timerMovement;
+  private Timer timerAttack;
+  private Timer timerSprite;
 
   private int sleep = 10;
 
@@ -109,9 +108,12 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     setX(x);
     setY(y);
 
-    moveTimer = Timer.create("몹 이동", 10);
-    attackTimer = Timer.create("몹 공격", (long) (attackSpeed + 0.5));
-    spriteTimer = Timer.create("몹 프레임", framePeriod);
+    timerMovement = Timer.create("몹 이동", 10);
+    timerMovement.start();
+    timerAttack = Timer.create("몹 공격", (long) (attackSpeed + 0.5));
+    timerAttack.start();
+    timerSprite = Timer.create("몹 프레임", framePeriod);
+    timerSprite.start();
   }
 
   @Override
@@ -136,7 +138,8 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public Projectile attack(Hittable unit) {
-    if (attackTimer.isAvailable()) {
+    if (timerAttack.isUsable()) {
+      timerAttack.consumeTimer();
       Statue target = (Statue) unit;
       return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
     }
@@ -147,7 +150,9 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   @Override
   public void move() {
     // 10밀리세컨드 마다 1 픽셀씩 이동
-    if (moveTimer.isAvailable()) {
+    if (timerMovement.isUsable()) {
+      timerMovement.consumeTimer();
+
       vector.set(station.x - x, station.y - y);
       vector.nor();
       vector.mul(moveSpeed);
@@ -194,7 +199,9 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   public void update(long gameTime) {
-    if (spriteTimer.isAvailable()) {
+    if (timerSprite.isUsable()) {
+      timerSprite.consumeTimer();
+
       curFrame++;
       if (curFrame >= frameNum) {
         curFrame = 0;
@@ -210,5 +217,29 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   public void setLap(int lap) {
     this.lap = lap;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#unfreeze()
+   */
+  @Override
+  public void unfreeze() {
+    timerMovement.resume();
+    timerAttack.resume();
+    timerSprite.resume();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#freeze()
+   */
+  @Override
+  public void freeze() {
+    timerMovement.pause();
+    timerAttack.pause();
+    timerSprite.pause();
   }
 }
