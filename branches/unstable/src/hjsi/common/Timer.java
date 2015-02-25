@@ -148,10 +148,18 @@ public class Timer {
     }
   }
 
+  /**
+   * 0, 시작! 1, 2, 3, 4...
+   */
   public void startDelayed() {
     startDelayed(wait);
   }
 
+  /**
+   * -5, -4, -3, -2, -1, 시작! 1, 2, 3, 4...
+   * 
+   * @param delay 주어진 시간만큼 카운트다운하고 시작한다.
+   */
   public void startDelayed(long delay) {
     stopped = false;
     loop = expirationCount;
@@ -160,6 +168,9 @@ public class Timer {
     usable = false;
   }
 
+  /**
+   * 시작! 1, 2, 3, 4...
+   */
   public void start() {
     stopped = false;
     loop = expirationCount;
@@ -168,12 +179,18 @@ public class Timer {
     usable = false;
   }
 
+  /**
+   * 작동 중인 타이머를 일시정지한다.
+   */
   public void pause() {
     stopped = true;
     if (!usable)
       elapsed += (NOW - past) * FAST_FORWARD;
   }
 
+  /**
+   * 일시정지 중인 타이머를 작동 시킨다.
+   */
   public void resume() {
     stopped = false;
     if (!usable)

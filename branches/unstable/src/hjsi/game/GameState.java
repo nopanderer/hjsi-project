@@ -99,10 +99,10 @@ public class GameState {
     }
 
     /* 정류장 삽입 */
-    stations.add(new Station(200, WORLD_HEIGHT - 140));
-    stations.add(new Station(WORLD_WIDTH - 200, WORLD_HEIGHT - 140));
-    stations.add(new Station(WORLD_WIDTH - 200, 140));
-    stations.add(new Station(200, 140));
+    stations.add(new Station(400, WORLD_HEIGHT - 280));
+    stations.add(new Station(WORLD_WIDTH - 400, WORLD_HEIGHT - 280));
+    stations.add(new Station(WORLD_WIDTH - 400, 280));
+    stations.add(new Station(400, 280));
 
     timers = new LinkedList<Timer>();
     worldTimer = Timer.create("월드시계", 1000);
@@ -544,22 +544,23 @@ public class GameState {
     return deadMob >= MAX_MOB;
   }
 
-  public void finishWave() {}
+  public void finishWave() {
+    curMob = 0;
+    deadMob = 0;
+    spawnTimer.setEnable(false);
+  }
 
   public void waveReady() {
     // 새로운 비트맵 추가
     userWave++;
     makeFace(userWave);
 
-    curMob = 0;
-    deadMob = 0;
-
     // 이전 웨이브의 몹은 폐기처분한다.
     destroyMob(userWave - 1);
 
     // 몹 리스폰 타이머를 리필함.
     spawnTimer.setEnable(true);
-    spawnTimer.start();
+    spawnTimer.startDelayed(10000);
   }
 
   public void spawnMob() {
