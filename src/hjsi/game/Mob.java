@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
@@ -107,6 +109,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
     setX(x);
     setY(y);
+    setHitRect();
 
     timerMovement = Timer.create("몹 이동", 10);
     timerMovement.start();
@@ -123,6 +126,10 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
             + height);
     canvas.drawBitmap(face, rect, destRect, null);
     showHealthBar(hpMax, hp, canvas, screenRatio);
+    Paint pnt = new Paint();
+    pnt.setStyle(Paint.Style.STROKE);
+    pnt.setColor(Color.RED);
+    canvas.drawRect(destRect, pnt);
   }
 
   /*
@@ -161,6 +168,8 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
       y += vector.y;
       cntrX += vector.x;
       cntrY += vector.y;
+
+      setHitRect();
     }
   }
 

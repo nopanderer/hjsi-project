@@ -2,6 +2,10 @@ package hjsi.game;
 
 import hjsi.common.Timer;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 
 /**
  * 투사체
@@ -45,6 +49,7 @@ public class Projectile extends Unit implements Movable {
     moveSpeed = 3;
     type = NORMAL;
     this.damage = damage;
+    setHitRect();
 
     vector = new Vector2d();
 
@@ -53,12 +58,22 @@ public class Projectile extends Unit implements Movable {
   }
 
   @Override
+  public void draw(Canvas canvas, float screenRatio) {
+    super.draw(canvas, screenRatio);
+    Paint pnt = new Paint();
+    pnt.setStyle(Paint.Style.STROKE);
+    pnt.setColor(Color.RED);
+    canvas.drawRect(new RectF(x * screenRatio, y * screenRatio, x * screenRatio + width, y
+        * screenRatio + height), pnt);
+  }
+
+  @Override
   public void move() {
     if (timerMovement.isUsable()) {
       timerMovement.consumeTimer();
 
       /* 충돌검사 */
-      if ((x >= target.x && x <= targetXWidth()) && y >= target.y && y <= targetYHeight()) {
+      if (target.hitRect.contains(hitRect)) {
         destroyed = true;
         ((Hittable) target).hit(damage);
       }
@@ -85,15 +100,8 @@ public class Projectile extends Unit implements Movable {
         cntrX += vector.x;
         cntrY += vector.y;
       }
+      setHitRect();
     }
-  }
-
-  private float targetXWidth() {
-    return target.x + target.width;
-  }
-
-  private float targetYHeight() {
-    return target.y + target.height;
   }
 
   @Override
