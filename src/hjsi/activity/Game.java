@@ -24,19 +24,23 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
   /**
    * 게임을 재개하도록 요청한다.
    */
-  public static final int HANDLER_DLG_RESUME = 0;
+  public static final int HANDLER_GAME_RESUME = 0;
+  /**
+   * 게임을 멈추도록 요청한다.
+   */
+  public static final int HANDLER_GAME_PAUSE = 1;
   /**
    * 사운드를 on/off 하도록 요청한다.
    */
-  public static final int HANDLER_DLG_SOUND = 1;
+  public static final int HANDLER_DLG_SOUND = 2;
   /**
    * 게임을 종료하도록 요청한다.
    */
-  public static final int HANDLER_DLG_QUIT = 2;
+  public static final int HANDLER_DLG_QUIT = 3;
   /**
    * 몹 생성 버튼을 표시하도록 요청한다.
    */
-  public static final int HANDLER_SHOW_SPAWN_BTN = 3;
+  public static final int HANDLER_SHOW_SPAWN_BTN = 4;
 
   /**
    * 게임에서 사용한 리소스 해제 타이밍을 위한 변수
@@ -108,7 +112,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
 
     /* GameMaster 생성 */
     gameMaster = new GameMaster(gameHandler, gState);
-    gameMaster.playGame();
+    gameHandler.sendEmptyMessage(HANDLER_GAME_RESUME);
 
     AppManager.printDetailLog(getClass().getSimpleName() + " 초기화 완료");
   }
@@ -118,9 +122,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     AppManager.printSimpleLog();
     super.onStop();
 
-    if (gameMaster != null) {
-      gameMaster.pauseGame();
-    }
+    gameHandler.sendEmptyMessage(HANDLER_GAME_PAUSE);
 
     if (bgMusic != null) {
       bgMusic.pause();
@@ -164,7 +166,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
   @Override
   public void onBackPressed() {
     AppManager.printSimpleLog();
-    showSettingMenu();
+    gameHandler.sendEmptyMessage(HANDLER_GAME_PAUSE);
   }
 
   @Override
@@ -175,14 +177,10 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
       Intent Book = new Intent(Game.this, RecipeBook.class);
       startActivity(Book);
     }
-    /*
-     * play 버튼
-     */
+
     else if (v == btnPause) {
-      gameMaster.pauseGame();
-      showSettingMenu();
+      gameHandler.sendEmptyMessage(HANDLER_GAME_PAUSE);
     }
-    /* 재생 -> 일시정지 */
 
     else if (v == btnStore) {
       Intent Store = new Intent(Game.this, Store.class);
@@ -257,8 +255,16 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
   @Override
   public boolean handleMessage(Message msg) {
     switch (msg.what) {
-      case Game.HANDLER_DLG_RESUME:
+      case Game.HANDLER_GAME_RESUME:
+        dlgSetting.hide();
         gameMaster.playGame();
+        break;
+
+      case Game.HANDLER_GAME_PAUSE:
+        gameMaster.pauseGame();
+        if (!explicitQuit) {
+          dlgSetting.show();
+        }
         break;
 
       case Game.HANDLER_DLG_SOUND:
@@ -293,11 +299,5 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
   public void quitExplicitly() {
     AppManager.printSimpleLog();
     explicitQuit = true;
-  }
-
-  private void showSettingMenu() {
-    AppManager.printSimpleLog();
-    dlgSetting.show();
-    gameMaster.pauseGame();
   }
 }

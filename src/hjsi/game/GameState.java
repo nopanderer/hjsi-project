@@ -58,6 +58,11 @@ public class GameState {
    * 현재 게임이 진행된 시간을 나타낸다.
    */
   private volatile long worldTime = 0L;
+
+  /**
+   * 게임 시스템에서 사용하는 타이머들
+   */
+  private LinkedList<Timer> timers;
   /**
    * 게임 시간을 재는 타이머
    */
@@ -99,10 +104,12 @@ public class GameState {
     stations.add(new Station(WORLD_WIDTH - 200, 140));
     stations.add(new Station(200, 140));
 
-
+    timers = new LinkedList<Timer>();
     worldTimer = Timer.create("월드시계", 1000);
-    spawnTimer = Timer.create("몹 생성 시계", 1000, MAX_MOB);
-    spawnTimer.stop();
+    timers.add(worldTimer);
+    spawnTimer = Timer.create("몹 생성 시계", 2000, MAX_MOB);
+    spawnTimer.setEnable(false);
+    timers.add(spawnTimer);
   }
 
   /**
@@ -120,6 +127,49 @@ public class GameState {
     userCoin = coin;
     synchronized (units) {
       units.addAll(towers);
+    }
+  }
+
+  /**
+   * 1초 증가
+   */
+  public void ticktock() {
+    if (worldTimer.isUsable()) {
+      worldTimer.consumeTimer();
+      worldTime++;
+      AppManager.printInfoLog("딸깍...");
+    }
+  }
+
+  /**
+   * 시스템과 유닛들의 타이머를 재개한다.
+   */
+  public void resumeTimers() {
+    Timer.timestamp();
+
+    synchronized (timers) {
+      for (Timer timer : timers) {
+        timer.resume();
+      }
+    }
+    synchronized (units) {
+      for (Unit unit : units) {
+        unit.unfreeze();
+      }
+    }
+  }
+
+  /**
+   * 시스템과 유닛들의 타이머를 정지한다.
+   */
+  public void pauseTimers() {
+    synchronized (timers) {
+      for (Timer timer : timers)
+        timer.pause();
+    }
+    synchronized (units) {
+      for (Unit unit : units)
+        unit.freeze();
     }
   }
 
@@ -222,16 +272,6 @@ public class GameState {
 
   public long getWorldTime() {
     return worldTime;
-  }
-
-  /**
-   * 1초 증가
-   */
-  public void passWorldTime() {
-    if (worldTimer.isAvailable()) {
-      worldTime++;
-      AppManager.printInfoLog("딸깍...");
-    }
   }
 
   /**
@@ -504,12 +544,7 @@ public class GameState {
     return deadMob >= MAX_MOB;
   }
 
-  public void finishWave() {
-    deadMob = 0;
-    curMob = 0;
-
-    spawnTimer.stop();
-  }
+  public void finishWave() {}
 
   public void waveReady() {
     // 새로운 비트맵 추가
@@ -523,12 +558,13 @@ public class GameState {
     destroyMob(userWave - 1);
 
     // 몹 리스폰 타이머를 리필함.
-    spawnTimer.refill();
+    spawnTimer.setEnable(true);
     spawnTimer.start();
   }
 
   public void spawnMob() {
-    if (spawnTimer.isAvailable()) {
+    if (spawnTimer.isUsable()) {
+      spawnTimer.consumeTimer();
       addUnit(new Mob(80, 80, mImgMob, userWave, stations.get(0)));
       curMob++;
     }

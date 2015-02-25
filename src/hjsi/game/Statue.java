@@ -12,7 +12,6 @@ import android.graphics.Canvas;
  * 회복할 경우 변수에 들어갈 값은 1050이다.
  */
 public class Statue extends Unit implements Hittable {
-
   /**
    * 체력 재생량
    */
@@ -50,6 +49,7 @@ public class Statue extends Unit implements Hittable {
      * 타이머 생성
      */
     timerHpRegen = Timer.create("동상 체력재생", 100);
+    timerHpRegen.start();
   }
 
   /*
@@ -59,7 +59,8 @@ public class Statue extends Unit implements Hittable {
    */
   @Override
   public void action() {
-    if (timerHpRegen.isAvailable()) {
+    if (timerHpRegen.isUsable()) {
+      timerHpRegen.consumeTimer();
       hp = Math.min(hp + hpRegen, hpMax);
     }
   }
@@ -98,5 +99,25 @@ public class Statue extends Unit implements Hittable {
   @Override
   public void dead() {
     destroyed = true;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#unfreeze()
+   */
+  @Override
+  public void unfreeze() {
+    timerHpRegen.resume();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#freeze()
+   */
+  @Override
+  public void freeze() {
+    timerHpRegen.pause();
   }
 }

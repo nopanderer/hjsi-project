@@ -1,8 +1,5 @@
 package hjsi.common;
 
-import java.util.LinkedList;
-
-
 /**
  * 타이머 클래스
  */
@@ -15,22 +12,15 @@ public class Timer {
    * 현재 시간을 가진다.
    */
   public volatile static long NOW = 0L;
+
   /**
-   * 타이머를 관리하기 위한 리스트
-   */
-  private static LinkedList<Timer> TIMERS = new LinkedList<Timer>();
-  /**
-   * 디버깅용 타이머 이름
-   */
-  private String name;
-  /**
-   * 타이머 개별적인 사용여부
+   * 타이머의 작동 유무를 강제로 설정함
    */
   private boolean enabled;
   /**
-   * 타이머가 특정 객체에 의해서 사용되고 있는지를 체크하기 위한 변수.
+   * 디버깅용 타이머 이름
    */
-  private boolean used;
+  private final String name;
   /**
    * 타이머의 대기시간(반복주기) 값을 의미한다.
    */
@@ -39,6 +29,10 @@ public class Timer {
    * 타이머 만료까지의 유효 횟수를 저장한다.
    */
   private final int expirationCount;
+  /**
+   * 타이머 정지 여부
+   */
+  private boolean stopped;
   /**
    * 타이머가 만료될 때까지의 유효 횟수를 나타낸다. 음수일 경우 무한 반복한다.
    */
@@ -51,7 +45,10 @@ public class Timer {
    * 직전에 시간을 측정한 프레임과 지금 시간을 측정한 프레임 사이에 흐른 시간을 누적한다.
    */
   private long elapsed;
-
+  /**
+   * 타이머 사용가능(대기시간 완료) 여부
+   */
+  private boolean usable;
 
   /**
    * 타이머를 생성한다.
@@ -59,14 +56,18 @@ public class Timer {
    * @param waitMilliSec 대기할 시간을 밀리초 단위로 설정한다.
    * @param expirationCount 타이머가 만료되는 횟수를 지정한다. 음수를 입력하면 무기한이다.
    */
-  private Timer(long waitMilliSec, int expirationCount) {
-    enabled = true;
-    used = false;
+  private Timer(String name, long waitMilliSec, int expirationCount) {
+    setEnable(true);
+
+    this.name = name;
     wait = waitMilliSec;
     this.expirationCount = expirationCount;
+
+    stopped = true;
     loop = expirationCount;
-    past = System.currentTimeMillis();
+    past = NOW;
     elapsed = 0;
+    usable = false;
   }
 
   /**
@@ -87,65 +88,7 @@ public class Timer {
    * @param expirationCount 타이머가 만료되는 횟수를 지정한다. 음수를 입력하면 무기한이다.
    */
   public static Timer create(String name, long waitMilliSec, int expirationCount) {
-    Timer t = new Timer(waitMilliSec, expirationCount);
-    t.name = name;
-    addTimer(t);
-    return t;
-  }
-
-  /**
-   * 타이머를 관리하기 위한 리스트에 타이머 객체를 추가함.
-   * 
-   * @param t 추가할 타이머 객체
-   */
-  private static void addTimer(Timer t) {
-    synchronized (TIMERS) {
-      TIMERS.add(t);
-      AppManager.printDetailLog(t.toString() + "가 추가되었습니다.");
-    }
-  }
-
-  /**
-   * 가비지콜렉터처럼, 다른 객체에서 사용하지 않는 타이머를 찾아서 제거한다.
-   */
-  public static void removeUnusedTimer() {
-    synchronized (TIMERS) {
-      LinkedList<Timer> temp = new LinkedList<Timer>(TIMERS);
-      for (Timer t : temp) {
-        if (t.used)
-          t.used = false;
-        else {
-          TIMERS.remove(t);
-          AppManager.printDetailLog(t.toString() + "가 제거되었습니다.");
-        }
-      }
-    }
-  }
-
-  /**
-   * 게임을 일시정지한 경우 타이머도 같이 멈춘 것과 같은 효과를 내기 위한 메소드이다.
-   */
-  public static void resume() {
-    NOW = System.currentTimeMillis();
-    synchronized (TIMERS) {
-      for (Timer t : TIMERS) {
-        // t.start();
-        t.past = NOW;
-      }
-    }
-  }
-
-  /**
-   * 게임을 일시정지하게 되는 경우, 마지막 측정 시간으로부터 조금 지난 시간도 반영해둔다.
-   */
-  public static void pause() {
-    NOW = System.currentTimeMillis();
-    synchronized (TIMERS) {
-      for (Timer t : TIMERS) {
-        // t.stop();
-        t.elapsed += (NOW - t.past) * FAST_FORWARD;
-      }
-    }
+    return new Timer(name, waitMilliSec, expirationCount);
   }
 
   /**
@@ -164,19 +107,12 @@ public class Timer {
   }
 
   /**
-   * 타이머를 시작한다.
+   * 타이머를 사용 가능하거나 불가능하게 설정한다.
+   * 
+   * @param enable
    */
-  public void start() {
-    enabled = true;
-    // past = NOW;
-  }
-
-  /**
-   * 타이머를 멈춘다.
-   */
-  public void stop() {
-    enabled = false;
-    // elapsed += (NOW - past) * FAST_FORWARD;
+  public void setEnable(boolean enable) {
+    enabled = enable;
   }
 
   /**
@@ -184,30 +120,64 @@ public class Timer {
    * 
    * @return 타이머의 대기시간이 지났다면 true를 반환하고, 아직 시간이 부족하다면 false를 반환한다.
    */
-  public boolean isAvailable() {
-    // 타이머를 사용하는 객체가 살아있으면 무조건 이 코드를 수행한다는 뜻임.
-    used = true;
-    boolean available = false;
-
-    if (enabled) {
+  public boolean isUsable() {
+    // 타이머의 대기시간이 남아서 아직 사용할 수 없는 경우에만 타이머의 시간을 측정한다.
+    if (enabled && !stopped && !usable) {
       elapsed += (NOW - past) * FAST_FORWARD;
       past = NOW;
 
       if ((loop == -1 || loop > 0) && elapsed >= wait) {
-        elapsed -= wait;
-        loop = Math.max(-1, loop - 1);
-        available = true;
+        usable = true;
       }
     }
-
-    return available;
+    return usable;
   }
 
   /**
-   * 사용횟수가 만료된 타이머를 재사용한다.
+   * 타이머 대기시간 측정을 계속해야 할 경우, 이 메소드를 반드시 호출한다. 타이머에 의해서 수행되는 작업이 있을 경우, 해당 작업을 실제로 수행한 경우에만 타이머가 다시
+   * 대기하도록 한다.
    */
-  public void refill() {
+  public void consumeTimer() {
+    if (usable) {
+      usable = false;
+      elapsed = 0;
+      loop = Math.max(-1, loop - 1);
+      if (loop == 0) {
+        setEnable(false);
+      }
+    }
+  }
+
+  public void startDelayed() {
+    startDelayed(wait);
+  }
+
+  public void startDelayed(long delay) {
+    stopped = false;
     loop = expirationCount;
+    past = NOW;
+    elapsed = wait - delay;
+    usable = false;
+  }
+
+  public void start() {
+    stopped = false;
+    loop = expirationCount;
+    past = NOW;
+    elapsed = wait;
+    usable = false;
+  }
+
+  public void pause() {
+    stopped = true;
+    if (!usable)
+      elapsed += (NOW - past) * FAST_FORWARD;
+  }
+
+  public void resume() {
+    stopped = false;
+    if (!usable)
+      past = NOW;
   }
 
   /*

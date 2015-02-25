@@ -21,7 +21,7 @@ public class Tower extends Unit implements Attackable {
   private int tier;
   public String imgName;
 
-  private Timer attackTimer;
+  private Timer timerAttack;
 
   private static final int PRIMITIVE = 1;
   private static final int BASIC = 2;
@@ -57,7 +57,8 @@ public class Tower extends Unit implements Attackable {
     this.attackSpeed = attackSpeed;
     this.range = range;
 
-    attackTimer = Timer.create(name, attackSpeed);
+    timerAttack = Timer.create(name, attackSpeed);
+    timerAttack.start();
   }
 
   @Override
@@ -80,10 +81,31 @@ public class Tower extends Unit implements Attackable {
 
   @Override
   public Projectile attack(Hittable unit) {
-    if (attackTimer.isAvailable()) {
+    if (timerAttack.isUsable()) {
+      timerAttack.consumeTimer();
       Mob target = (Mob) unit;
       return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
     }
     return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#unfreeze()
+   */
+  @Override
+  public void unfreeze() {
+    timerAttack.resume();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#freeze()
+   */
+  @Override
+  public void freeze() {
+    timerAttack.pause();
   }
 }
