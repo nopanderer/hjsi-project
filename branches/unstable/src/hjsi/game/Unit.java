@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 
 /**
  * 게임 오브젝트의 기본이 되는 추상 클래스
@@ -28,14 +29,14 @@ public abstract class Unit {
    */
   protected float x;
   protected float y;
+  protected float cntrX, cntrY;
+  protected float width;
+  protected float height;
 
   public boolean destroyed;
   /**
    * 유닛 정중앙
    */
-  protected float cntrX, cntrY;
-  protected float width;
-  protected float height;
 
   /**
    * 사정거리
@@ -45,6 +46,7 @@ public abstract class Unit {
    * 충돌거리
    */
   protected float hitRange;
+  protected RectF hitRect;
 
   protected Bitmap face;
   private Paint paint;
@@ -77,22 +79,15 @@ public abstract class Unit {
 
     setX(x);
     setY(y);
+    hitRect = new RectF();
 
     hitRange = Math.max(width, height) / 2;
     destroyed = false;
 
+    setHitRect();
+
     this.face = face;
     paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-  }
-
-  public final void setX(float x) {
-    this.x = x;
-    cntrX = x + width * 0.5f;
-  }
-
-  public final void setY(float y) {
-    this.y = y;
-    cntrY = y + height * 0.5f;
   }
 
   /**
@@ -113,12 +108,30 @@ public abstract class Unit {
     return id;
   }
 
+  public final void setX(float x) {
+    this.x = x;
+    cntrX = x + width * 0.5f;
+  }
+
+  public final void setY(float y) {
+    this.y = y;
+    cntrY = y + height * 0.5f;
+  }
+
   public final float getX() {
     return x;
   }
 
   public final float getY() {
     return y;
+  }
+
+  public void setHitRect() {
+    hitRect.set(x, y, x + width, y + height);
+  }
+
+  public RectF getHitRect() {
+    return hitRect;
   }
 
   /**
