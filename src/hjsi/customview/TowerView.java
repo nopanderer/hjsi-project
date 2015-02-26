@@ -187,14 +187,14 @@ public class TowerView extends RelativeLayout
 
         // drawable을 생성한 적이 있으면 새로 만들지 않고 가져다 쓴다.
         // 안하면 리스트뷰에서 렉걸림..
-        if (TowerView.arDrawable.containsKey(mElement.imgName))
+        if (TowerView.arDrawable.containsKey(mElement.resourceFileName))
         {
-            roundIcon = TowerView.arDrawable.get(mElement.imgName);
+            roundIcon = TowerView.arDrawable.get(mElement.resourceFileName);
         }
         else
         {
             // 파일 이름으로 리소스 ID 구해서 비트맵 파일을 만든다
-            int drawableId = getResources().getIdentifier(mElement.imgName, "drawable", "exam.androidproject");
+            int drawableId = getResources().getIdentifier(mElement.resourceFileName, "drawable", "exam.androidproject");
             Bitmap bm = BitmapFactory.decodeResource(getResources(), drawableId);
 
             // 테스트용으로 사이즈 다른 이미지 대충 쓰니까 크기 조절해야함.
@@ -205,7 +205,7 @@ public class TowerView extends RelativeLayout
 
             roundIcon = new RoundedDrawable(bm);
             // 한 번 생성한 드로블 객체는 맵 구조에 넣어서 보관함. 재활용을 위한 조치
-            TowerView.arDrawable.put(mElement.imgName, roundIcon);
+            TowerView.arDrawable.put(mElement.resourceFileName, roundIcon);
         }
 
         mElementIcon.setImageDrawable(roundIcon);

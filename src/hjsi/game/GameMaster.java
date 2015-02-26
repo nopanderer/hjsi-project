@@ -33,12 +33,16 @@ public class GameMaster implements Runnable {
    */
   private boolean running = false;
 
-  public GameMaster(Handler handler, GameState gameState) {
+  public GameMaster(Handler handler) {
     gameActHandler = handler;
-    gState = gameState;
+    refreshGameState();
 
     workerThread = new Thread(this);
     workerThread.start();
+  }
+
+  public void refreshGameState() {
+    gState = AppManager.getGameState();
   }
 
   @Override
@@ -58,7 +62,7 @@ public class GameMaster implements Runnable {
 
         // 웨이브가 종료되면 타이머를 멈추고 다음 웨이브를 준비한다.
         if (gState.isWaveDone()) {
-          gameActHandler.sendEmptyMessage(Game.HANDLER_SHOW_SPAWN_BTN);
+          gameActHandler.sendMessage(AppManager.obtainMessage(Game.HANDLER_SHOW_SPAWN_BTN));
           gState.finishWave();
         }
         // 웨이브가 아직 진행 중이면 몹 생성을 시도한다.
@@ -138,7 +142,7 @@ public class GameMaster implements Runnable {
         fpsRealTime = (System.currentTimeMillis() - Timer.NOW);
         fpsElapsedTime += fpsRealTime;
         if (fpsElapsedTime >= 1000) { // 1초마다 프레임율 갱신
-          AppManager.getInstance().setLogicFps(fpsRealFps);
+          AppManager.setLogicFps(fpsRealFps);
           fpsRealFps = 0;
           fpsElapsedTime -= 1000;
         }
@@ -182,5 +186,12 @@ public class GameMaster implements Runnable {
     AppManager.printSimpleLog();
     running = false;
     gState.pauseTimers();
+  }
+
+  /**
+   * @return 게임이 멈춰있으면 true, 진행 중이면 false를 반환한다.
+   */
+  public boolean isPaused() {
+    return !running;
   }
 }

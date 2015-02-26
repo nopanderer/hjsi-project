@@ -1,12 +1,11 @@
 package hjsi.activity;
 
 import hjsi.common.AppManager;
-import hjsi.common.Camera;
+import hjsi.common.DataManager;
 import hjsi.common.GameSurface;
 import hjsi.common.Timer;
 import hjsi.game.GameMaster;
 import hjsi.game.GameState;
-import hjsi.game.Tower;
 import hjsi.game.Unit;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -47,24 +46,34 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
   public static final int HANDLER_SPAWN_MOBS = 5;
 
   /**
+   * bgm 재생 객체
+   */
+  private MediaPlayer bgMusic;
+  /**
+   * bgm 음소거 여부
+   */
+  private boolean bgmPlaying = true;
+  /**
+   * 게임을 진행하는 인게임 스레드를 가진 개체
+   */
+  private GameMaster gameMaster = null;
+  /**
+   * 게임 정보 관리 객체
+   */
+  private GameState gState = null;
+  /**
+   * 게임 그리기 클래스
+   */
+  private GameSurface surface = null;
+  /**
    * 게임에서 사용한 리소스 해제 타이밍을 위한 변수
    */
   private boolean explicitQuit = false;
 
+  /* 자식 뷰들 */
   private Button btnBook, btnPause, btnStore, btnDeploy, btnGen;
   private ToggleButton btnFF;
   private DlgSetting dlgSetting;
-
-  /** bgm 재생 객체 */
-  private MediaPlayer bgMusic;
-  /** bgm 음소거 여부 */
-  private boolean bgmPlaying = true;
-  /** 게임을 진행하는 인게임 스레드를 가진 개체 */
-  private GameMaster gameMaster;
-  /** 카메라 */
-  private Camera camera;
-  /** 게임 정보 관리 객체 */
-  GameState gState = null;
 
   private final Handler gameHandler = new Handler(this);
 
@@ -73,17 +82,13 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
 
-    gState = AppManager.getInstance().getGameState();
+    gState = AppManager.getGameState();
 
-    /*
-     * 화면 비율을 구해서 카메라를 생성할 때 넘겨준다.
-     */
-    camera = new Camera(AppManager.getInstance().getDisplayFactor());
     /*
      * surfaceview 생성 및 등록
      */
-    GameSurface gameView = new GameSurface(getApplicationContext(), camera, gState);
-    setContentView(gameView);
+    surface = new GameSurface(getApplicationContext());
+    setContentView(surface);
 
     /*
      * 기타 버튼 UI 등록
@@ -115,8 +120,13 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     bgMusic.start();
 
     /* GameMaster 생성 */
-    gameMaster = new GameMaster(gameHandler, gState);
-    gameHandler.sendEmptyMessage(HANDLER_GAME_RESUME);
+    gameMaster = new GameMaster(gameHandler);
+    if (savedInstanceState == null) {
+      // 서피스뷰가 생성되기까지 딜레이가 좀 있어서 게임스레드를 조금 늦게 실행하게 함
+      gameHandler.sendMessageDelayed(AppManager.obtainMessage(HANDLER_GAME_RESUME), 300);
+    } else {
+      gameHandler.sendMessage(AppManager.obtainMessage(HANDLER_GAME_PAUSE));
+    }
 
     AppManager.printDetailLog(getClass().getSimpleName() + " 초기화 완료");
   }
@@ -126,7 +136,9 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     AppManager.printSimpleLog();
     super.onStop();
 
-    gameHandler.sendEmptyMessage(HANDLER_GAME_PAUSE);
+    if (gameMaster != null) {
+      gameMaster.pauseGame();
+    }
 
     if (bgMusic != null) {
       bgMusic.pause();
@@ -150,17 +162,23 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
 
     if (gameMaster != null) {
       gameMaster.quitGame();
+      gameMaster = null;
     }
 
     if (bgMusic != null) {
       bgMusic.stop();
       bgMusic.release();
+      bgMusic = null;
+    }
+
+    // 게임 정보를 저장한다.
+    synchronized (GameState.class) {
+      DataManager.save(gState);
     }
 
     if (explicitQuit) {
-      /* 사용했던 리소스를 해제한다. */
-      AppManager.getInstance().allRecycle();
-      gState.purgeGameState(); // 게임 상태정보를 없앤다.
+      // 사용했던 리소스를 해제한다.
+      AppManager.allRecycle();
     }
   }
 
@@ -170,7 +188,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
   @Override
   public void onBackPressed() {
     AppManager.printSimpleLog();
-    gameHandler.sendEmptyMessage(HANDLER_GAME_PAUSE);
+    gameHandler.sendMessage(AppManager.obtainMessage(HANDLER_GAME_PAUSE));
   }
 
   @Override
@@ -183,7 +201,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     }
 
     else if (v == btnPause) {
-      gameHandler.sendEmptyMessage(HANDLER_GAME_PAUSE);
+      gameHandler.sendMessage(AppManager.obtainMessage(HANDLER_GAME_PAUSE));
     }
 
     else if (v == btnStore) {
@@ -197,7 +215,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     }
 
     else if (v == btnGen) {
-      gameHandler.sendEmptyMessage(HANDLER_SPAWN_MOBS);
+      gameHandler.sendMessage(AppManager.obtainMessage(HANDLER_SPAWN_MOBS));
     }
 
     else if (v == btnFF) {
@@ -207,44 +225,18 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    /*
-     * 기본적인 View 객체에 대한 이벤트는 해당 객체가 먼저 이벤트를 받아서 처리하므로, 여기서는 카메라 및 유닛 등의 조작에 대해서만 고려한다. 다음은 터치 이벤트 중
-     * 스크롤 및 핀치줌 인/아웃에 관한 동작은 카메라가 처리하도록 한다.
-     */
-    if (camera.touchHandler(event)) {
-      AppManager.printEventLog(event);
-      return true;
-    }
+    // 이 액티비티의 자식 뷰가 처리한 이벤트는 이 메소드까지 전달되지 않는다.
+    // 위에서 버튼들과 서피스뷰가 이 액티비티의 자식으로 등록되어 있으니, 이 메소드에서는 유닛이나 다른 클릭 조작만 고려한다.
 
-    /*
-     * 카메라가 처리할 이벤트가 아닌 경우는 보통의 클릭 동작이며, 여러가지 게임 개체에 대한 동작을 수행한다. 가장 먼저, 화면 터치 좌표를 게임월드의 좌표로 변환한다.
-     */
-    int logicalX = (int) ((event.getX() + camera.getX()) / camera.getScale());
-    int logicalY = (int) ((event.getY() + camera.getY()) / camera.getScale());
-
-    // 터치로 입력받은 화면상의 좌표를 게임월드 비율에 맞게 변환함
-    logicalX =
-        (int) (logicalX / (float) (camera.getScreenWidth() / (float) GameState.WORLD_WIDTH) + 0.5);
-    logicalY =
-        (int) (logicalY / (float) (camera.getScreenWidth() / (float) GameState.WORLD_WIDTH) + 0.5);
-
-    /* 로그 출력용 코드 */
-    event.setLocation(logicalX, logicalY);
+    // 터치로 입력받은 화면상의 좌표를 보여지는 게임월드 비율에 맞게 변환함
+    event = surface.convertGameEvent(event);
     AppManager.printEventLog(event);
 
-    int row = GameState.getRow(logicalY);
-    int col = GameState.getColumn(logicalX);
-    Tower tower = gState.getTower(row, col);
-    if (tower != null) {
-      AppManager.printDetailLog("타워" + tower.getId() + " 클릭 됨.");
-    }
-    /* 로그 출력용 코드 끝 */
-
-    Unit unit = gState.getUnit(logicalX, logicalY);
+    Unit unit = gState.getUnit(event.getX(), event.getY());
     if (unit != null) {
       AppManager.printInfoLog(unit.toString());
     } else if (gState.checkDeployMode()) {
-      gState.deployTower(logicalX, logicalY);
+      gState.deployTower(event.getX(), event.getY());
     }
 
     return super.onTouchEvent(event);
@@ -257,6 +249,8 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
    */
   @Override
   public boolean handleMessage(Message msg) {
+    AppManager.printDetailLog(AppManager.msgToString(msg));
+
     switch (msg.what) {
       case Game.HANDLER_GAME_RESUME:
         dlgSetting.hide();
@@ -265,7 +259,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
 
       case Game.HANDLER_GAME_PAUSE:
         gameMaster.pauseGame();
-        if (!explicitQuit) {
+        if (!explicitQuit && !(dlgSetting.isShowing())) {
           dlgSetting.show();
         }
         break;
@@ -284,8 +278,8 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
         bgMusic.stop();
         bgMusic.release();
         bgMusic = null;
-        quitExplicitly(); // 이번에 Game.onDestroy() 될 때 리소스 해제하라고 알림
-        AppManager.getInstance().quitApp();
+        quitExplicitly(); // 다음번 Game.onDestroy()가 호출될 때 리소스를 해제하라고 알림
+        AppManager.quitApp();
         break;
 
       case Game.HANDLER_SHOW_SPAWN_BTN:
@@ -298,14 +292,45 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
         break;
 
       default:
-        AppManager.printErrorLog("Game 액티비티에 예외 메시지(" + msg + ")가 왔습니다.");
-        break;
+        AppManager.printErrorLog("Game 액티비티에 예외 메시지(" + AppManager.msgToString(msg) + ")가 왔습니다.");
+        return false;
     }
-    return false;
+    return true;
   }
 
   public void quitExplicitly() {
     AppManager.printSimpleLog();
     explicitQuit = true;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see android.app.Activity#onSaveInstanceState(android.os.Bundle)
+   */
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    AppManager.printSimpleLog();
+    super.onSaveInstanceState(outState);
+
+    outState.putFloatArray("camera", surface.saveCameraState());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see android.app.Activity#onRestoreInstanceState(android.os.Bundle)
+   */
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    AppManager.printSimpleLog();
+    super.onRestoreInstanceState(savedInstanceState);
+
+    gState = new GameState();
+    DataManager.loadDatabase(getApplicationContext(), 1, gState);
+    AppManager.putGameState(gState);
+    gameMaster.refreshGameState();
+    surface.refreshGameState();
+    surface.loadCameraState(savedInstanceState.getFloatArray("camera"));
   }
 }

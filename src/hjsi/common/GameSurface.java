@@ -10,7 +10,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -30,7 +32,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   /**
    * 화면 대 게임월드 비율
    */
-  private float screenRatio;
+  private float visualizeFactor;
   /**
    * GameState
    */
@@ -40,6 +42,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
    * 각종 정보를 출력하는데 사용함
    */
   private Paint mPaintInfo; // 텍스트 출력용 페인트 객체
+  /* 개발 참고용 정보 표시 */
+  private int xForText = 0;
+  private int yForText = 0;
   private int mFps; // 그리기 fps
 
   /**
@@ -51,13 +56,16 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
    * GameSurface 생성자
    * 
    * @param context getApplicationContext()를 이용하여 컨텍스트 객체를 넣어주셈
-   * @param camera 카메라
    */
-  public GameSurface(Context context, Camera camera, GameState gameState) {
+  public GameSurface(Context context) {
     super(context);
-    this.camera = camera;
-    screenRatio = camera.getScreenWidth() / (float) GameState.WORLD_WIDTH;
-    gState = gameState;
+    visualizeFactor = AppManager.getVisualizeFactor();
+    refreshGameState();
+
+    /* 서피스뷰에서 사용할 카메라를 생성한다. */
+    float marginValue = 125 * AppManager.getResizeFactor();
+    RectF margin = new RectF(marginValue, marginValue, marginValue, marginValue);
+    camera = new Camera(AppManager.getSeenWorldWidth(), AppManager.getSeenWorldHeight(), margin);
 
     // 게임 내 변수 출력용 페인트 객체 생성
     mPaintInfo = new Paint();
@@ -67,7 +75,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
 
     // displayInformation용 좌표값
     xForText =
-        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 52, getResources()
+        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 22/* 52 */, getResources()
             .getDisplayMetrics());
     yForText =
         (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources()
@@ -84,10 +92,14 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     getHolder().addCallback(this);
   }
 
-  /* SurfaceHolder.Callback 구현 */
+  public void refreshGameState() {
+    gState = AppManager.getGameState();
+  }
+
   @Override
   public void surfaceCreated(SurfaceHolder holder) {
     AppManager.printSimpleLog();
+
     /*
      * 표면이 생성될 때 그리기 스레드를 시작한다. 표면은 아마 화면상에 실제로 보이는 그림을 말하는 것 같다. lockCanvas() 할 때 뱉어내는 캔버스가 더블버퍼링을
      * 위한 메모리 상의 캔버스인 것 같고
@@ -128,9 +140,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     /*
      * 타워 배치 격자를 미리 준비한다.
      */
-    Rect area = gState.getTowersArea(screenRatio);
-    int cellsWidth = gState.getTowersWidth(screenRatio);
-    int cellsHeight = gState.getTowersHeight(screenRatio);
+    Rect area = gState.getTowersArea(visualizeFactor);
+    int cellsWidth = GameState.getTowersWidth(visualizeFactor);
+    int cellsHeight = GameState.getTowersHeight(visualizeFactor);
 
     while (mIsRunning) {
       // 프레임 시작 시간을 구한다.
@@ -155,7 +167,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         canvas.translate(-camera.getX(), -camera.getY());
 
         /* 현재 카메라 배율에 맞게 캔버스를 확대/축소함 */
-        canvas.scale(camera.getScale(), camera.getScale(), 0, 0);
+        canvas.scale(camera.getZoom(), camera.getZoom(), 0, 0);
 
         /* 맵 배경을 그린다. */
         canvas.drawBitmap(AppManager.getBitmap("background"), 0, 0, null);
@@ -188,7 +200,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
 
           /* 살아있으면 그리기 */
           else
-            unit.draw(canvas, screenRatio);
+            unit.draw(canvas, visualizeFactor);
 
           /*
            * 스레드 종료가 필요한 경우 최대한 빨리 끝내기 위해 그림을 그리는 도중에도 스레드 종료 조건을 검사한다.
@@ -224,9 +236,33 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     AppManager.printDetailLog("GameSurface 스레드 종료");
   }
 
-  /* 개발 참고용 정보 표시 */
-  private int xForText = 0;
-  private int yForText = 0;
+  /*
+   * (non-Javadoc)
+   * 
+   * @see android.view.View#onTouchEvent(android.view.MotionEvent)
+   */
+  @Override
+  public boolean onTouchEvent(MotionEvent event) {
+    boolean consumed = camera.handleTouchEvent(event);
+
+    if (!consumed)
+      consumed = performClick();
+
+    if (consumed)
+      AppManager.printEventLog(event);
+
+    return consumed;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see android.view.View#performClick()
+   */
+  @Override
+  public boolean performClick() {
+    return super.performClick();
+  }
 
   @SuppressLint("DefaultLocale")
   private void displayInformation(Canvas canvas) {
@@ -246,8 +282,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      * 카메라 좌상단 좌표 (논리적인 기준점) 출력
      */
     canvas.translate(0, yForText);
-    canvas.drawText("CAM left: " + camera.getX() + " / top: " + camera.getY() + " / scale: "
-        + (int) (camera.getScale() * 100 + 0.5) + "%", xForText, yForText, mPaintInfo);
+    canvas.drawText("CAM left: " + (int) (camera.getX() + .5f) + " / top: "
+        + (int) (camera.getY() + .5f) + " / scale: " + (int) (camera.getZoom() * 100 + .5f) + "%",
+        xForText, yForText, mPaintInfo);
 
     /*
      * 메모리 정보 표시
@@ -283,5 +320,37 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     canvas.drawText("Wave: " + gState.getWave(), xForText, yForText, mPaintInfo);
 
     canvas.restore();
+  }
+
+  /**
+   * 기기 화면에 대한 물리적인 이벤트 좌표를 게임월드에서 사용하는 논리적인 단위로 변환한다.
+   * 
+   * @param event 물리적인 좌표를 가지고 있는 MotionEvent 객체
+   * @return 인수로 들어온 이벤트 객체의 좌표 값만 변경해서 그대로 반환한다.
+   */
+  public MotionEvent convertGameEvent(MotionEvent event) {
+    float x = (event.getX() + camera.getX()) / camera.getZoom() / AppManager.getVisualizeFactor();
+    float y = (event.getY() + camera.getY()) / camera.getZoom() / AppManager.getVisualizeFactor();
+    event.setLocation(x, y);
+    return event;
+  }
+
+  /**
+   * 현재 메모리에 올라가 있는 카메라의 상태를 x, y 좌표 및 배율 순으로 저장된 배열을 반환한다.
+   * 
+   * @return x, y, zoom 순서로 들어있는 float 배열
+   */
+  public float[] saveCameraState() {
+    return new float[] {camera.getX(), camera.getY(), camera.getZoom()};
+  }
+
+  /**
+   * 임시로 저장됐던 카메라의 상태를 다시 복원한다.
+   * 
+   * @param state x, y, zoom 순서로 들어있는 float 배열
+   */
+  public void loadCameraState(float[] state) {
+    camera.setPosition(state[0], state[1]);
+    camera.setZoom(state[2]);
   }
 }
