@@ -14,6 +14,8 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
+import android.os.Bundle;
+import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -40,15 +42,36 @@ public class AppManager {
   /**
    * 기기의 해상도와 비교할 기준 해상도(가로)
    */
-  public static final float STANDARD_WIDTH = 1920f;
+  private static final float WISHED_STANDARD_WIDTH = 1920f;
   /**
    * 기기의 해상도와 비교할 기준 해상도(세로)
    */
-  public static final float STANDARD_HEIGHT = 1080f;
+  private static final float WISHED_STANDARD_HEIGHT = 1080f;
   /**
-   * 해상도 조정을 위한 비율 변수
+   * 기기의 실제 가로 해상도
    */
-  private float displayRatioFactor;
+  private float realDeviceWidth = 0;
+  /**
+   * 기기의 실제 세로 해상도
+   */
+  private float realDeviceHeight = 0;
+  /**
+   * 게임 월드를 화면에 표현하기 위해 사용하는 값. 내부적으로 처리되는 논리적인 크기가 아니라 기기 해상도를 따라가는 물리적인 가로 크기
+   */
+  private float seenWorldWidth = 0;
+  /**
+   * 게임 월드를 화면에 표현하기 위해 사용하는 값. 내부적으로 처리되는 논리적인 크기가 아니라 기기 해상도를 따라가는 물리적인 세로 크기
+   */
+  private float seenWorldHeight = 0;
+  /**
+   * 이미지 리소스들의 해상도 조정을 위한 비율 변수
+   */
+  private float resizeFactor;
+  /**
+   * 프로그램 내부에서 논리적인 크기를 가진 게임 월드에서 취급되는 타워, 투사체 등의 위치나 크기, 길이 등의 단위를 물리적인 기기 해상도에 알맞게 보이도록 각각의 값에
+   * 곱해줄 비율 값이다. 구체적인 값은 [기기 해상도에 비례하게 보여질 월드 크기] 나누기 [내부에서 취급하는 월드 크기]로 구한다.
+   */
+  private float visualizeFactor;
   /**
    * TODO 제거 대상
    */
@@ -89,7 +112,7 @@ public class AppManager {
    * 
    * @return class.method 형태의 문자열
    */
-  private static String getClassMethodName(boolean deepMore) {
+  public static String getClassMethodName(boolean deepMore) {
     StackTraceElement[] elements = null;
 
     try {
@@ -205,6 +228,20 @@ public class AppManager {
     Log.e(getTagPrefix(customTag), message);
   }
 
+  public static String msgToString(Message msg) {
+    String caller = msg.getData().getString("caller");
+    return "Message " + msg.what + ", caller: " + caller;
+  }
+
+  public static Message obtainMessage(int what) {
+    Bundle callerName = new Bundle();
+    callerName.putString("caller", getClassMethodName(false));
+    Message msg = Message.obtain();
+    msg.what = what;
+    msg.setData(callerName);
+    return msg;
+  }
+
   /**
    * byte 단위의 숫자를 적절한 단위로 환산한다.
    * 
@@ -234,19 +271,19 @@ public class AppManager {
     return bitmapId + ", " + convertByteUnit(bm.getByteCount());
   }
 
-  public void addActivity(Base act) {
+  public static void addActivity(Base act) {
     if (act != null) {
-      if (runningActivities.contains(act) == false) {
-        runningActivities.addFirst(act);
+      if (getInstance().runningActivities.contains(act) == false) {
+        getInstance().runningActivities.addFirst(act);
       }
     }
 
     printDetailLog(act.toString() + " 액티비티가 추가됨");
   }
 
-  public void removeActivity(Base act) {
+  public static void removeActivity(Base act) {
     if (act != null) {
-      runningActivities.remove(act);
+      getInstance().runningActivities.remove(act);
     }
 
     printDetailLog(act.toString() + " 액티비티가 제거됨");
@@ -255,8 +292,8 @@ public class AppManager {
   /**
    * 현재 실행 중(arAct에 들어있음)인 Activity들을 종료시킴.
    */
-  public void quitApp() {
-    for (Activity act : runningActivities) {
+  public static void quitApp() {
+    for (Activity act : getInstance().runningActivities) {
       act.finish();
       printDetailLog(act.toString() + " finish() 요청함.");
     }
@@ -267,28 +304,56 @@ public class AppManager {
    * 
    * @param assetManager
    */
-  public void setAssetManager(AssetManager assetManager) {
+  public static void setAssetManager(AssetManager assetManager) {
     if (assetManager == null) {
       printDetailLog("AssetManager 객체가 null이 들어옴.");
       throw new NullPointerException();
     } else {
-      this.assetManager = assetManager;
+      getInstance().assetManager = assetManager;
     }
   }
 
-  public void setDisplayFactor(int deviceWidth, int deviceHeight) {
-    float horizontalRatio = deviceWidth / STANDARD_WIDTH;
-    float verticalRatio = deviceHeight / STANDARD_HEIGHT;
-    displayRatioFactor = Math.max(horizontalRatio, verticalRatio);
-    printDetailLog("비율 변수: " + displayRatioFactor);
+  public static void calculateVariousFactors(float realDeviceWidth, float realDeviceHeight) {
+    getInstance().realDeviceWidth = realDeviceWidth;
+    getInstance().realDeviceHeight = realDeviceHeight;
+
+    getInstance().resizeFactor =
+        Math.max(realDeviceWidth / WISHED_STANDARD_WIDTH, realDeviceHeight / WISHED_STANDARD_HEIGHT);
+
+    getInstance().seenWorldWidth =
+        (int) (WISHED_STANDARD_WIDTH * getInstance().resizeFactor + 0.5f);
+    getInstance().seenWorldHeight =
+        (int) (WISHED_STANDARD_HEIGHT * getInstance().resizeFactor + 0.5f);
+
+    // 가로 길이나 세로 길이나 똑같은 값이 나옴
+    getInstance().visualizeFactor = getInstance().seenWorldWidth / GameState.WORLD_WIDTH;
+
+    printDetailLog("리사이즈 비율: " + getInstance().resizeFactor + ", 시각화 비율: "
+        + getInstance().visualizeFactor);
   }
 
-  public float getDisplayFactor() {
-    return displayRatioFactor;
+  public static float getResizeFactor() {
+    return getInstance().resizeFactor;
   }
 
-  public int getDisplayWidth() {
-    return (int) (STANDARD_WIDTH * displayRatioFactor);
+  public static float getRealDeviceWidth() {
+    return getInstance().realDeviceWidth;
+  }
+
+  public static float getRealDeviceHeight() {
+    return getInstance().realDeviceHeight;
+  }
+
+  public static float getSeenWorldWidth() {
+    return getInstance().seenWorldWidth;
+  }
+
+  public static float getSeenWorldHeight() {
+    return getInstance().seenWorldHeight;
+  }
+
+  public static float getVisualizeFactor() {
+    return getInstance().visualizeFactor;
   }
 
   /**
@@ -434,9 +499,8 @@ public class AppManager {
       printInfoLog("\"" + path + "\"", "원본 용량: " + convertByteUnit(is.available()));
       bm = BitmapFactory.decodeStream(is, null, opts);
       bm =
-          Bitmap.createScaledBitmap(bm,
-              (int) (bm.getWidth() * getInstance().displayRatioFactor + 0.5f),
-              (int) (bm.getHeight() * getInstance().displayRatioFactor + 0.5f), false);
+          Bitmap.createScaledBitmap(bm, (int) (bm.getWidth() * getResizeFactor() + 0.5f),
+              (int) (bm.getHeight() * getResizeFactor() + 0.5f), false);
       is.close();
       printInfoLog("\"" + path + "\"", bitmapToString(bm) + " 읽기 성공");
     }
@@ -447,16 +511,16 @@ public class AppManager {
   /**
    * 모든 리소스를 반환 (지금은 비트맵만)
    */
-  public void allRecycle() {
+  public static void allRecycle() {
     String msg = new String();
 
-    Set<String> keySet = loadedBitmap.keySet();
-    synchronized (loadedBitmap) {
+    Set<String> keySet = getInstance().loadedBitmap.keySet();
+    synchronized (getInstance().loadedBitmap) {
       for (String key : keySet) {
         msg += key + ", ";
-        loadedBitmap.get(key).recycle();
+        getInstance().loadedBitmap.get(key).recycle();
       }
-      loadedBitmap.clear();
+      getInstance().loadedBitmap.clear();
 
       if (msg.length() > 0) {
         msg = "\"" + msg.substring(0, msg.length() - 1);
@@ -473,12 +537,12 @@ public class AppManager {
    * 
    * @param key 해제하려는 비트맵의 이름
    */
-  public void recycleBitmap(String key) {
+  public static void recycleBitmap(String key) {
     String msg = new String();
 
-    synchronized (loadedBitmap) {
-      if (loadedBitmap.containsKey(key)) {
-        loadedBitmap.get(key).recycle();
+    synchronized (getInstance().loadedBitmap) {
+      if (getInstance().loadedBitmap.containsKey(key)) {
+        getInstance().loadedBitmap.get(key).recycle();
         msg += "\"" + key + "\" recycled";
       } else {
         msg = "\"" + key + "\"를 찾을 수 없음.";
@@ -488,21 +552,19 @@ public class AppManager {
     printDetailLog(msg);
   }
 
-  public void putGameState(GameState gameState) {
-    gState = gameState;
+  public static void putGameState(GameState gameState) {
+    getInstance().gState = gameState;
   }
 
-  public GameState getGameState() {
-    GameState g = gState;
-    gState = null;
-    return g;
+  public static GameState getGameState() {
+    return getInstance().gState;
   }
 
-  public int getLogicFps() {
-    return logicFps;
+  public static int getLogicFps() {
+    return getInstance().logicFps;
   }
 
-  public void setLogicFps(int fps) {
-    logicFps = fps;
+  public static void setLogicFps(int fps) {
+    getInstance().logicFps = fps;
   }
 }

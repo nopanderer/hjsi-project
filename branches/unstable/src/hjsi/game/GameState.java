@@ -11,13 +11,14 @@ import java.util.LinkedList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.Rect;
+import android.graphics.RectF;
 
 /**
  * 게임에 필요한 정보를 저장한다.
  */
 public class GameState {
-  public static final int WORLD_WIDTH = 3840;
-  public static final int WORLD_HEIGHT = 2160;
+  public static final float WORLD_WIDTH = 3840f;
+  public static final float WORLD_HEIGHT = 2160f;
 
   /**
    * 마지막으로 클리어한 웨이브
@@ -48,7 +49,7 @@ public class GameState {
   /**
    * 타워가 배치되는 구역
    */
-  private static Rect towersArea = new Rect(AREA_LEFT, AREA_TOP, AREA_RIGHT, AREA_BOTTOM);
+  private static RectF towersArea = new RectF(AREA_LEFT, AREA_TOP, AREA_RIGHT, AREA_BOTTOM);
   private static final int TOWERS_COLUMNS = 10;
   private static final int TOWERS_ROWS = 8;
   public static final int TOWERS_WIDTH = (int) ((AREA_RIGHT - AREA_LEFT) / TOWERS_COLUMNS + 0.5);
@@ -110,15 +111,6 @@ public class GameState {
     spawnTimer = Timer.create("몹 생성 시계", 2000, MAX_MOB);
     spawnTimer.setEnable(false);
     timers.add(spawnTimer);
-  }
-
-  /**
-   * 현재의 게임 정보를 가지고 있는 GameState의 유일한 객체를 없애서 정보를 초기화한다.
-   */
-  public void purgeGameState() {
-    synchronized (GameState.class) {
-      DataManager.save(this);
-    }
   }
 
   public void setUserData(int wave, int gold, int coin, LinkedList<Tower> towers) {
@@ -215,7 +207,7 @@ public class GameState {
     // TODO inHand 변수에 타워가 들어있으면 Game activity에 표시해줘야한다.
   }
 
-  public void deployTower(int x, int y) {
+  public void deployTower(float x, float y) {
     // 1. 현재 터치한 좌표가 배치 가능한 구역인지 확인한다. (맵의 가운데)
     if (inArea(x, y)) {
       /*
@@ -281,7 +273,7 @@ public class GameState {
    * @param y 게임 y 좌표
    * @return 주어진 게임 좌표 위에 유닛이 있다면 해당 유닛, 없으면 null을 반환한다.
    */
-  public Unit getUnit(int x, int y) {
+  public Unit getUnit(float x, float y) {
     synchronized (units) {
       for (Unit unit : units) {
         if ((unit.x <= x && x <= unit.x + unit.width) && (unit.y <= y && y <= unit.y + unit.height))
@@ -299,17 +291,17 @@ public class GameState {
    * @return
    */
   public Tower getTower(int row, int column) {
-    int cellsCenterX = (int) (TOWERS_WIDTH / 2.0 + 0.5);
-    int cellsCenterY = (int) (TOWERS_HEIGHT / 2.0 + 0.5);
+    float cellsCenterX = TOWERS_WIDTH / 2f;
+    float cellsCenterY = TOWERS_HEIGHT / 2f;
 
-    int x = towersArea.left + (TOWERS_WIDTH * column) + cellsCenterX;
-    int y = towersArea.top + (TOWERS_HEIGHT * row) + cellsCenterY;
+    float x = towersArea.left + (float) (TOWERS_WIDTH * column) + cellsCenterX;
+    float y = towersArea.top + (float) (TOWERS_HEIGHT * row) + cellsCenterY;
 
     Unit unit = getUnit(x, y);
     if (unit == null) {
       return null;
     } else if (unit instanceof Tower == false) {
-      AppManager.printErrorLog("왜 타워가 아닌게 여기 있냐");
+      AppManager.printErrorLog("왜 타워가 아닌게 여기 있냐??");
       return null;
     } else
       return (Tower) unit;
@@ -404,7 +396,7 @@ public class GameState {
     return projs;
   }
 
-  public Rect getTowersArea() {
+  public RectF getTowersArea() {
     return towersArea;
   }
 
@@ -434,7 +426,7 @@ public class GameState {
    * @param y 좌표 형태 값
    * @return x, y 좌표가 배치 영역 내부에 있다면 true, 벗어난다면 false를 반환한다.
    */
-  public boolean inArea(int x, int y) {
+  public boolean inArea(float x, float y) {
     if (x >= towersArea.left && x <= towersArea.right && y >= towersArea.top
         && y <= towersArea.bottom) {
       return true;
@@ -478,11 +470,11 @@ public class GameState {
    * @param y 좌표 형태의 세로 위치 값
    * @return y 좌표 값이 배치 영역 내에 속한다면 그에 알맞는 행 번호를 반환하고, 범위를 벗어난다면 -1을 반환한다.
    */
-  public static int getRow(int y) {
+  public static int getRow(float y) {
     int retValue = -1;
     if (y >= towersArea.top && y <= towersArea.bottom) {
       y = y - towersArea.top;
-      retValue = y / TOWERS_HEIGHT;
+      retValue = (int) (y / TOWERS_HEIGHT);
     }
     return retValue;
   }
@@ -493,11 +485,11 @@ public class GameState {
    * @param x 좌표 형태의 가로 위치 값
    * @return x 좌표 값이 배치 영역 내에 속한다면 그에 알맞는 열 번호를 반환하고, 범위를 벗어난다면 -1을 반환한다.
    */
-  public static int getColumn(int x) {
+  public static int getColumn(float x) {
     int retValue = -1;
     if (x >= towersArea.left && x <= towersArea.right) {
       x = x - towersArea.left;
-      retValue = x / TOWERS_WIDTH;
+      retValue = (int) (x / TOWERS_WIDTH);
     }
     return retValue;
   }

@@ -53,17 +53,17 @@ public class DlgSetting extends Dialog implements OnClickListener {
     AppManager.printDetailLog(v.toString());
 
     if (v == resume) {
-      gameActHandler.sendEmptyMessage(Game.HANDLER_GAME_RESUME);
+      gameActHandler.sendMessage(AppManager.obtainMessage(Game.HANDLER_GAME_RESUME));
 
     } else if (v == sound) {
-      gameActHandler.sendEmptyMessage(Game.HANDLER_DLG_SOUND);
+      gameActHandler.sendMessage(AppManager.obtainMessage(Game.HANDLER_DLG_SOUND));
       if (sound.isChecked())
         sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
       else
         sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundon));
 
     } else if (v == quit) {
-      gameActHandler.sendEmptyMessage(Game.HANDLER_DLG_QUIT);
+      gameActHandler.sendMessage(AppManager.obtainMessage(Game.HANDLER_DLG_QUIT));
       dismiss();
     }
   }
@@ -75,5 +75,22 @@ public class DlgSetting extends Dialog implements OnClickListener {
   public void onBackPressed() {
     AppManager.printSimpleLog();
     onClick(resume);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see android.app.Dialog#onStart()
+   */
+  @Override
+  protected void onStart() {
+    super.onStart();
+
+    try {
+      throw new Exception("※game pause 호출 원인 규명 위원회※");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
   }
 }

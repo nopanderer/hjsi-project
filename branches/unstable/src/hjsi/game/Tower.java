@@ -6,6 +6,13 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
 public class Tower extends Unit implements Attackable {
+  /**
+   * 타워 이미지 리소스 이름
+   */
+  public String resourceFileName;
+  /**
+   * 타워 이름
+   */
   public String name;
   /**
    * 공격력
@@ -19,8 +26,11 @@ public class Tower extends Unit implements Attackable {
    * 등급
    */
   private int tier;
-  public String imgName;
 
+
+  /**
+   * 공격횟수를 제어하는 타이머
+   */
   private Timer timerAttack;
 
   private static final int PRIMITIVE = 1;
@@ -31,12 +41,14 @@ public class Tower extends Unit implements Attackable {
   private static final int LEGEND = 6;
   private static final int HIDDEN = 7;
 
+  // private static final String[] TIER_CAPTIONS = {"원시적인",
+
   public Tower() {
     super();
     name = "불";
     tier = 0;
     damage = 5;
-    imgName = "element_match";
+    resourceFileName = "element_match";
 
   }
 

@@ -1,10 +1,10 @@
 package hjsi.game;
 
 public class Station {
-  int x, y;
+  float x, y;
   int range = 10;
 
-  public Station(int x, int y) {
+  public Station(float x, float y) {
     this.x = x;
     this.y = y;
   }

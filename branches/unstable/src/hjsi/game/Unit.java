@@ -220,4 +220,35 @@ public abstract class Unit {
     else
       return false;
   }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    String retValue = null;
+
+    switch (type) {
+      case Unit.TYPE_STATUE:
+        retValue = "동상(statue";
+        break;
+
+      case Unit.TYPE_TOWER:
+        retValue = "타워(tower";
+        break;
+
+      case Unit.TYPE_MOB:
+        retValue = "몹(mob";
+        break;
+
+      default:
+        retValue = "기타 유닛(";
+        break;
+    }
+    retValue += id + ") 클릭 됨.";
+
+    return retValue;
+  }
 }
