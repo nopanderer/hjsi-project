@@ -253,18 +253,21 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
 
     switch (msg.what) {
       case Game.HANDLER_GAME_RESUME:
-        dlgSetting.hide();
+        AppManager.printDetailLog("핸들러 resume");
+        dlgSetting.dismiss();
         gameMaster.playGame();
         break;
 
       case Game.HANDLER_GAME_PAUSE:
+        AppManager.printDetailLog("핸들러 pause");
         gameMaster.pauseGame();
-        if (!explicitQuit && !(dlgSetting.isShowing())) {
+        if (!explicitQuit) {
           dlgSetting.show();
         }
         break;
 
       case Game.HANDLER_DLG_SOUND:
+        AppManager.printDetailLog("핸들러 sound toggle");
         if (bgmPlaying) {
           bgmPlaying = false;
           bgMusic.pause();
@@ -275,6 +278,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
         break;
 
       case Game.HANDLER_DLG_QUIT:
+        AppManager.printDetailLog("핸들러 game quit");
         bgMusic.stop();
         bgMusic.release();
         bgMusic = null;
@@ -283,10 +287,12 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
         break;
 
       case Game.HANDLER_SHOW_SPAWN_BTN:
+        AppManager.printDetailLog("핸들러 ready spawn button");
         btnGen.setVisibility(View.VISIBLE);
         break;
 
       case Game.HANDLER_SPAWN_MOBS:
+        AppManager.printDetailLog("핸들러 push spawn button");
         btnGen.setVisibility(View.GONE);
         gState.waveReady();
         break;

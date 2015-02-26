@@ -4,6 +4,7 @@ import hjsi.common.AppManager;
 import hjsi.common.Timer;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.RectF;
 
 public class Tower extends Unit implements Attackable {
   /**
@@ -89,6 +90,15 @@ public class Tower extends Unit implements Attackable {
   public void draw(Canvas canvas, float screenRatio) {
     super.draw(canvas, screenRatio);
     showRange(canvas, screenRatio);
+
+    updateHitRect();
+    RectF drawingBox = getHitRect();
+    drawingBox.left *= screenRatio;
+    drawingBox.right *= screenRatio;
+    drawingBox.top *= screenRatio;
+    drawingBox.bottom *= screenRatio;
+
+    canvas.drawRect(drawingBox, paint);
   }
 
   @Override
@@ -96,7 +106,7 @@ public class Tower extends Unit implements Attackable {
     if (timerAttack.isUsable()) {
       timerAttack.consumeTimer();
       Mob target = (Mob) unit;
-      return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
+      return new Projectile(x, y, damage, target, AppManager.getBitmap("proj1"));
     }
     return null;
   }

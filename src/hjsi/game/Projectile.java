@@ -49,7 +49,7 @@ public class Projectile extends Unit implements Movable {
     moveSpeed = 3;
     type = NORMAL;
     this.damage = damage;
-    setHitRect();
+    updateHitRect();
 
     vector = new Vector2d();
 
@@ -63,8 +63,14 @@ public class Projectile extends Unit implements Movable {
     Paint pnt = new Paint();
     pnt.setStyle(Paint.Style.STROKE);
     pnt.setColor(Color.RED);
-    canvas.drawRect(new RectF(x * screenRatio, y * screenRatio, x * screenRatio + width, y
-        * screenRatio + height), pnt);
+
+    RectF drawingBox = getHitRect();
+    drawingBox.left *= screenRatio;
+    drawingBox.right *= screenRatio;
+    drawingBox.top *= screenRatio;
+    drawingBox.bottom *= screenRatio;
+
+    canvas.drawRect(drawingBox, pnt);
   }
 
   @Override
@@ -79,7 +85,7 @@ public class Projectile extends Unit implements Movable {
       }
 
       /* 투사체에서 몹까지의 벡터 */
-      vector.set(target.cntrX - x, target.cntrY - y);
+      vector.set(target.x - x, target.y - y);
       /* 벡터 정규화 */
       vector.nor();
       /* 투사체 이동속도 스칼라 곱 */
@@ -90,17 +96,13 @@ public class Projectile extends Unit implements Movable {
         Vector2d desired =
             new Vector2d(((Mob) target).vector.x + vector.x, ((Mob) target).vector.y + vector.y);
 
-        x += desired.x;
-        y += desired.y;
-        cntrX += desired.x;
-        cntrY += desired.y;
+        setX(x + desired.x);
+        setY(y + desired.y);
       } else if (target instanceof Statue) {
-        x += vector.x;
-        y += vector.y;
-        cntrX += vector.x;
-        cntrY += vector.y;
+        setX(x + vector.x);
+        setY(y + vector.y);
       }
-      setHitRect();
+      updateHitRect();
     }
   }
 

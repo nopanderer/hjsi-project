@@ -76,21 +76,4 @@ public class DlgSetting extends Dialog implements OnClickListener {
     AppManager.printSimpleLog();
     onClick(resume);
   }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see android.app.Dialog#onStart()
-   */
-  @Override
-  protected void onStart() {
-    super.onStart();
-
-    try {
-      throw new Exception("※game pause 호출 원인 규명 위원회※");
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-  }
 }
