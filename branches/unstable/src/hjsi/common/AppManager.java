@@ -68,8 +68,8 @@ public class AppManager {
    */
   private float resizeFactor;
   /**
-   * 프로그램 내부에서 논리적인 크기를 가진 게임 월드에서 취급되는 타워, 투사체 등의 위치나 크기, 길이 등의 단위를 물리적인 기기 해상도에 알맞게 보이도록 각각의 값에
-   * 곱해줄 비율 값이다. 구체적인 값은 [기기 해상도에 비례하게 보여질 월드 크기] 나누기 [내부에서 취급하는 월드 크기]로 구한다.
+   * 프로그램 내부에서 논리적인 크기를 가진 게임 월드가 취급하는 타워, 투사체 등의 위치나 크기, 길이 등의 단위를 물리적인 기기 해상도에 알맞게 보이도록 각각의 값에 곱해줄
+   * 비율 값이다. 구체적인 값은 [기기 해상도에 비례하게 보여질 월드 크기] 나누기 [내부에서 취급하는 월드 크기]로 구한다.
    */
   private float visualizeFactor;
   /**
@@ -112,7 +112,7 @@ public class AppManager {
    * 
    * @return class.method 형태의 문자열
    */
-  public static String getClassMethodName(boolean deepMore) {
+  private static String getClassMethodName(boolean deepMore) {
     StackTraceElement[] elements = null;
 
     try {
