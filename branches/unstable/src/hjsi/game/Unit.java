@@ -1,9 +1,11 @@
 package hjsi.game;
 
+import hjsi.common.AppManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.RectF;
 
 /**
@@ -29,7 +31,8 @@ public abstract class Unit {
    */
   protected float x;
   protected float y;
-  protected float cntrX, cntrY;
+  protected float left;
+  protected float top;
   protected float width;
   protected float height;
 
@@ -49,7 +52,7 @@ public abstract class Unit {
   protected RectF hitRect;
 
   protected Bitmap face;
-  private Paint paint;
+  protected Paint paint;
 
   // 임시 생성자
   public Unit() {}
@@ -74,8 +77,13 @@ public abstract class Unit {
     this.type = type;
     this.id = id;
 
-    width = face.getWidth();
-    height = face.getHeight();
+    if (face == null) {
+      AppManager.printErrorLog("타워의 비트맵이 null이다!");
+    }
+
+    // TODO 비트맵에서 읽어오면 안됨
+    width = face.getWidth() * 2;
+    height = face.getHeight() * 2;
 
     setX(x);
     setY(y);
@@ -84,10 +92,11 @@ public abstract class Unit {
     hitRange = Math.max(width, height) / 2;
     destroyed = false;
 
-    setHitRect();
+    updateHitRect();
 
     this.face = face;
     paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    paint.setStyle(Style.STROKE);
   }
 
   /**
@@ -110,12 +119,12 @@ public abstract class Unit {
 
   public final void setX(float x) {
     this.x = x;
-    cntrX = x + width * 0.5f;
+    left = x - width * 0.5f;
   }
 
   public final void setY(float y) {
     this.y = y;
-    cntrY = y + height * 0.5f;
+    top = y - height * 0.5f;
   }
 
   public final float getX() {
@@ -126,12 +135,12 @@ public abstract class Unit {
     return y;
   }
 
-  public void setHitRect() {
-    hitRect.set(x, y, x + width, y + height);
+  public void updateHitRect() {
+    hitRect.set(left, top, left + width, top + height);
   }
 
   public RectF getHitRect() {
-    return hitRect;
+    return new RectF(hitRect);
   }
 
   /**
@@ -151,7 +160,7 @@ public abstract class Unit {
    */
   public void draw(Canvas canvas, float screenRatio) {
     if (face != null) {
-      canvas.drawBitmap(face, x * screenRatio, y * screenRatio, paint);
+      canvas.drawBitmap(face, left * screenRatio, top * screenRatio, paint);
     }
   }
 
@@ -177,8 +186,7 @@ public abstract class Unit {
     circle.setStyle(Paint.Style.STROKE); // 원의 윤곽선만 그림
     circle.setStrokeWidth(3); // 윤곽선 두께
     circle.setColor(Color.GREEN); // 윤곽선은 초록색
-    canvas.drawCircle(x * screenRatio + width * 0.5f, y * screenRatio + height * 0.5f, range
-        * screenRatio, circle);
+    canvas.drawCircle(x * screenRatio, y * screenRatio, range * screenRatio, circle);
   }
 
   /**
@@ -201,8 +209,8 @@ public abstract class Unit {
     else if (healthScale < 0.4)
       paint.setColor(Color.RED);
 
-    canvas.drawRect(x * screenRatio, y * screenRatio - 10, x * screenRatio + width * healthScale, y
-        * screenRatio - 5, paint);
+    canvas.drawRect(left * screenRatio, top * screenRatio - 10, left * screenRatio + width
+        * healthScale, top * screenRatio - 5, paint);
   }
 
   /**
@@ -214,8 +222,8 @@ public abstract class Unit {
    */
   public boolean inRange(Unit suspect, Unit victim) {
     /* 두 점 사이의 거리가 반지름의 합보다 작을 경우 충돌로 판단 */
-    if (Math.sqrt(Math.pow(suspect.cntrX - victim.cntrX, 2)
-        + Math.pow(suspect.cntrY - victim.cntrY, 2)) < suspect.range + victim.hitRange)
+    if (Math.sqrt(Math.pow(suspect.x - victim.x, 2) + Math.pow(suspect.y - victim.y, 2)) < suspect.range
+        + victim.hitRange)
       return true;
     else
       return false;

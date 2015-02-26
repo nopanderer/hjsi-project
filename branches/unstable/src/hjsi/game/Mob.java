@@ -55,8 +55,6 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   private Timer timerAttack;
   private Timer timerSprite;
 
-  private int sleep = 10;
-
   public Vector2d vector;
   /**
    * 정류소 번호
@@ -68,7 +66,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   private Station station;
 
   /* 스프라이트 이미지를 위한 임시 변수 */
-  private Rect rect;
+  private Rect spriteSrc;
   /**
    * 프레임 갯수
    */
@@ -103,13 +101,14 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     curFrame = 0;
     frameNum = 4;
     framePeriod = 1000 / frameNum;
-    width = face.getWidth() / frameNum;
-    height = face.getHeight();
-    rect = new Rect(0, 0, (int) this.width, (int) this.height);
+    // TODO 가로, 세로 비트맵에서 가져오면 안됨
+    width = face.getWidth() * 2 / frameNum;
+    height = face.getHeight() * 2;
+    spriteSrc = new Rect(0, 0, (int) this.width, (int) this.height);
 
     setX(x);
     setY(y);
-    setHitRect();
+    updateHitRect();
 
     timerMovement = Timer.create("몹 이동", 10);
     timerMovement.start();
@@ -121,15 +120,18 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public void draw(Canvas canvas, float screenRatio) {
-    RectF destRect =
-        new RectF(x * screenRatio, y * screenRatio, x * screenRatio + width, y * screenRatio
-            + height);
-    canvas.drawBitmap(face, rect, destRect, null);
+    RectF drawingBox = getHitRect();
+    drawingBox.left *= screenRatio;
+    drawingBox.right *= screenRatio;
+    drawingBox.top *= screenRatio;
+    drawingBox.bottom *= screenRatio;
+
+    canvas.drawBitmap(face, spriteSrc, drawingBox, null);
     showHealthBar(hpMax, hp, canvas, screenRatio);
     Paint pnt = new Paint();
     pnt.setStyle(Paint.Style.STROKE);
     pnt.setColor(Color.RED);
-    canvas.drawRect(destRect, pnt);
+    canvas.drawRect(drawingBox, pnt);
   }
 
   /*
@@ -148,7 +150,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     if (timerAttack.isUsable()) {
       timerAttack.consumeTimer();
       Statue target = (Statue) unit;
-      return new Projectile(cntrX, cntrY, damage, target, AppManager.getBitmap("proj1"));
+      return new Projectile(x, y, damage, target, AppManager.getBitmap("proj1"));
     }
 
     return null;
@@ -164,12 +166,9 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
       vector.nor();
       vector.mul(moveSpeed);
 
-      x += vector.x;
-      y += vector.y;
-      cntrX += vector.x;
-      cntrY += vector.y;
-
-      setHitRect();
+      setX(x + vector.x);
+      setY(y + vector.y);
+      updateHitRect();
     }
   }
 
@@ -216,8 +215,8 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
         curFrame = 0;
       }
     }
-    rect.left = curFrame * (int) width;
-    rect.right = rect.left + (int) width;
+    spriteSrc.left = curFrame * (int) width;
+    spriteSrc.right = spriteSrc.left + (int) width;
   }
 
   public int getLap() {
