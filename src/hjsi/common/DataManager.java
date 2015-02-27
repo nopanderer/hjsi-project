@@ -1,6 +1,7 @@
 package hjsi.common;
 
 import hjsi.game.GameState;
+import hjsi.game.Statue;
 import hjsi.game.Tower;
 import hjsi.game.Tower.Tier;
 import hjsi.game.Unit;
@@ -45,6 +46,71 @@ public class DataManager extends SQLiteOpenHelper {
    * 몹정보 테이블명
    */
   private static final String TABLE_MOBINFO = "mob_info";
+
+  private enum DBType {
+    INTEGER, TEXT;
+  }
+
+  private enum SchemeUserData {
+    ID(0, DBType.INTEGER, false), WAVE(1, DBType.INTEGER, false), GOLD(2, DBType.INTEGER, false), STATUES(
+        3, DBType.TEXT, false), TOWERS(4, DBType.TEXT, true), RECIPES(5, DBType.TEXT, true), UPGRADES(
+        6, DBType.TEXT, true);
+
+    private static final SchemeUserData[] columns = values();
+
+
+    private final int order;
+    private final DBType type;
+    private final boolean nullOk;
+
+    private SchemeUserData(int order, DBType type, boolean nullOk) {
+      this.order = order;
+      this.type = type;
+      this.nullOk = nullOk;
+    }
+
+    public static String getSqlStatement() {
+      String sql = "CREATE TABLE " + TABLE_USERDATA + " (";
+      for (int i = 0; i < columns.length; i++) {
+        sql += columns[i].toString();
+        if (i + 1 < columns.length)
+          sql += ", ";
+        else
+          sql += ");";
+      }
+      return sql;
+    }
+
+    public static SchemeUserData[] getColumns() {
+      return columns;
+    }
+
+    public int getOrder() {
+      return order;
+    }
+
+    public String getType() {
+      return type.name();
+    }
+
+    public String getPrimary() {
+      return order == 0 ? "PRIMARY KEY" : "";
+    }
+
+    public String getNotNull() {
+      return nullOk ? "" : "NOT NULL";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Enum#toString()
+     */
+    @Override
+    public String toString() {
+      return name() + " " + getType() + " " + getPrimary() + " " + getNotNull();
+    }
+  }
 
 
   /**
@@ -97,23 +163,15 @@ public class DataManager extends SQLiteOpenHelper {
     AppManager.printSimpleLog();
 
     /* 유저정보 테이블 생성 */
-    String sqlUserData = "CREATE TABLE " + TABLE_USERDATA + " (";
-    sqlUserData += "id INTEGER PRIMARY KEY NOT NULL, ";
-    sqlUserData += "wave INTEGER NOT NULL, ";
-    sqlUserData += "gold INTEGER NOT NULL, ";
-    sqlUserData += "coin INTEGER NOT NULL, ";
-    sqlUserData += "towers TEXT, ";
-    sqlUserData += "recipes TEXT, ";
-    sqlUserData += "upgrades TEXT);";
-    db.execSQL(sqlUserData);
-    AppManager.printInfoLog("query", sqlUserData);
+    db.execSQL(SchemeUserData.getSqlStatement());
+    AppManager.printInfoLog("query", SchemeUserData.getSqlStatement());
 
     /* 유저정보 초기값 입력 (단 1개의 레코드) */
     ContentValues values = new ContentValues();
     values.put("id", 1);
     values.put("wave", 0);
     values.put("gold", 1000);
-    values.put("coin", 3);
+    values.put("statues", ""); // TODO 기본 저장값 작성하시오.
     db.insert(TABLE_USERDATA, null, values);
     values = null;
 
@@ -244,20 +302,23 @@ public class DataManager extends SQLiteOpenHelper {
 
     Cursor cursor = db.rawQuery("select * from " + TABLE_USERDATA + " where id=1", null);
     cursor.moveToNext();
-    int userWave = cursor.getInt(1);
-    int userGold = cursor.getInt(2);
-    int userCoin = cursor.getInt(3);
-    String towers = cursor.getString(4);
-    String recipes = cursor.getString(5);
-    String upgrades = cursor.getString(6);
-    AppManager.printDetailLog("유저정보 wave: " + userWave + ", gold: " + userGold + ", coin: "
-        + userCoin + ", towers: " + towers);
+    int index = 0;
+    int userWave = cursor.getInt(++index);
+    int userGold = cursor.getInt(++index);
+    String statues = cursor.getString(++index);
+    String towers = cursor.getString(++index);
+    String recipes = cursor.getString(++index);
+    String upgrades = cursor.getString(++index);
+    AppManager.printDetailLog("유저정보 wave: " + userWave + ", gold: " + userGold + ", statues: "
+        + statues + ", towers: " + towers);
+
+    LinkedList<Statue> statueList = new LinkedList<Statue>();
 
     LinkedList<Tower> towerList = new LinkedList<Tower>();
     Tower tower = null;
     if (towers != null) {
       String[] token = towers.split(",");
-      for (int i = 0; i < token.length; i = i + 3) {
+      for (int i = 0; i + 3 <= token.length; i = i + 3) {
         tower = createTower("id", token[i]);
         tower.setX(Integer.parseInt(token[i + 1]));
         tower.setY(Integer.parseInt(token[i + 2]));
@@ -265,7 +326,7 @@ public class DataManager extends SQLiteOpenHelper {
       }
     }
 
-    outState.setUserData(userWave, userGold, userCoin, towerList);
+    outState.setUserData(userWave, userGold, statueList, towerList);
     cursor.close();
     db.close();
   }
@@ -278,6 +339,8 @@ public class DataManager extends SQLiteOpenHelper {
   public static void saveUserData(GameState gameState) {
     SQLiteDatabase db = openHelper.getWritableDatabase();
 
+    // TODO 동상 목록을 가져와서 동상의 id와 남은 체력을 저장한다.
+
     // 타워 목록을 가져와서 타워의 id와 x, y 좌표를 저장한다.
     String towers = new String();
     for (Unit tower : gameState.getUnits(Type.TOWER)) {
@@ -286,10 +349,12 @@ public class DataManager extends SQLiteOpenHelper {
 
     ContentValues values = new ContentValues();
     // values.put("wave", gState.getWave());
-    values.put("wave", 0); // 테스트를 위해서 웨이브는 저장 안함
-    values.put("gold", gameState.getGold() + 100);
-    values.put("coin", gameState.getCoin() + 3);
+    values.put("WAVE", 0); // 테스트를 위해서 웨이브는 저장 안함
+    values.put("gold", gameState.getUserGold() + 100);
+    values.put("statues", ""); // TODO 동상 String 넣어!
     values.put("towers", towers.toString());
+    values.put("recipes", "");
+    values.put("upgrades", "");
     int affectedRows = db.update(TABLE_USERDATA, values, "id=?", new String[] {"1"});
     AppManager.printDetailLog("Table " + TABLE_USERDATA + " updated " + affectedRows + " row(s).");
     db.close();
@@ -318,12 +383,13 @@ public class DataManager extends SQLiteOpenHelper {
         db.query(TABLE_TOWERINFO, null, selection + "=?", new String[] {arg}, null, null, null);
     cursor.moveToPosition((int) (Math.random() * cursor.getCount()));
 
-    int id = cursor.getInt(0);
-    String name = cursor.getString(1);
-    int tier = cursor.getInt(2);
-    int dmg = cursor.getInt(3);
-    int atkSpeed = cursor.getInt(4);
-    int range = cursor.getInt(5);
+    int index = 0;
+    int id = cursor.getInt(index++);
+    String name = cursor.getString(index++);
+    int tier = cursor.getInt(index++);
+    int dmg = cursor.getInt(index++);
+    int atkSpeed = cursor.getInt(index++);
+    int range = cursor.getInt(index++);
 
     Bitmap face = AppManager.getBitmap(Type.TOWER.toString() + id);
 

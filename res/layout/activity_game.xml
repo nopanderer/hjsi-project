@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-	>
+    android:layout_height="match_parent" >
 
     <TextView
         android:layout_width="wrap_content"
@@ -18,8 +17,8 @@
         android:id="@+id/btn_book"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginLeft="15dp"
         android:layout_centerVertical="true"
+        android:layout_marginLeft="15dp"
         android:background="@drawable/btn_book" />
 
     <Button
@@ -30,7 +29,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="15dp"
         android:background="@drawable/btn_pause" />
-    
+
     <Button
         android:id="@+id/btn_store"
         android:layout_width="40dp"
@@ -45,19 +44,10 @@
         android:id="@+id/btn_deploy"
         android:layout_width="40dp"
         android:layout_height="25dp"
-        android:layout_alignRight="@id/btn_store"
         android:layout_alignParentBottom="true"
+        android:layout_alignRight="@id/btn_store"
         android:layout_marginBottom="15dp"
         android:background="@drawable/btn_deploy" />
-
-    <Button
-        android:id="@+id/btn_gen"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_alignBaseline="@+id/btn_store"
-        android:layout_alignBottom="@+id/btn_store"
-        android:layout_alignLeft="@+id/btn_book"
-        android:background="@drawable/btn_gen" />
 
     <ToggleButton
         android:id="@+id/btn_ff"
@@ -66,8 +56,8 @@
         android:layout_alignBaseline="@+id/btn_pause"
         android:layout_alignBottom="@+id/btn_pause"
         android:layout_toRightOf="@+id/btn_pause"
-        android:textOn=""
+        android:background="@drawable/btn_ff"
         android:textOff=""
-        android:background="@drawable/btn_ff" />
+        android:textOn="" />
 
 </RelativeLayout>

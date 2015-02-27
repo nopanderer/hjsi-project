@@ -2,6 +2,7 @@ package hjsi.activity;
 
 import hjsi.common.AppManager;
 import hjsi.common.DataManager;
+import hjsi.common.GameController;
 import hjsi.common.GameSurface;
 import hjsi.common.Timer;
 import hjsi.game.GameMaster;
@@ -11,10 +12,11 @@ import hjsi.game.Unit;
 import java.io.IOException;
 
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,32 +24,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.ToggleButton;
 
-public class Game extends Base implements OnClickListener, Handler.Callback {
-  /**
-   * 게임을 재개하도록 요청한다.
-   */
-  public static final int HANDLER_GAME_RESUME = 0;
-  /**
-   * 게임을 멈추도록 요청한다.
-   */
-  public static final int HANDLER_GAME_PAUSE = 1;
-  /**
-   * 사운드를 on/off 하도록 요청한다.
-   */
-  public static final int HANDLER_DLG_SOUND = 2;
-  /**
-   * 게임을 종료하도록 요청한다.
-   */
-  public static final int HANDLER_DLG_QUIT = 3;
-  /**
-   * 몹 생성 버튼을 표시하도록 요청한다.
-   */
-  public static final int HANDLER_SHOW_SPAWN_BTN = 4;
-  /**
-   * 몹 생성을 하도록 요청한다.
-   */
-  public static final int HANDLER_SPAWN_MOBS = 5;
-
+public class Game extends Base implements OnClickListener, GameController {
   /**
    * bgm 재생 객체
    */
@@ -74,11 +51,10 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
   private boolean explicitQuit = false;
 
   /* 자식 뷰들 */
-  private Button btnBook, btnPause, btnStore, btnDeploy, btnGen;
+  private Button btnBook, btnPause, btnStore, btnDeploy;
   private ToggleButton btnFF;
+  private Drawable btnGen;
   private DlgSetting dlgSetting;
-
-  private final Handler gameHandler = new Handler(this);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +66,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     /*
      * surfaceview 생성 및 등록
      */
-    surface = new GameSurface(getApplicationContext());
+    surface = new GameSurface(getApplicationContext(), this);
     setContentView(surface);
 
     /*
@@ -110,12 +86,19 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     btnStore.setOnClickListener(this);
     btnDeploy = (Button) findViewById(R.id.btn_deploy);
     btnDeploy.setOnClickListener(this);
-    btnGen = (Button) findViewById(R.id.btn_gen);
-    btnGen.setOnClickListener(this);
     btnFF = (ToggleButton) findViewById(R.id.btn_ff);
     btnFF.setOnClickListener(this);
 
-    dlgSetting = new DlgSetting(Game.this, gameHandler);
+    int margin =
+        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15, getResources()
+            .getDisplayMetrics());
+    int size =
+        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources()
+            .getDisplayMetrics());
+    btnGen = (Drawable) getResources().getDrawable(R.drawable.btn_gen);
+    btnGen.setBounds(margin, margin, margin + size, margin + size);
+
+    dlgSetting = new DlgSetting(Game.this, this);
     dlgSetting.setCanceledOnTouchOutside(false);
 
     bgMusic = MediaPlayer.create(this, R.raw.bgm);
@@ -123,12 +106,11 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     bgMusic.start();
 
     /* GameMaster 생성 */
-    gameMaster = new GameMaster(gameHandler);
+    gameMaster = new GameMaster();
     if (savedInstanceState == null) {
-      // 서피스뷰가 생성되기까지 딜레이가 좀 있어서 게임스레드를 조금 늦게 실행하게 함
-      gameHandler.sendMessageDelayed(AppManager.obtainMessage(HANDLER_GAME_RESUME), 300);
+      resumeGame();
     } else {
-      gameHandler.sendMessage(AppManager.obtainMessage(HANDLER_GAME_PAUSE));
+      pauseGame();
     }
 
     AppManager.printDetailLog(getClass().getSimpleName() + " 초기화 완료");
@@ -140,7 +122,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     super.onStop();
 
     if (gameMaster != null) {
-      gameMaster.pauseGame();
+      pauseGame();
     }
 
     if (bgMusic != null) {
@@ -162,6 +144,11 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
   protected void onDestroy() {
     AppManager.printSimpleLog();
     super.onDestroy();
+
+    if (dlgSetting != null) {
+      if (dlgSetting.isShowing())
+        dlgSetting.dismiss();
+    }
 
     if (gameMaster != null) {
       gameMaster.quitGame();
@@ -191,7 +178,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
   @Override
   public void onBackPressed() {
     AppManager.printSimpleLog();
-    gameHandler.sendMessage(AppManager.obtainMessage(HANDLER_GAME_PAUSE));
+    pauseGame();
   }
 
   @Override
@@ -204,7 +191,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     }
 
     else if (v == btnPause) {
-      gameHandler.sendMessage(AppManager.obtainMessage(HANDLER_GAME_PAUSE));
+      pauseGame();
     }
 
     else if (v == btnStore) {
@@ -217,10 +204,6 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
       gState.onDeployMode();
     }
 
-    else if (v == btnGen) {
-      gameHandler.sendMessage(AppManager.obtainMessage(HANDLER_SPAWN_MOBS));
-    }
-
     else if (v == btnFF) {
       Timer.fastForward();
     }
@@ -228,83 +211,36 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    // 이 액티비티의 자식 뷰가 처리한 이벤트는 이 메소드까지 전달되지 않는다.
-    // 위에서 버튼들과 서피스뷰가 이 액티비티의 자식으로 등록되어 있으니, 이 메소드에서는 유닛이나 다른 클릭 조작만 고려한다.
+    boolean consumed = false;
 
-    // 터치로 입력받은 화면상의 좌표를 보여지는 게임월드 비율에 맞게 변환함
-    event = surface.convertGameEvent(event);
-    AppManager.printEventLog(event);
-
-    Unit unit = gState.getUnit(event.getX(), event.getY());
-    if (unit != null) {
-      AppManager.printInfoLog(unit.toString());
-    } else if (gState.checkDeployMode()) {
-      gState.deployTower(event.getX(), event.getY());
+    // 웨이브 대기 중일 때 웨이브 시작 버튼을 클릭한 경우
+    if (btnGen.getBounds().contains((int) event.getX(), (int) event.getY())
+        && !(gState.isWaveStarted())) {
+      startWave();
+      consumed = true;
+    } else {
+      consumed = surface.handleTouchEvent(event);
     }
 
-    return super.onTouchEvent(event);
-  }
+    if (!consumed) {
+      // 이 액티비티의 자식 뷰가 처리한 이벤트는 이 메소드까지 전달되지 않는다.
+      // 위에서 버튼들과 서피스뷰가 이 액티비티의 자식으로 등록되어 있으니, 이 메소드에서는 유닛이나 다른 클릭 조작만 고려한다.
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see android.os.Handler.Callback#handleMessage(android.os.Message)
-   */
-  @Override
-  public boolean handleMessage(Message msg) {
-    AppManager.printDetailLog(AppManager.msgToString(msg));
+      // 터치로 입력받은 화면상의 좌표를 보여지는 게임월드 비율에 맞게 변환함
+      event = surface.convertGameEvent(event);
+      AppManager.printEventLog(event);
 
-    switch (msg.what) {
-      case Game.HANDLER_GAME_RESUME:
-        AppManager.printDetailLog("핸들러 resume");
-        dlgSetting.dismiss();
-        gameMaster.playGame();
-        break;
+      Unit unit = gState.getUnit(event.getX(), event.getY());
+      if (unit != null) {
+        AppManager.printInfoLog(unit.toString());
+      } else if (gState.checkDeployMode()) {
+        gState.deployTower(event.getX(), event.getY());
+      }
 
-      case Game.HANDLER_GAME_PAUSE:
-        AppManager.printDetailLog("핸들러 pause");
-        gameMaster.pauseGame();
-        if (!explicitQuit) {
-          dlgSetting.show();
-        }
-        break;
-
-      case Game.HANDLER_DLG_SOUND:
-        AppManager.printDetailLog("핸들러 sound toggle");
-        if (bgmPlaying) {
-          bgmPlaying = false;
-          bgMusic.pause();
-        } else {
-          bgmPlaying = true;
-          bgMusic.start();
-        }
-        break;
-
-      case Game.HANDLER_DLG_QUIT:
-        AppManager.printDetailLog("핸들러 game quit");
-        bgMusic.stop();
-        bgMusic.release();
-        bgMusic = null;
-        quitExplicitly(); // 다음번 Game.onDestroy()가 호출될 때 리소스를 해제하라고 알림
-        AppManager.quitApp();
-        break;
-
-      case Game.HANDLER_SHOW_SPAWN_BTN:
-        AppManager.printDetailLog("핸들러 ready spawn button");
-        btnGen.setVisibility(View.VISIBLE);
-        break;
-
-      case Game.HANDLER_SPAWN_MOBS:
-        AppManager.printDetailLog("핸들러 push spawn button");
-        btnGen.setVisibility(View.GONE);
-        gState.waveReady();
-        break;
-
-      default:
-        AppManager.printErrorLog("Game 액티비티에 예외 메시지(" + AppManager.msgToString(msg) + ")가 왔습니다.");
-        return false;
+      consumed = super.onTouchEvent(event);
     }
-    return true;
+
+    return consumed;
   }
 
   public void quitExplicitly() {
@@ -345,5 +281,86 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     gameMaster.refreshGameState();
     surface.refreshGameState();
     surface.loadCameraState(savedInstanceState.getFloatArray("camera"));
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.common.GameController#resumeGame()
+   */
+  public void resumeGame() {
+    if (dlgSetting.isShowing())
+      dlgSetting.dismiss();
+    gameMaster.playGame();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.common.GameController#pauseGame()
+   */
+  @Override
+  public void pauseGame() {
+    gameMaster.pauseGame();
+    if (!explicitQuit && !(dlgSetting.isShowing())) {
+      dlgSetting.show();
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.common.GameController#quitGame()
+   */
+  @Override
+  public void quitGame() {
+    bgMusic.stop();
+    bgMusic.release();
+    bgMusic = null;
+    quitExplicitly(); // 다음번 Game.onDestroy()가 호출될 때 리소스를 해제하라고 알림
+    AppManager.quitApp();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.common.GameController#startWave()
+   */
+  @Override
+  public void startWave() {
+    gState.waveReady();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.common.GameController#finishWave()
+   */
+  @Override
+  public void finishWave() {}
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.common.GameController#toggleSound()
+   */
+  @Override
+  public void toggleSound() {
+    if (!(bgmPlaying = !bgmPlaying))
+      bgMusic.pause();
+    else
+      bgMusic.start();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.common.GameController#drawWaveButton(android.graphics.Canvas)
+   */
+  @Override
+  public void drawWaveButton(Canvas canvas) {
+    if (!gState.isWaveStarted()) {
+      btnGen.draw(canvas);
+    }
   }
 }

@@ -1,19 +1,13 @@
 package hjsi.game;
 
-import hjsi.activity.Game;
 import hjsi.common.AppManager;
 import hjsi.common.Timer;
 import hjsi.game.Unit.Type;
-import android.os.Handler;
 
 /**
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
  */
 public class GameMaster implements Runnable {
-  /**
-   * Game 액티비티와 통신하기 위한 핸들러
-   */
-  private Handler gameActHandler = null;
   /**
    * GameState
    */
@@ -31,8 +25,7 @@ public class GameMaster implements Runnable {
    */
   private boolean running = false;
 
-  public GameMaster(Handler handler) {
-    gameActHandler = handler;
+  public GameMaster() {
     refreshGameState();
 
     workerThread = new Thread(this);
@@ -60,7 +53,6 @@ public class GameMaster implements Runnable {
 
         // 웨이브가 종료되면 타이머를 멈추고 다음 웨이브를 준비한다.
         if (gState.isWaveStop()) {
-          gameActHandler.sendMessage(AppManager.obtainMessage(Game.HANDLER_SHOW_SPAWN_BTN));
           gState.finishWave();
         }
         // 웨이브가 아직 진행 중이면 몹 생성을 시도한다.
