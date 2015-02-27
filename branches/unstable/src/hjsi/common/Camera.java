@@ -458,9 +458,8 @@ public class Camera {
   /**
    * 카메라를 지정한 좌표로 완전히 이동시킨다.
    */
-  private void gotoCamera(float x, float y) {
-    position.set(x, y);
-  }
+  @SuppressWarnings("unused")
+  private void gotoCamera(float x, float y) {}
 
   /**
    * 카메라를 현재 위치에서 지정한 값만큼 이동시킨다.

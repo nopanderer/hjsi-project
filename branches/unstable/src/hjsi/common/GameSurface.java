@@ -2,7 +2,6 @@ package hjsi.common;
 
 import hjsi.game.GameState;
 import hjsi.game.Mob;
-import hjsi.game.Tower;
 import hjsi.game.Unit;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -276,8 +275,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     /*
      * 그리기 fps 출력
      */
-    canvas.drawText(mFps + " fps (" + AppManager.getInstance().getLogicFps() + " fps)", xForText,
-        yForText, mPaintInfo);
+    canvas.drawText(mFps + " fps (" + AppManager.getLogicFps() + " fps)", xForText, yForText,
+        mPaintInfo);
 
     /*
      * 카메라 좌상단 좌표 (논리적인 기준점) 출력
@@ -321,8 +320,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     canvas.drawText("Wave: " + gState.getWave(), xForText, yForText, mPaintInfo);
 
     if (gState.checkDeployMode()) {
-      Tower temp = gState.getInHandTower();
-      canvas.drawText(temp.getTier() + "등급 " + temp.name + " 배치하세요 ", 550, -100, mPaintInfo);
+      canvas.drawText(gState.getInHandTower() + " 배치하세요 ", 550, -100, mPaintInfo);
     }
 
     canvas.restore();

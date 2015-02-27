@@ -210,7 +210,11 @@ public class GameState {
       setCoin(getCoin() - spentCoin);
 
       // 타워를 생성한다.
-      inHand = DataManager.createRandomTowerByTier(0);
+      try {
+        inHand = DataManager.createTower("tier", "0");
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
       AppManager.printInfoLog(inHand.getId() + "번 타워 구매함.");
     }
 
