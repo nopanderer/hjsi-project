@@ -250,6 +250,10 @@ public class GameState {
     return (inHand != null);
   }
 
+  public Tower getInHandTower() {
+    return inHand;
+  }
+
   public int getWave() {
     return userWave;
   }
