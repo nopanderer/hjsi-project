@@ -2,6 +2,7 @@ package hjsi.common;
 
 import hjsi.game.GameState;
 import hjsi.game.Tower;
+import hjsi.game.Tower.Tier;
 import hjsi.game.Unit;
 import hjsi.game.Unit.Type;
 
@@ -303,6 +304,14 @@ public class DataManager extends SQLiteOpenHelper {
     db.close();
   }
 
+  /**
+   * 주어진 검색 조건으로 데이터베이스에서 타워 정보를 구해 타워 객체를 생성한다. 검색된 타워 정보 레코드가 다수일 경우는 그 중 임의의 타워가 생성된다.
+   * 
+   * @param selection 검색할 파라미터로 "id" 혹은 "tier"가 가능하다.
+   * @param arg 검색할 파라미터의 값
+   * @return 조건에 해당하는 타워 객체
+   * @throws IOException
+   */
   public static Tower createTower(String selection, String arg) throws IOException {
     SQLiteDatabase db = openHelper.getReadableDatabase();
     Cursor cursor =
@@ -325,42 +334,6 @@ public class DataManager extends SQLiteOpenHelper {
       AppManager.addBitmap(Type.TOWER.toString() + id, face);
     }
 
-    return new Tower(id, name, tier, dmg, atkSpeed, range, face);
-  }
-
-  /**
-   * 특정 등급의 타워들 중에 아무 타워를 랜덤으로 생성한다.
-   * 
-   * @param tierArg 랜덤으로 생성할 타워의 등급
-   * @return 지정한 등급의 임의의 타워 객체 혹은 null
-   */
-  public static Tower createRandomTowerByTier(int tierArg) {
-    String[] columns = "id,name,tier,damage,attackspeed,range".split(",");
-
-    SQLiteDatabase db = openHelper.getReadableDatabase();
-    Cursor cursor =
-        db.query(TABLE_TOWERINFO, columns, "tier=?", new String[] {String.valueOf(tierArg)}, null,
-            null, null);
-    // 지정된 티어의 전체 타워 범위 내에서 랜덤 넘버가 타워의 인덱스
-    cursor.moveToPosition((int) (Math.random() * cursor.getCount()));
-
-    int id = cursor.getInt(0);
-    String name = cursor.getString(1);
-    int tier = cursor.getInt(2);
-    int dmg = cursor.getInt(3);
-    int atkSpeed = cursor.getInt(4);
-    int range = cursor.getInt(5);
-
-    String fileName = "tower" + id;
-    Bitmap face = AppManager.getBitmap(fileName);
-    if (face == null) {
-      try {
-        face = AppManager.readImageFile("img/towers/" + fileName + ".png", null);
-        AppManager.addBitmap(fileName, face);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    return new Tower(id, name, tier, dmg, atkSpeed, range, face);
+    return new Tower(id, name, Tier.getTier(tier), dmg, atkSpeed, range, face);
   }
 }

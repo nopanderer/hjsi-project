@@ -7,6 +7,42 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 
 public class Tower extends Unit implements Attackable {
+  public enum Tier {
+    PRIMITIVE(0, "원시적인"), BASIC(1, "기초적인"), SPECIAL(3, "특별한"), MIGHTY(4, "강력한"), TOP(5, "최상의"), LEGEND(
+        6, "전설의"), HIDDEN(7, "숨겨진");
+
+    private final int value;
+    private final String caption;
+    private static final Tier[] tiers = values();
+
+    Tier(int value, String caption) {
+      this.value = value;
+      this.caption = caption;
+    }
+
+    public int getValue() {
+      return value;
+    }
+
+    public String getCaption() {
+      return caption;
+    }
+
+    public static Tier getTier(int order) {
+      return tiers[order];
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Enum#toString()
+     */
+    @Override
+    public String toString() {
+      return caption;
+    }
+  }
+
   /**
    * 타워 이미지 리소스 이름
    */
@@ -26,7 +62,7 @@ public class Tower extends Unit implements Attackable {
   /**
    * 등급
    */
-  private int tier;
+  private Tier tier;
 
 
   /**
@@ -34,20 +70,10 @@ public class Tower extends Unit implements Attackable {
    */
   private Timer timerAttack;
 
-  private static final int PRIMITIVE = 1;
-  private static final int BASIC = 2;
-  private static final int SPECIAL = 3;
-  private static final int MIGHTY = 4;
-  private static final int TOP = 5;
-  private static final int LEGEND = 6;
-  private static final int HIDDEN = 7;
-
-  // private static final String[] TIER_CAPTIONS = {"원시적인",
-
   public Tower() {
     super();
     name = "불";
-    tier = 0;
+    tier = Tier.PRIMITIVE;
     damage = 5;
     resourceFileName = "element_match";
 
@@ -62,7 +88,7 @@ public class Tower extends Unit implements Attackable {
    * @param range 타워 사정거리
    * @param face 타워 이미지
    */
-  public Tower(int id, String name, int tier, int damage, int attackSpeed, int range, Bitmap face) {
+  public Tower(int id, String name, Tier tier, int damage, int attackSpeed, int range, Bitmap face) {
     super(Type.TOWER, id, face);
     this.name = name;
     this.tier = tier;
@@ -74,7 +100,7 @@ public class Tower extends Unit implements Attackable {
     timerAttack.start();
   }
 
-  public int getTier() {
+  public Tier getTier() {
     return tier;
   }
 
@@ -133,5 +159,15 @@ public class Tower extends Unit implements Attackable {
   @Override
   public void freeze() {
     timerAttack.pause();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#toString()
+   */
+  @Override
+  public String toString() {
+    return tier + " 등급 " + name + " 타워";
   }
 }
