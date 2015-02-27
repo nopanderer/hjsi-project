@@ -7,6 +7,7 @@ import hjsi.common.GameSurface;
 import hjsi.common.Timer;
 import hjsi.game.GameMaster;
 import hjsi.game.GameState;
+import hjsi.game.Tower;
 import hjsi.game.Unit;
 
 import java.io.IOException;
@@ -233,6 +234,12 @@ public class Game extends Base implements OnClickListener, GameController {
       Unit unit = gState.getUnit(event.getX(), event.getY());
       if (unit != null) {
         AppManager.printInfoLog(unit.toString());
+        if (unit instanceof Tower) {
+          gState.setShowTowerMode(true);
+          gState.towerToShow((Tower) unit);
+        }
+      } else if (gState.checkShowTowerMode()) {
+        gState.setShowTowerMode(false);
       } else if (gState.checkDeployMode()) {
         gState.deployTower(event.getX(), event.getY());
       }
