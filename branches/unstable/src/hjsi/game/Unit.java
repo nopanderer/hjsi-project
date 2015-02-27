@@ -1,6 +1,9 @@
 package hjsi.game;
 
 import hjsi.common.AppManager;
+
+import java.util.Locale;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,15 +15,38 @@ import android.graphics.RectF;
  * 게임 오브젝트의 기본이 되는 추상 클래스
  */
 public abstract class Unit {
-  public static final int TYPE_STATUE = 0;
-  public static final int TYPE_TOWER = 1;
-  public static final int TYPE_MOB = 2;
-  public static final int TYPE_ETC = 3;
+  public enum Type {
+    STATUE(0), TOWER(1), MOB(2), PROJECTILE(3);
+    private final int value;
+    private static final Type[] types = values();
+
+    Type(int value) {
+      this.value = value;
+    }
+
+    public int getValue() {
+      return value;
+    }
+
+    public Type getType(int index) {
+      return types[index];
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Enum#toString()
+     */
+    @Override
+    public String toString() {
+      return name().toString().toLowerCase(Locale.US);
+    }
+  }
 
   /**
-   * 유닛의 종류를 나타내는 값. Unit.TYPE_XXXX
+   * 유닛의 종류를 나타낸다.
    */
-  private int type;
+  private Type type;
   /**
    * 유닛의 종류별로 고유한 아이디. 즉, 유닛의 종류가 다를 경우 같은 아이디를 가질 수 있으며, 같은 id를 가지는 개체도 존재할 수 있음.
    */
@@ -62,18 +88,18 @@ public abstract class Unit {
    * @param id 해당하는 종류 안에서 특정 유닛을 가리키는 정수 값
    * @param face 화면에 표시할 이미지
    */
-  public Unit(int type, int id, Bitmap face) {
+  public Unit(Type type, int id, Bitmap face) {
     this(type, id, -1, -1, face);
   }
 
   /**
-   * @param type 유닛의 종류를 입력한다. -> Unit.TYPE_XXXX
+   * @param type 유닛의 종류를 입력한다.
    * @param id 해당하는 종류 안에서 특정 유닛을 가리키는 정수 값
    * @param x 이미지를 표시할 x 좌표
    * @param y 이미지를 표시할 y 좌표
    * @param face 화면에 표시할 이미지
    */
-  public Unit(int type, int id, float x, float y, Bitmap face) {
+  public Unit(Type type, int id, float x, float y, Bitmap face) {
     this.type = type;
     this.id = id;
 
@@ -104,7 +130,7 @@ public abstract class Unit {
    * 
    * @return 유닛의 타입을 의미하는 정수를 반환한다.
    */
-  public final int getType() {
+  public final Type getType() {
     return type;
   }
 
@@ -236,27 +262,6 @@ public abstract class Unit {
    */
   @Override
   public String toString() {
-    String retValue = null;
-
-    switch (type) {
-      case Unit.TYPE_STATUE:
-        retValue = "동상(statue";
-        break;
-
-      case Unit.TYPE_TOWER:
-        retValue = "타워(tower";
-        break;
-
-      case Unit.TYPE_MOB:
-        retValue = "몹(mob";
-        break;
-
-      default:
-        retValue = "기타 유닛(";
-        break;
-    }
-    retValue += id + ") 클릭 됨.";
-
-    return retValue;
+    return type.toString() + id + "@" + Integer.toHexString(hashCode());
   }
 }

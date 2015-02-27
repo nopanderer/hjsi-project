@@ -63,7 +63,7 @@ public class Tower extends Unit implements Attackable {
    * @param face 타워 이미지
    */
   public Tower(int id, String name, int tier, int damage, int attackSpeed, int range, Bitmap face) {
-    super(Unit.TYPE_TOWER, id, face);
+    super(Type.TOWER, id, face);
     this.name = name;
     this.tier = tier;
     this.damage = damage;
@@ -110,7 +110,7 @@ public class Tower extends Unit implements Attackable {
     if (timerAttack.isUsable()) {
       timerAttack.consumeTimer();
       Mob target = (Mob) unit;
-      return new Projectile(x, y, damage, target, AppManager.getBitmap("proj1"));
+      return new Projectile(x, y, damage, target, AppManager.getBitmap("projectile1"));
     }
     return null;
   }

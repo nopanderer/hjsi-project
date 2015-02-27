@@ -81,7 +81,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   private long framePeriod;
 
   public Mob(int x, int y, Bitmap face, int wave, Station dest) {
-    super(Unit.TYPE_MOB, 0, x, y, face);
+    super(Type.MOB, 0, x, y, face);
 
     setLap(0);
     this.wave = wave;

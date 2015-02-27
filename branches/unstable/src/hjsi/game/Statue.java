@@ -38,7 +38,7 @@ public class Statue extends Unit implements Hittable {
    *
    */
   public Statue(int x, int y, Bitmap face) {
-    super(Unit.TYPE_STATUE, 0, x, y, face);
+    super(Type.STATUE, 0, x, y, face);
 
     hpRegen = 1500; // 1초당 1.5 재생 = 0.1초당 0.15 재생 = hpRegen 150
     hpMax = 1000000; // 1000.000
