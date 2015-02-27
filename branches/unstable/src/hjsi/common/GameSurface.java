@@ -316,6 +316,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
       canvas.drawText(gState.getInHandTower() + " 배치하세요 ", 550, -100, mPaintInfo);
     }
 
+    if (gState.checkShowTowerMode()) {
+      canvas.drawText(gState.showTowerToShow(), 400, 400, mPaintInfo);
+    }
+
     canvas.restore();
   }
 

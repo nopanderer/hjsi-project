@@ -35,9 +35,17 @@ public class GameState {
    */
   private Tower inHand = null;
   /**
+   * 선택된 타워
+   */
+  private Tower towerToShow = null;
+  /**
    * 타워 배치를 완료하기 전에 배치모드를 끄면, 코인으로 되돌려 받는게 아니라 타워를 잠시 보관한다.
    */
   private Tower keepingTower = null;
+  /**
+   * 
+   */
+  private boolean showTowerMode = false;
 
   private static final int AREA_LEFT = 800;
   private static final int AREA_RIGHT = 3040;
@@ -514,6 +522,23 @@ public class GameState {
    */
   public boolean isWaveStarted() {
     return waveStarted;
+  }
+
+  public boolean checkShowTowerMode() {
+    return showTowerMode;
+  }
+
+  public void setShowTowerMode(boolean setShowTowerMode) {
+    this.showTowerMode = setShowTowerMode;
+  }
+
+  public void towerToShow(Tower tower) {
+    towerToShow = tower;
+  }
+
+  public String showTowerToShow() {
+    return towerToShow.getTier() + " " + towerToShow.name + " 공격력 " + towerToShow.damage + " 공격속도 "
+        + towerToShow.attackSpeed;
   }
 
   public void finishWave() {
