@@ -2,6 +2,7 @@ package hjsi.common;
 
 import hjsi.game.GameState;
 import hjsi.game.Mob;
+import hjsi.game.Tower;
 import hjsi.game.Unit;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -318,6 +319,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
      */
     canvas.translate(0, yForText);
     canvas.drawText("Wave: " + gState.getWave(), xForText, yForText, mPaintInfo);
+
+    if (gState.checkDeployMode()) {
+      Tower temp = gState.getInHandTower();
+      canvas.drawText(temp.getTier() + "등급 " + temp.name + " 배치하세요 ", 550, -100, mPaintInfo);
+    }
 
     canvas.restore();
   }

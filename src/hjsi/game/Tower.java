@@ -74,6 +74,10 @@ public class Tower extends Unit implements Attackable {
     timerAttack.start();
   }
 
+  public int getTier() {
+    return tier;
+  }
+
   @Override
   public void action() {
     // TODO Auto-generated method stub
