@@ -108,7 +108,7 @@ public class GameState {
     timers = new LinkedList<Timer>();
     worldTimer = Timer.create("월드시계", 1000);
     timers.add(worldTimer);
-    spawnTimer = Timer.create("몹 생성 시계", 2000, MAX_MOB);
+    spawnTimer = Timer.create("몹 생성 시계", 4000, MAX_MOB);
     spawnTimer.setEnable(false);
     timers.add(spawnTimer);
   }
@@ -509,8 +509,8 @@ public class GameState {
       e.printStackTrace();
     }
 
-    if ((mImgMob.getWidth() != 256) || (mImgMob.getHeight() != 64)) {
-      mImgMob = Bitmap.createScaledBitmap(mImgMob, 256, 64, true);
+    if ((mImgMob.getWidth() != 512) || (mImgMob.getHeight() != 128)) {
+      mImgMob = Bitmap.createScaledBitmap(mImgMob, 1024, 256, true);
     }
 
     AppManager.addBitmap(key, mImgMob);
@@ -552,7 +552,7 @@ public class GameState {
 
     // 몹 리스폰 타이머를 리필함.
     spawnTimer.setEnable(true);
-    spawnTimer.startDelayed(10000);
+    spawnTimer.startDelayed(2000);
   }
 
   public void spawnMob() {
