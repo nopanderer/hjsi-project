@@ -25,7 +25,7 @@ public class Projectile extends Unit implements Movable {
   /**
    * 투사체 종류
    */
-  private int type;
+  private int attackType;
   /**
    * 타워의 공격 데미지
    */
@@ -43,11 +43,11 @@ public class Projectile extends Unit implements Movable {
   private static final int CHAIN = 6;
 
   public Projectile(float x, float y, int damage, Unit target, Bitmap face) {
-    super(Unit.TYPE_ETC, 0, x, y, face);
+    super(Type.PROJECTILE, 0, x, y, face);
     this.target = target;
 
     moveSpeed = 3;
-    type = NORMAL;
+    attackType = NORMAL;
     this.damage = damage;
     updateHitRect();
 

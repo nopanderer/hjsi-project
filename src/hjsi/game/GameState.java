@@ -3,12 +3,14 @@ package hjsi.game;
 import hjsi.common.AppManager;
 import hjsi.common.DataManager;
 import hjsi.common.Timer;
+import hjsi.game.Unit.Type;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -96,7 +98,15 @@ public class GameState {
      * 동상 추가
      */
     synchronized (units) {
-      units.add(new Statue(5, 5, AppManager.getBitmap("statue1")));
+      Options opts = new Options();
+      opts.inPreferredConfig = Config.RGB_565;
+      try {
+        Bitmap face = AppManager.readUnitImageFile(Type.STATUE, 1, opts);
+        AppManager.addBitmap(Type.STATUE.toString() + 1, face);
+        units.add(new Statue(5, 5, face));
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
 
     /* 정류장 삽입 */
@@ -311,15 +321,6 @@ public class GameState {
       return (Tower) unit;
   }
 
-  /**
-   * 유닛 통합 연결 리스트 반환
-   * 
-   * @return units
-   */
-  public LinkedList<Unit> getUnits() {
-    return units;
-  }
-
   public void addUnit(Unit newbie) {
     synchronized (units) {
       units.add(newbie);
@@ -333,71 +334,33 @@ public class GameState {
   }
 
   /**
-   * 전체 유닛 목록에서 몹만 가져온다.
+   * 유닛 통합 연결 리스트 반환
    * 
-   * @return 몹이 0개 이상 들어있는 연결리스트를 반환한다.
+   * @return units
    */
-  public LinkedList<Mob> getMobs() {
-    LinkedList<Mob> mobs = new LinkedList<Mob>();
-    synchronized (units) {
-      for (Unit unit : units) {
-        if (unit.getType() == Unit.TYPE_MOB) {
-          mobs.add((Mob) unit);
-        }
-      }
-    }
-    return mobs;
+  public LinkedList<Unit> getUnits() {
+    return units;
+  }
+
+  public LinkedList<Unit> getUnitsClone() {
+    return new LinkedList<Unit>(units);
   }
 
   /**
-   * 전체 유닛 목록에서 타워만 가져온다.
+   * 매개변수로 지정한 종류의 유닛 목록을 반환한다.
    * 
-   * @return 타워가 0개 이상 들어있는 연결리스트를 반환한다.
+   * @param type 유닛 종류 열거형
+   * @return 해당 타입이 0개 이상 들어있는 연결리스트를 반환한다.
    */
-  public LinkedList<Tower> getTowers() {
-    LinkedList<Tower> towers = new LinkedList<Tower>();
+  public LinkedList<Unit> getUnits(Type type) {
+    LinkedList<Unit> clone = new LinkedList<Unit>();
     synchronized (units) {
       for (Unit unit : units) {
-        if (unit.getType() == Unit.TYPE_TOWER) {
-          towers.add((Tower) unit);
-        }
+        if (unit.getType() == type)
+          clone.add(unit);
       }
     }
-    return towers;
-  }
-
-  /**
-   * 전체 유닛 목록에서 동상만 가져온다.
-   * 
-   * @return 동상이 0개 이상 들어있는 연결리스트를 반환한다.
-   */
-  public LinkedList<Statue> getStatues() {
-    LinkedList<Statue> statues = new LinkedList<Statue>();
-    synchronized (units) {
-      for (Unit unit : units) {
-        if (unit.getType() == Unit.TYPE_STATUE) {
-          statues.add((Statue) unit);
-        }
-      }
-    }
-    return statues;
-  }
-
-  /**
-   * 전체 유닛 목록에서 투사체만 가져온다.
-   * 
-   * @return 투사체가 0개 이상 들어있는 연결리스트를 반환한다.
-   */
-  public LinkedList<Projectile> getProjs() {
-    LinkedList<Projectile> projs = new LinkedList<Projectile>();
-    synchronized (units) {
-      for (Unit unit : units) {
-        if (unit.getType() == Unit.TYPE_ETC) {
-          projs.add((Projectile) unit);
-        }
-      }
-    }
-    return projs;
+    return clone;
   }
 
   public RectF getTowersArea() {
@@ -450,7 +413,7 @@ public class GameState {
       }
     }
     // 타워가 있는 칸만 true
-    for (Tower tower : getTowers()) {
+    for (Unit tower : getUnits(Type.TOWER)) {
       int row = getRow((int) tower.getY());
       int col = getColumn((int) tower.getX());
       areaUsedCells[row][col] = true;
@@ -526,18 +489,18 @@ public class GameState {
    * @param wave 웨이브 정수 값
    */
   public void destroyMob(int wave) {
-    AppManager.getInstance().recycleBitmap("mob" + wave);
+    AppManager.recycleBitmap("mob" + wave);
     synchronized (units) {
-      for (Mob mob : getMobs())
+      for (Unit mob : getUnits(Type.MOB))
         units.remove(mob);
     }
   }
 
   /**
-   * @return deadMob >= MAX_MOB
+   * @return deadMob == 0 && curMob == 0
    */
-  public boolean isWaveDone() {
-    return deadMob >= MAX_MOB;
+  public boolean isWaveStop() {
+    return deadMob >= MAX_MOB; // deadMob == 0 && curMob == 0;
   }
 
   public void finishWave() {

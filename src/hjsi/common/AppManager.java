@@ -2,11 +2,13 @@ package hjsi.common;
 
 import hjsi.activity.Base;
 import hjsi.game.GameState;
+import hjsi.game.Unit.Type;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Set;
 
 import android.app.Activity;
@@ -487,25 +489,37 @@ public class AppManager {
    * @param path 입력된 경로 아래에서만 대상 파일을 찾는다
    * @param opts 비트맵 생성시 적용할 옵션 객체. 옵션을 적용하지 않을 경우는 null
    * @return 비트맵 객체 혹은 null
-   * @throws IOException
+   * @throws IOException 파일이 없거나 다른 입출력 예외 발생시
    */
   public static Bitmap readImageFile(String path, Options opts) throws IOException {
     Bitmap bm = null;
 
-    if (path == null) {
-      throw new IOException("Not found \"" + path + "\".");
-    } else {
-      InputStream is = getInstance().assetManager.open(path);
-      printInfoLog("\"" + path + "\"", "원본 용량: " + convertByteUnit(is.available()));
-      bm = BitmapFactory.decodeStream(is, null, opts);
-      bm =
-          Bitmap.createScaledBitmap(bm, (int) (bm.getWidth() * getResizeFactor() + 0.5f),
-              (int) (bm.getHeight() * getResizeFactor() + 0.5f), false);
-      is.close();
-      printInfoLog("\"" + path + "\"", bitmapToString(bm) + " 읽기 성공");
-    }
+    InputStream is = getInstance().assetManager.open(path);
+    printInfoLog("\"" + path + "\"", "원본 용량: " + convertByteUnit(is.available()));
+    bm = BitmapFactory.decodeStream(is, null, opts);
+    bm =
+        Bitmap.createScaledBitmap(bm, (int) (bm.getWidth() * getResizeFactor() + 0.5f),
+            (int) (bm.getHeight() * getResizeFactor() + 0.5f), false);
+    is.close();
+    printInfoLog("\"" + path + "\"", bitmapToString(bm) + " 읽기 성공");
 
     return bm;
+  }
+
+  /**
+   * 주어진 유닛 종류와 아이디에 해당하는 이미지 파일을 읽어서 비트맵 객체를 생성한다.
+   * 
+   * @param unitType 유닛 종류
+   * @param unitId 유닛별 일련 번호(아이디)
+   * @param opts 비트맵 생성시 적용할 옵션 객체. 옵션을 적용하지 않을 경우는 null
+   * @return 비트맵 객체 or null
+   * @throws IOException
+   */
+  public static Bitmap readUnitImageFile(Type unitType, int unitId, Options opts)
+      throws IOException {
+    String typeName = unitType.name().toLowerCase(Locale.US);
+    String path = "img/" + typeName + "s/" + typeName + unitId + ".png";
+    return readImageFile(path, opts);
   }
 
   /**

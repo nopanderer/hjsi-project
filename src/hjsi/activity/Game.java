@@ -7,6 +7,9 @@ import hjsi.common.Timer;
 import hjsi.game.GameMaster;
 import hjsi.game.GameState;
 import hjsi.game.Unit;
+
+import java.io.IOException;
+
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -173,7 +176,7 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
 
     // 게임 정보를 저장한다.
     synchronized (GameState.class) {
-      DataManager.save(gState);
+      DataManager.saveUserData(gState);
     }
 
     if (explicitQuit) {
@@ -333,7 +336,11 @@ public class Game extends Base implements OnClickListener, Handler.Callback {
     super.onRestoreInstanceState(savedInstanceState);
 
     gState = new GameState();
-    DataManager.loadDatabase(getApplicationContext(), 1, gState);
+    try {
+      DataManager.loadUserData(gState);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     AppManager.putGameState(gState);
     gameMaster.refreshGameState();
     surface.refreshGameState();

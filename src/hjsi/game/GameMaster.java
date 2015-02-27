@@ -3,9 +3,7 @@ package hjsi.game;
 import hjsi.activity.Game;
 import hjsi.common.AppManager;
 import hjsi.common.Timer;
-
-import java.util.LinkedList;
-
+import hjsi.game.Unit.Type;
 import android.os.Handler;
 
 /**
@@ -61,7 +59,7 @@ public class GameMaster implements Runnable {
         gState.ticktock();
 
         // 웨이브가 종료되면 타이머를 멈추고 다음 웨이브를 준비한다.
-        if (gState.isWaveDone()) {
+        if (gState.isWaveStop()) {
           gameActHandler.sendMessage(AppManager.obtainMessage(Game.HANDLER_SHOW_SPAWN_BTN));
           gState.finishWave();
         }
@@ -71,20 +69,9 @@ public class GameMaster implements Runnable {
         }
 
         /*
-         * 각각의 스테이션은 자신에게 도달한 몹을 다음 스테이션으로 향하도록 설정한다.
-         */
-        for (Mob mob : gState.getMobs()) {
-          if (mob.isArrive()) {
-            mob.nextStation(gState.stations);
-          }
-        }
-
-        /*
          * 파괴된 유닛 삭제
          */
-        LinkedList<Unit> clone = new LinkedList<Unit>(gState.getUnits());
-
-        for (Unit unit : clone) {
+        for (Unit unit : gState.getUnitsClone()) {
           if (unit.destroyed)
             gState.removeUnit(unit);
         }
@@ -92,16 +79,21 @@ public class GameMaster implements Runnable {
         /*
          * Mob 루프
          */
-        for (Mob mob : gState.getMobs()) {
+        for (Unit unit : gState.getUnits(Type.MOB)) {
+          Mob mob = (Mob) unit;
+          if (mob.isArrive()) {
+            mob.nextStation(gState.stations);
+          }
+
           if (mob.getLap() == 2) {
             mob.dead();
             continue;
           }
 
           else if (mob.getLap() == 1) {
-            for (Statue statue : gState.getStatues()) {
+            for (Unit statue : gState.getUnits(Type.STATUE)) {
               if (statue.destroyed == false && mob.inRange(mob, statue)) {
-                Projectile proj = ((Mob) mob).attack(statue);
+                Projectile proj = mob.attack((Statue) statue);
                 if (proj != null)
                   gState.addUnit(proj);
               }
@@ -113,10 +105,10 @@ public class GameMaster implements Runnable {
         /*
          * Tower 루프
          */
-        for (Tower tower : gState.getTowers()) {
-          for (Mob mob : gState.getMobs()) {
+        for (Unit tower : gState.getUnits(Type.TOWER)) {
+          for (Unit mob : gState.getUnits(Type.MOB)) {
             if (mob.destroyed == false && tower.inRange(tower, mob)) {
-              Projectile proj = tower.attack(mob);
+              Projectile proj = ((Tower) tower).attack((Mob) mob);
               if (proj != null)
                 gState.addUnit(proj);
             }
@@ -126,14 +118,14 @@ public class GameMaster implements Runnable {
         /*
          * Projectile 루프
          */
-        for (Projectile proj : gState.getProjs()) {
-          proj.move();
+        for (Unit proj : gState.getUnits(Type.PROJECTILE)) {
+          ((Projectile) proj).move();
         }
 
         /*
          * Statue 루프
          */
-        for (Statue statue : gState.getStatues()) {
+        for (Unit statue : gState.getUnits(Type.STATUE)) {
           statue.action();
         }
 
