@@ -102,8 +102,8 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     frameNum = 4;
     framePeriod = 1000 / frameNum;
     // TODO 가로, 세로 비트맵에서 가져오면 안됨
-    width = face.getWidth() * 2 / frameNum;
-    height = face.getHeight() * 2;
+    width = face.getWidth() / frameNum;
+    height = face.getHeight();
     spriteSrc = new Rect(0, 0, (int) this.width, (int) this.height);
 
     setX(x);

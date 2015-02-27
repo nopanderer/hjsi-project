@@ -210,7 +210,7 @@ public abstract class Unit {
       paint.setColor(Color.RED);
 
     canvas.drawRect(left * screenRatio, top * screenRatio - 10, left * screenRatio + width
-        * healthScale, top * screenRatio - 5, paint);
+        * screenRatio * healthScale, top * screenRatio - 5, paint);
   }
 
   /**
