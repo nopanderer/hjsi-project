@@ -108,6 +108,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
     setX(x);
     setY(y);
+    hitRange = Math.max(width, height) / 2;
     updateHitRect();
 
     timerMovement = Timer.create("몹 이동", 10);
