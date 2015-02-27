@@ -123,7 +123,7 @@ public class Timer {
   public boolean isUsable() {
     // 타이머의 대기시간이 남아서 아직 사용할 수 없는 경우에만 타이머의 시간을 측정한다.
     if (enabled && !stopped && !usable) {
-      elapsed += (NOW - past) * FAST_FORWARD;
+      elapsed += (NOW - past) * FAST_FORWARD + 0.5f;
       past = NOW;
 
       if ((loop == -1 || loop > 0) && elapsed >= wait) {
@@ -140,7 +140,7 @@ public class Timer {
   public void consumeTimer() {
     if (usable) {
       usable = false;
-      elapsed = 0;
+      elapsed -= wait;
       loop = Math.max(-1, loop - 1);
       if (loop == 0) {
         setEnable(false);
@@ -185,7 +185,7 @@ public class Timer {
   public void pause() {
     stopped = true;
     if (!usable)
-      elapsed += (NOW - past) * FAST_FORWARD;
+      elapsed += (NOW - past) * FAST_FORWARD + 0.5f;
   }
 
   /**

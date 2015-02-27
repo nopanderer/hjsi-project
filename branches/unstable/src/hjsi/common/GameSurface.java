@@ -53,12 +53,19 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   private Paint gridPaint;
 
   /**
+   * Game 액티비티와 통신하기 위한 컨트롤러
+   */
+  private GameController controller = null;
+
+  /**
    * GameSurface 생성자
    * 
    * @param context getApplicationContext()를 이용하여 컨텍스트 객체를 넣어주셈
    */
-  public GameSurface(Context context) {
+  public GameSurface(Context context, GameController controller) {
     super(context);
+    this.controller = controller;
+
     visualizeFactor = AppManager.getVisualizeFactor();
     refreshGameState();
 
@@ -66,6 +73,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     float marginValue = 125 * AppManager.getResizeFactor();
     RectF margin = new RectF(marginValue, marginValue, marginValue, marginValue);
     camera = new Camera(AppManager.getSeenWorldWidth(), AppManager.getSeenWorldHeight(), margin);
+    camera.setViewportSize(AppManager.getRealDeviceWidth(), AppManager.getRealDeviceHeight());
 
     // 게임 내 변수 출력용 페인트 객체 생성
     mPaintInfo = new Paint();
@@ -75,7 +83,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
 
     // displayInformation용 좌표값
     xForText =
-        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 22/* 52 */, getResources()
+        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 62, getResources()
             .getDisplayMetrics());
     yForText =
         (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources()
@@ -99,7 +107,6 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   @Override
   public void surfaceCreated(SurfaceHolder holder) {
     AppManager.printSimpleLog();
-
     /*
      * 표면이 생성될 때 그리기 스레드를 시작한다. 표면은 아마 화면상에 실제로 보이는 그림을 말하는 것 같다. lockCanvas() 할 때 뱉어내는 캔버스가 더블버퍼링을
      * 위한 메모리 상의 캔버스인 것 같고
@@ -112,7 +119,6 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
   @Override
   public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
     AppManager.printDetailLog("width: " + width + "px, height: " + height + "px");
-    camera.setViewportSize(width, height);
   }
 
   @Override
@@ -215,6 +221,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
 
         canvas.restore(); // 이동, 확대/축소했던 캔버스를 원상태로 복원
 
+        // 버튼을 고정된 자리에 그려야되니까 마지막에 호출함.
+        controller.drawWaveButton(canvas);
+
         // 테스트 정보 표시
         displayInformation(canvas);
 
@@ -236,13 +245,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     AppManager.printDetailLog("GameSurface 스레드 종료");
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see android.view.View#onTouchEvent(android.view.MotionEvent)
-   */
-  @Override
-  public boolean onTouchEvent(MotionEvent event) {
+  public boolean handleTouchEvent(MotionEvent event) {
     boolean consumed = camera.handleTouchEvent(event);
 
     if (!consumed)
@@ -252,16 +255,6 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
       AppManager.printEventLog(event);
 
     return consumed;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see android.view.View#performClick()
-   */
-  @Override
-  public boolean performClick() {
-    return super.performClick();
   }
 
   @SuppressLint("DefaultLocale")

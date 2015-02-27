@@ -31,11 +31,6 @@ public class GameState {
    */
   private int userGold;
   /**
-   * 보유 중인 배치 코인
-   */
-  private int userCoin;
-
-  /**
    * 아직 자리가 확정되지 않은 배치할 타워를 가리킨다. null이 아니라면 게임 화면이 배치모드로 표시된다.
    */
   private Tower inHand = null;
@@ -61,6 +56,10 @@ public class GameState {
    * 현재 게임이 진행된 시간을 나타낸다.
    */
   private volatile long worldTime = 0L;
+  /**
+   * 웨이브의 진행 여부
+   */
+  private volatile boolean waveStarted;
 
   /**
    * 게임 시스템에서 사용하는 타이머들
@@ -94,6 +93,8 @@ public class GameState {
   public GameState() {
     AppManager.printSimpleLog();
 
+    setWaveStarted(false);
+
     /*
      * 동상 추가
      */
@@ -123,11 +124,11 @@ public class GameState {
     timers.add(spawnTimer);
   }
 
-  public void setUserData(int wave, int gold, int coin, LinkedList<Tower> towers) {
+  public void setUserData(int wave, int gold, LinkedList<Statue> statues, LinkedList<Tower> towers) {
     userWave = wave;
-    userGold = gold;
-    userCoin = coin;
+    setUserGold(gold);
     synchronized (units) {
+      units.addAll(statues);
       units.addAll(towers);
     }
   }
@@ -190,35 +191,29 @@ public class GameState {
       inHand = null;
 
       // 유저 정보에서 가지고 있는 토큰 수를 확인한다.
-    } else if (getCoin() < 3) {
+    } else if (getUserGold() < 100) {
       // TODO 토큰이 모자랄 때를 표현한다
+      AppManager.printInfoLog("골드가 모질랍니다!");
 
     } else {
-      // 토큰 수에 알맞은 등급의 임의의 타워를 생성한다.
-      int spentCoin = 0;
+      // TODO 현재 웨이브에 알맞은 등급의 타워를 생성하도록 한다.
+      int spendGold = 0;
       int purchaseTier = 0;
-      if (getCoin() >= 7) {
-        spentCoin = 7;
-        purchaseTier = 2;
-      } else if (getCoin() >= 5) {
-        spentCoin = 5;
-        purchaseTier = 1;
-      } else if (getCoin() >= 3) {
-        spentCoin = 3;
+
+      if (getUserGold() >= 100) {
+        spendGold = 100;
         purchaseTier = 0;
       }
-      setCoin(getCoin() - spentCoin);
+      setUserGold(getUserGold() - spendGold);
 
       // 타워를 생성한다.
       try {
-        inHand = DataManager.createTower("tier", "0");
+        inHand = DataManager.createTower("tier", Integer.toString(purchaseTier));
       } catch (IOException e) {
         e.printStackTrace();
       }
       AppManager.printInfoLog(inHand.getId() + "번 타워 구매함.");
     }
-
-    // TODO inHand 변수에 타워가 들어있으면 Game activity에 표시해줘야한다.
   }
 
   public void deployTower(float x, float y) {
@@ -272,12 +267,8 @@ public class GameState {
     return userWave;
   }
 
-  public int getGold() {
+  public int getUserGold() {
     return userGold;
-  }
-
-  public int getCoin() {
-    return userCoin;
   }
 
   public long getWorldTime() {
@@ -346,8 +337,17 @@ public class GameState {
     return units;
   }
 
+  /**
+   * 유닛 통합 연결 리스트의 복제를 반환한다.
+   * 
+   * @return 새로 할당된 연결리스트 반환
+   */
   public LinkedList<Unit> getUnitsClone() {
-    return new LinkedList<Unit>(units);
+    LinkedList<Unit> clone = new LinkedList<Unit>();
+    synchronized (units) {
+      clone.addAll(units);
+    }
+    return clone;
   }
 
   /**
@@ -465,10 +465,6 @@ public class GameState {
     return retValue;
   }
 
-  public void setCoin(int coin) {
-    userCoin = coin;
-  }
-
   public void makeFace(int wave) {
     Options option = new Options();
     // option.inSampleSize = 16;
@@ -507,9 +503,23 @@ public class GameState {
     return deadMob >= MAX_MOB; // deadMob == 0 && curMob == 0;
   }
 
+  public void setWaveStarted(boolean waveStarted) {
+    this.waveStarted = waveStarted;
+  }
+
+  /**
+   * 웨이브가 시작 됐는지를 알아온다. 게임 자체의 일시정지 여부와는 상관이 없다.
+   * 
+   * @return 웨이브가 시작된 이후라면 true를 반환하고, 종료되고 나서 시작하지 않았다면 false를 반환한다.
+   */
+  public boolean isWaveStarted() {
+    return waveStarted;
+  }
+
   public void finishWave() {
     curMob = 0;
     deadMob = 0;
+    setWaveStarted(false);
     spawnTimer.setEnable(false);
   }
 
@@ -521,6 +531,7 @@ public class GameState {
     // 이전 웨이브의 몹은 폐기처분한다.
     destroyMob(userWave - 1);
 
+    setWaveStarted(true);
     // 몹 리스폰 타이머를 리필함.
     spawnTimer.setEnable(true);
     spawnTimer.startDelayed(2000);
@@ -532,5 +543,9 @@ public class GameState {
       addUnit(new Mob(80, 80, mImgMob, userWave, stations.get(0)));
       curMob++;
     }
+  }
+
+  public void setUserGold(int userGold) {
+    this.userGold = userGold;
   }
 }

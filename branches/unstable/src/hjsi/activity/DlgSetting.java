@@ -1,12 +1,12 @@
 package hjsi.activity;
 
 import hjsi.common.AppManager;
+import hjsi.common.GameController;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -18,13 +18,13 @@ public class DlgSetting extends Dialog implements OnClickListener {
   private ToggleButton sound;
 
   /**
-   * 통신을 위한 부모 액티비티의 핸들러
+   * 통신을 위한 컨트롤러
    */
-  private Handler gameActHandler = null;
+  private GameController controller = null;
 
-  public DlgSetting(Context context, Handler handler) {
+  public DlgSetting(Context context, GameController controller) {
     super(context);
-    gameActHandler = handler;
+    this.controller = controller;
   }
 
   @Override
@@ -53,17 +53,17 @@ public class DlgSetting extends Dialog implements OnClickListener {
     AppManager.printDetailLog(v.toString());
 
     if (v == resume) {
-      gameActHandler.sendMessage(AppManager.obtainMessage(Game.HANDLER_GAME_RESUME));
+      controller.resumeGame();
 
     } else if (v == sound) {
-      gameActHandler.sendMessage(AppManager.obtainMessage(Game.HANDLER_DLG_SOUND));
+      controller.toggleSound();
       if (sound.isChecked())
         sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
       else
         sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundon));
 
     } else if (v == quit) {
-      gameActHandler.sendMessage(AppManager.obtainMessage(Game.HANDLER_DLG_QUIT));
+      controller.quitGame();
       dismiss();
     }
   }

@@ -114,7 +114,7 @@ public class Camera {
     worldMarginSpace = margin;
   }
 
-  public void setViewportSize(int width, int height) {
+  public void setViewportSize(float width, float height) {
     if (viewport == null) {
       viewport = new RectF(0, 0, width, height);
     } else {
