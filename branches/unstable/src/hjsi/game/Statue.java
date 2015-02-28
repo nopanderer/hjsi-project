@@ -89,7 +89,7 @@ public class Statue extends Unit implements Hittable {
 
   @Override
   public void hit(int damage) {
-    if (destroyed == false) {
+    if (isDestroyed() == false) {
       hp -= damage;
       if (hp <= 0)
         dead();
@@ -98,7 +98,7 @@ public class Statue extends Unit implements Hittable {
 
   @Override
   public void dead() {
-    destroyed = true;
+    setDestroyed(true);
   }
 
   /*

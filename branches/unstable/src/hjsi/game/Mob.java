@@ -7,10 +7,7 @@ import java.util.ArrayList;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.RectF;
 
 /**
  * Mob 클래스
@@ -120,19 +117,11 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   @Override
-  public void draw(Canvas canvas, float screenRatio) {
-    RectF drawingBox = getHitRect();
-    drawingBox.left *= screenRatio;
-    drawingBox.right *= screenRatio;
-    drawingBox.top *= screenRatio;
-    drawingBox.bottom *= screenRatio;
-
-    canvas.drawBitmap(face, spriteSrc, drawingBox, null);
-    showHealthBar(hpMax, hp, canvas, screenRatio);
-    Paint pnt = new Paint();
-    pnt.setStyle(Paint.Style.STROKE);
-    pnt.setColor(Color.RED);
-    canvas.drawRect(drawingBox, pnt);
+  public void draw(Canvas canvas, float scale) {
+    showHealthBar(hpMax, hp, canvas, scale);
+    setDrawingBox(getHitRect(), scale);
+    canvas.drawBitmap(face, spriteSrc, getDrawingBox(), null);
+    canvas.drawRect(getDrawingBox(), borderPaint);
   }
 
   /*
@@ -181,7 +170,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public void hit(int damage) {
-    if (destroyed == false) {
+    if (isDestroyed() == false) {
       hp -= damage;
       if (hp <= 0)
         dead();
@@ -190,7 +179,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public void dead() {
-    destroyed = true;
+    setDestroyed(true);
     GameState.curMob--;
     GameState.deadMob++;
   }
