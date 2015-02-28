@@ -4,15 +4,18 @@ import hjsi.common.AppManager;
 import hjsi.common.Timer;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.RectF;
 
 public class Tower extends Unit implements Attackable {
   public enum Tier {
     PRIMITIVE(0, "원시적인"), BASIC(1, "기초적인"), SPECIAL(3, "특별한"), MIGHTY(4, "강력한"), TOP(5, "최상의"), LEGEND(
         6, "전설의"), HIDDEN(7, "숨겨진");
 
+    public static Tier getTier(int order) {
+      return tiers[order];
+    }
     private final int value;
     private final String caption;
+
     private static final Tier[] tiers = values();
 
     Tier(int value, String caption) {
@@ -20,16 +23,12 @@ public class Tower extends Unit implements Attackable {
       this.caption = caption;
     }
 
-    public int getValue() {
-      return value;
-    }
-
     public String getCaption() {
       return caption;
     }
 
-    public static Tier getTier(int order) {
-      return tiers[order];
+    public int getValue() {
+      return value;
     }
 
     /*
@@ -76,7 +75,6 @@ public class Tower extends Unit implements Attackable {
     tier = Tier.PRIMITIVE;
     damage = 5;
     resourceFileName = "element_match";
-
   }
 
   /**
@@ -100,14 +98,46 @@ public class Tower extends Unit implements Attackable {
     timerAttack.start();
   }
 
+  @Override
+  public void action() {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public Projectile attack(Hittable unit) {
+    if (timerAttack.isUsable()) {
+      timerAttack.startDelayed();
+      Mob target = (Mob) unit;
+      return new Projectile(x, y, damage, target, AppManager.getBitmap("projectile1"));
+    }
+    return null;
+  }
+
+  @Override
+  public void draw(Canvas canvas, float scale) {
+    super.draw(canvas, scale);
+
+    if (isSelected()) {
+      showRange(canvas, scale);
+      updateHitRect();
+      setDrawingBox(getHitRect(), scale);
+      canvas.drawRect(getDrawingBox(), borderPaint);
+    }
+  }
+
+  @Override
+  public void freeze() {
+    timerAttack.pause();
+  }
+
   public Tier getTier() {
     return tier;
   }
 
   @Override
-  public void action() {
-    // TODO Auto-generated method stub
-
+  public String toString() {
+    return "<" + tier + " " + name + "> 타워";
   }
 
   @Override
@@ -117,57 +147,7 @@ public class Tower extends Unit implements Attackable {
   }
 
   @Override
-  public void draw(Canvas canvas, float screenRatio) {
-    super.draw(canvas, screenRatio);
-    showRange(canvas, screenRatio);
-
-    updateHitRect();
-    RectF drawingBox = getHitRect();
-    drawingBox.left *= screenRatio;
-    drawingBox.right *= screenRatio;
-    drawingBox.top *= screenRatio;
-    drawingBox.bottom *= screenRatio;
-
-    canvas.drawRect(drawingBox, paint);
-  }
-
-  @Override
-  public Projectile attack(Hittable unit) {
-    if (timerAttack.isUsable()) {
-      timerAttack.consumeTimer();
-      Mob target = (Mob) unit;
-      return new Projectile(x, y, damage, target, AppManager.getBitmap("projectile1"));
-    }
-    return null;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hjsi.game.Unit#unfreeze()
-   */
-  @Override
   public void unfreeze() {
     timerAttack.resume();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hjsi.game.Unit#freeze()
-   */
-  @Override
-  public void freeze() {
-    timerAttack.pause();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hjsi.game.Unit#toString()
-   */
-  @Override
-  public String toString() {
-    return tier + " 등급 " + name + " 타워";
   }
 }

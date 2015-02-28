@@ -263,7 +263,7 @@ public class GameState {
    * 
    * @return 현재 배치할 타워가 있으면 true, 없으면 false를 반환한다.
    */
-  public boolean checkDeployMode() {
+  public boolean isDeployMode() {
     return (inHand != null);
   }
 
@@ -293,7 +293,7 @@ public class GameState {
   public Unit getUnit(float x, float y) {
     synchronized (units) {
       for (Unit unit : units) {
-        if ((unit.x <= x && x <= unit.x + unit.width) && (unit.y <= y && y <= unit.y + unit.height))
+        if (unit.contains(x, y))
           return unit;
       }
     }
@@ -474,21 +474,24 @@ public class GameState {
   }
 
   public void makeFace(int wave) {
-    Options option = new Options();
-    // option.inSampleSize = 16;
-    String key = "mob" + wave;
+    // 원활한 테스트 진행을 위한 임시조치
+    if (wave <= 2) {
+      Options option = new Options();
+      // option.inSampleSize = 16;
+      String key = "mob" + wave;
 
-    try {
-      mImgMob = AppManager.readImageFile("img/mobs/" + key + ".png", option);
-    } catch (IOException e) {
-      e.printStackTrace();
+      try {
+        mImgMob = AppManager.readImageFile("img/mobs/" + key + ".png", option);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+      if ((mImgMob.getWidth() != 512) || (mImgMob.getHeight() != 128)) {
+        mImgMob = Bitmap.createScaledBitmap(mImgMob, 1024, 256, true);
+      }
+
+      AppManager.addBitmap(key, mImgMob);
     }
-
-    if ((mImgMob.getWidth() != 512) || (mImgMob.getHeight() != 128)) {
-      mImgMob = Bitmap.createScaledBitmap(mImgMob, 1024, 256, true);
-    }
-
-    AppManager.addBitmap(key, mImgMob);
   }
 
   /**
@@ -524,7 +527,7 @@ public class GameState {
     return waveStarted;
   }
 
-  public boolean checkShowTowerMode() {
+  public boolean isShowTowerMode() {
     return showTowerMode;
   }
 

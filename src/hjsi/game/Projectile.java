@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 
 /**
  * 투사체
@@ -64,13 +63,8 @@ public class Projectile extends Unit implements Movable {
     pnt.setStyle(Paint.Style.STROKE);
     pnt.setColor(Color.RED);
 
-    RectF drawingBox = getHitRect();
-    drawingBox.left *= screenRatio;
-    drawingBox.right *= screenRatio;
-    drawingBox.top *= screenRatio;
-    drawingBox.bottom *= screenRatio;
-
-    canvas.drawRect(drawingBox, pnt);
+    setDrawingBox(getHitRect(), screenRatio);
+    canvas.drawRect(getDrawingBox(), pnt);
   }
 
   @Override
@@ -80,7 +74,7 @@ public class Projectile extends Unit implements Movable {
 
       /* 충돌검사 */
       if (target.hitRect.contains(hitRect)) {
-        destroyed = true;
+        setDestroyed(true);
         ((Hittable) target).hit(damage);
       }
 

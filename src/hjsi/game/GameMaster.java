@@ -64,7 +64,7 @@ public class GameMaster implements Runnable {
          * 파괴된 유닛 삭제
          */
         for (Unit unit : gState.getUnitsClone()) {
-          if (unit.destroyed)
+          if (unit.isDestroyed())
             gState.removeUnit(unit);
         }
 
@@ -84,7 +84,7 @@ public class GameMaster implements Runnable {
 
           else if (mob.getLap() == 1) {
             for (Unit statue : gState.getUnits(Type.STATUE)) {
-              if (statue.destroyed == false && mob.inRange(mob, statue)) {
+              if (statue.isDestroyed() == false && mob.inRange(mob, statue)) {
                 Projectile proj = mob.attack((Statue) statue);
                 if (proj != null)
                   gState.addUnit(proj);
@@ -99,7 +99,7 @@ public class GameMaster implements Runnable {
          */
         for (Unit tower : gState.getUnits(Type.TOWER)) {
           for (Unit mob : gState.getUnits(Type.MOB)) {
-            if (mob.destroyed == false && tower.inRange(tower, mob)) {
+            if (mob.isDestroyed() == false && tower.inRange(tower, mob)) {
               Projectile proj = ((Tower) tower).attack((Mob) mob);
               if (proj != null)
                 gState.addUnit(proj);

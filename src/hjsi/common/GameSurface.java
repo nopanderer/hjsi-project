@@ -179,7 +179,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         canvas.drawBitmap(AppManager.getBitmap("background"), 0, 0, null);
 
         // 배치모드 UI를 그린다.
-        if (gState.checkDeployMode()) {
+        if (gState.isDeployMode()) {
           for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 8; j++) {
               if (gState.isUsedCell(j, i)) {
@@ -201,7 +201,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
         for (int i = 0; i < gState.getUnits().size(); i++) {
           Unit unit = gState.getUnits().get(i);
           /* 파괴되었는지 검사 */
-          if (unit.destroyed)
+          if (unit.isDestroyed())
             continue;
 
           /* 살아있으면 그리기 */
@@ -247,9 +247,6 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
 
   public boolean handleTouchEvent(MotionEvent event) {
     boolean consumed = camera.handleTouchEvent(event);
-
-    if (!consumed)
-      consumed = performClick();
 
     if (consumed)
       AppManager.printEventLog(event);
@@ -312,12 +309,14 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback, 
     canvas.translate(0, yForText);
     canvas.drawText("Wave: " + gState.getWave(), xForText, yForText, mPaintInfo);
 
-    if (gState.checkDeployMode()) {
-      canvas.drawText(gState.getInHandTower() + " 배치하세요 ", 550, -100, mPaintInfo);
+    if (gState.isDeployMode()) {
+      canvas.drawText(gState.getInHandTower() + " 배치하세요 ", 625 * AppManager.getResizeFactor(), -150
+          * AppManager.getResizeFactor(), mPaintInfo);
     }
 
-    if (gState.checkShowTowerMode()) {
-      canvas.drawText(gState.showTowerToShow(), 400, 400, mPaintInfo);
+    if (gState.isShowTowerMode()) {
+      canvas.drawText(gState.showTowerToShow(), 600 * AppManager.getResizeFactor(),
+          600 * AppManager.getResizeFactor(), mPaintInfo);
     }
 
     canvas.restore();
