@@ -7,3 +7,9 @@
 최상의
 전설의
 히든
+
+
+
+2. 스키마
+
+id, name, tier, damage, attackspeed, range, projectile_id

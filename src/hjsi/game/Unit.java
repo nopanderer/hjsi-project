@@ -35,11 +35,6 @@ public abstract class Unit {
       return value;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Enum#toString()
-     */
     @Override
     public String toString() {
       // 파일 읽어올 때 이걸로 쓰기 때문에 소문자로 바꿈.
@@ -47,14 +42,16 @@ public abstract class Unit {
     }
   }
 
-  /**
-   * 유닛의 종류를 나타낸다.
-   */
-  private Type type;
+  protected static Paint borderPaint;
+  protected static Paint rangePaint;
   /**
    * 유닛의 종류별로 고유한 아이디. 즉, 유닛의 종류가 다를 경우 같은 아이디를 가질 수 있으며, 같은 id를 가지는 개체도 존재할 수 있음.
    */
   private int id;
+  /**
+   * 유닛의 종류를 나타낸다.
+   */
+  private Type type;
   /**
    * 유닛의 중심 X 좌표
    */
@@ -103,19 +100,7 @@ public abstract class Unit {
   private RectF drawingBox;
   protected Bitmap face;
 
-  protected Paint borderPaint;
-  protected Paint rangePaint;
-
-  // 임시 생성자
-  public Unit() {}
-
-  /**
-   * 메모리 할당이나 공통적인 것들
-   */
-  {
-    hitRect = new RectF();
-    drawingBox = new RectF();
-
+  static {
     borderPaint = new Paint();
     borderPaint.setAntiAlias(true);
     borderPaint.setStyle(Style.STROKE);
@@ -127,10 +112,18 @@ public abstract class Unit {
     rangePaint.setStyle(Style.STROKE); // 원의 윤곽선만 그림
     rangePaint.setStrokeWidth(3); // 윤곽선 두께
     rangePaint.setColor(Color.GREEN); // 윤곽선은 초록색
+  }
+
+  {
+    hitRect = new RectF();
+    drawingBox = new RectF();
 
     setSelected(false);
     setDestroyed(false);
   }
+
+  // 임시 생성자
+  public Unit() {}
 
   /**
    * @param type 유닛의 종류를 입력한다. -> Unit.TYPE_XXXX
@@ -336,10 +329,6 @@ public abstract class Unit {
    */
   abstract public void unfreeze();
 
-  protected void updateHitRect() {
-    hitRect.set(left, top, left + width, top + height);
-  }
-
   protected RectF getDrawingBox() {
     return drawingBox;
   }
@@ -354,5 +343,9 @@ public abstract class Unit {
     this.drawingBox.top *= scale;
     this.drawingBox.right *= scale;
     this.drawingBox.bottom *= scale;
+  }
+
+  protected void updateHitRect() {
+    hitRect.set(left, top, left + width, top + height);
   }
 }
