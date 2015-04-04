@@ -250,6 +250,17 @@ public abstract class Unit {
     return selected;
   }
 
+  /**
+   * 이 유닛이 target 유닛과 충돌한 상태인지 확인한다.
+   * 
+   * @param target 충돌을 검사할 유닛
+   * @return 이 유닛과 target이 충돌한 상태라면 true, or false
+   */
+  public boolean isCollidedWith(Unit target) {
+    // TODO 모양에 따른 히트박스를 더 만들어서 자세하게 할 필요가 있을 수도 있다. 고전게임 MysticArts에 히트박스 보여주는 옵션 켰을 때 처럼.
+    return hitRect.contains(target.hitRect);
+  }
+
   public void setDestroyed(boolean destroyed) {
     this.destroyed = destroyed;
   }

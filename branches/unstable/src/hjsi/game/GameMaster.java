@@ -1,5 +1,8 @@
 package hjsi.game;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 import hjsi.common.AppManager;
 import hjsi.common.Timer;
 import hjsi.game.Unit.Type;
@@ -73,24 +76,14 @@ public class GameMaster implements Runnable {
          */
         for (Unit unit : gState.getUnits(Type.MOB)) {
           Mob mob = (Mob) unit;
-          if (mob.isArrive()) {
-            mob.nextStation(gState.stations);
+
+          if (mob.getLap() == 1) {
+            LinkedList<Hittable> statues = gState.getHittables(Type.STATUE);
+            LinkedList<Attackable> projs = mob.attack(statues);
+            if (projs != null)
+              gState.addUnits(projs);
           }
 
-          if (mob.getLap() == 2) {
-            mob.dead();
-            continue;
-          }
-
-          else if (mob.getLap() == 1) {
-            for (Unit statue : gState.getUnits(Type.STATUE)) {
-              if (statue.isDestroyed() == false && mob.inRange(mob, statue)) {
-                Projectile proj = mob.attack((Statue) statue);
-                if (proj != null)
-                  gState.addUnit(proj);
-              }
-            }
-          }
           mob.move();
         }
 
@@ -98,13 +91,10 @@ public class GameMaster implements Runnable {
          * Tower 루프
          */
         for (Unit tower : gState.getUnits(Type.TOWER)) {
-          for (Unit mob : gState.getUnits(Type.MOB)) {
-            if (mob.isDestroyed() == false && tower.inRange(tower, mob)) {
-              Projectile proj = ((Tower) tower).attack((Mob) mob);
-              if (proj != null)
-                gState.addUnit(proj);
-            }
-          }
+          LinkedList<Hittable> mobs = gState.getHittables(Type.MOB);
+          LinkedList<Attackable> projs = ((Tower) tower).attack(mobs);
+          if (projs != null)
+            gState.addUnits(projs);
         }
 
         /*

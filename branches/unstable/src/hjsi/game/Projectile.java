@@ -1,6 +1,9 @@
 package hjsi.game;
 
 import hjsi.common.Timer;
+
+import java.util.LinkedList;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,7 +15,7 @@ import android.graphics.Paint;
  * @author Administrator
  *
  */
-public class Projectile extends Unit implements Movable {
+public class Projectile extends Unit implements Movable, Attackable {
   /**
    * 타겟
    */
@@ -41,6 +44,13 @@ public class Projectile extends Unit implements Movable {
   private static final int ICED = 5;
   private static final int CHAIN = 6;
 
+  /**
+   * @param x 초기 x 좌표 값
+   * @param y 초기 y 좌표 값
+   * @param damage 투사체 명중시 데미지
+   * @param target 투사체가 향할 목표
+   * @param face 투사체 이미지
+   */
   public Projectile(float x, float y, int damage, Unit target, Bitmap face) {
     super(Type.PROJECTILE, 0, x, y, face);
     this.target = target;
@@ -57,6 +67,16 @@ public class Projectile extends Unit implements Movable {
   }
 
   @Override
+  public void action() {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public LinkedList<Attackable> attack(LinkedList<Hittable> units) {
+    return null;
+  }
+
+  @Override
   public void draw(Canvas canvas, float screenRatio) {
     super.draw(canvas, screenRatio);
     Paint pnt = new Paint();
@@ -67,19 +87,30 @@ public class Projectile extends Unit implements Movable {
     canvas.drawRect(getDrawingBox(), pnt);
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#freeze()
+   */
+  @Override
+  public void freeze() {
+    timerMovement.pause();
+  }
+
   @Override
   public void move() {
-    if (timerMovement.isUsable()) {
+    /* 충돌 검사 */
+    if (target.isCollidedWith(this)) {
+      setDestroyed(true);
+      ((Hittable) target).hit(damage);
+    }
+    
+    /* 충돌하지 않은 경우에 한해서만 타이머를 체크해서 이동 처리 */
+    else if (timerMovement.isUsable()) {
       timerMovement.consumeTimer();
 
-      /* 충돌검사 */
-      if (target.hitRect.contains(hitRect)) {
-        setDestroyed(true);
-        ((Hittable) target).hit(damage);
-      }
-
       /* 투사체에서 몹까지의 벡터 */
-      vector.set(target.x - x, target.y - y);
+      vector.set(target.getX() - x, target.getY() - y);
       /* 벡터 정규화 */
       vector.nor();
       /* 투사체 이동속도 스칼라 곱 */
@@ -101,12 +132,6 @@ public class Projectile extends Unit implements Movable {
   }
 
   @Override
-  public void action() {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public void touch() {
     // TODO Auto-generated method stub
   }
@@ -119,15 +144,5 @@ public class Projectile extends Unit implements Movable {
   @Override
   public void unfreeze() {
     timerMovement.resume();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see hjsi.game.Unit#freeze()
-   */
-  @Override
-  public void freeze() {
-    timerMovement.pause();
   }
 }
