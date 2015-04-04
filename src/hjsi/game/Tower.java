@@ -1,7 +1,11 @@
 package hjsi.game;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 import hjsi.common.AppManager;
 import hjsi.common.Timer;
+import hjsi.game.Unit.Type;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
@@ -13,6 +17,7 @@ public class Tower extends Unit implements Attackable {
     public static Tier getTier(int order) {
       return tiers[order];
     }
+
     private final int value;
     private final String caption;
 
@@ -105,13 +110,27 @@ public class Tower extends Unit implements Attackable {
   }
 
   @Override
-  public Projectile attack(Hittable unit) {
+  public LinkedList<Attackable> attack(LinkedList<Hittable> units) {
     if (timerAttack.isUsable()) {
-      timerAttack.startDelayed();
-      Mob target = (Mob) unit;
-      return new Projectile(x, y, damage, target, AppManager.getBitmap("projectile1"));
-    }
-    return null;
+      timerAttack.startDelayed(); // 타워는 왜 startDelayed를 호출하는지 기억이 전혀 안 난다.
+      LinkedList<Attackable> projs = new LinkedList<Attackable>();
+
+      for (Hittable unit : units) {
+        Mob mob = (Mob) unit;
+        if (mob.isDestroyed() == false && inRange(this, mob)) {
+          Projectile proj =
+              new Projectile(x, y, damage, mob,
+                  AppManager.getBitmap(Type.PROJECTILE.toString() + 1));
+          projs.add(proj);
+          break; // 타워도 기본적으로 몹 하나만 공격하므로 투사체 하나 생성했으면 반복문 종료
+          /*
+           * TODO 타워 및 몹이 공격할 때 투사체를 생성하는데, 타워나 몹의 종류별로 공격 방식이 다르므로 어떤 투사체를 생성할 것인가에 대한 정보를 가질 필요가 있다.
+           */
+        }
+      }
+      return projs;
+    } else
+      return null;
   }
 
   @Override

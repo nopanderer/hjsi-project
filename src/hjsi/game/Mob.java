@@ -2,8 +2,11 @@ package hjsi.game;
 
 import hjsi.common.AppManager;
 import hjsi.common.Timer;
+import hjsi.game.Unit.Type;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -56,11 +59,11 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   /**
    * 정류소 번호
    */
-  private int stationIndex;
+  private int station;
   /**
-   * 정류소
+   * 게임상의 모든 정류소
    */
-  private Station station;
+  private ArrayList<Station> stations;
 
   /* 스프라이트 이미지를 위한 임시 변수 */
   private Rect spriteSrc;
@@ -77,7 +80,7 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
    */
   private long framePeriod;
 
-  public Mob(int x, int y, Bitmap face, int wave, Station dest) {
+  public Mob(int x, int y, Bitmap face, int wave, ArrayList<Station> stations) {
     super(Type.MOB, 0, x, y, face);
 
     setLap(0);
@@ -92,8 +95,8 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
     range = 400;
 
     vector = new Vector2d();
-    stationIndex = 0;
-    station = dest;
+    station = 0;
+    this.stations = stations;
 
     curFrame = 0;
     frameNum = 4;
@@ -136,23 +139,41 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   @Override
-  public Projectile attack(Hittable unit) {
+  public LinkedList<Attackable> attack(LinkedList<Hittable> units) {
     if (timerAttack.isUsable()) {
       timerAttack.consumeTimer();
-      Statue target = (Statue) unit;
-      return new Projectile(x, y, damage, target, AppManager.getBitmap("proj1"));
-    }
+      LinkedList<Attackable> projs = new LinkedList<Attackable>();
 
-    return null;
+      for (Hittable unit : units) {
+        Statue statue = (Statue) unit;
+        if (statue.isDestroyed() == false && inRange(this, statue)) {
+          Projectile proj =
+              new Projectile(x, y, damage, statue,
+                  AppManager.getBitmap(Type.PROJECTILE.toString() + 1));
+          projs.add(proj);
+          break; // 기본적으로는 몹이 동상 한 개만 공격해야하니까 투사체 하나 만들었으면 반복문 종료
+        }
+      }
+      return projs;
+    } else
+      return null;
   }
 
   @Override
   public void move() {
-    // 10밀리세컨드 마다 1 픽셀씩 이동
-    if (timerMovement.isUsable()) {
+    if (isArrive()) {
+      nextStation();
+    }
+
+    /* 원활한 테스트를 위해서 2바퀴 도달하면 장례식 */
+    if (getLap() == 2) {
+      dead();
+    }
+    /* 10밀리세컨드 마다 1 픽셀씩 이동 */
+    else if (timerMovement.isUsable()) {
       timerMovement.consumeTimer();
 
-      vector.set(station.x - x, station.y - y);
+      vector.set(stations.get(station).x - x, stations.get(station).y - y);
       vector.nor();
       vector.mul(moveSpeed);
 
@@ -185,15 +206,13 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   public boolean isArrive() {
-    return station.arrive(this);
+    return stations.get(station).arrive(this);
   }
 
-  public void nextStation(ArrayList<Station> stations) {
-    stationIndex = (stationIndex + 1) % stations.size();
-    if (stationIndex == 0)
+  public void nextStation() {
+    station = (station + 1) % stations.size();
+    if (station == 0)
       setLap(getLap() + 1);
-
-    station = stations.get(stationIndex);
   }
 
   public void update(long gameTime) {
