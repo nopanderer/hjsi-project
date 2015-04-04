@@ -3,6 +3,10 @@ package hjsi.game;
 import hjsi.common.AppManager;
 import hjsi.common.Timer;
 import hjsi.game.Unit.Type;
+import hjsi.unit.attr.Attackable;
+import hjsi.unit.attr.Hittable;
+import hjsi.unit.attr.Movable;
+import hjsi.unit.skills.Projectile;
 
 import java.io.IOException;
 import java.util.ArrayList;

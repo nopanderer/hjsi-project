@@ -4,6 +4,7 @@
 package hjsi.game;
 
 import hjsi.common.Timer;
+import hjsi.unit.attr.Hittable;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 

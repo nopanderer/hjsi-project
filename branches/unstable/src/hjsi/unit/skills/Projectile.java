@@ -1,6 +1,14 @@
-package hjsi.game;
+package hjsi.unit.skills;
 
 import hjsi.common.Timer;
+import hjsi.game.Mob;
+import hjsi.game.Statue;
+import hjsi.game.Unit;
+import hjsi.game.Vector2d;
+import hjsi.game.Unit.Type;
+import hjsi.unit.attr.Attackable;
+import hjsi.unit.attr.Hittable;
+import hjsi.unit.attr.Movable;
 
 import java.util.LinkedList;
 

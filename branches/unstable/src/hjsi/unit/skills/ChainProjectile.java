@@ -1,7 +1,6 @@
 package hjsi.unit.skills;
 
 import hjsi.game.Mob;
-import hjsi.game.Projectile;
 import hjsi.game.Unit;
 
 import java.util.LinkedList;

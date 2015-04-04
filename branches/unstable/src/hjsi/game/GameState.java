@@ -4,6 +4,8 @@ import hjsi.common.AppManager;
 import hjsi.common.DataManager;
 import hjsi.common.Timer;
 import hjsi.game.Unit.Type;
+import hjsi.unit.attr.Attackable;
+import hjsi.unit.attr.Hittable;
 
 import java.io.IOException;
 import java.util.ArrayList;
