@@ -1,4 +1,4 @@
-package hjsi.game;
+package hjsi.unit.attr;
 
 public interface Hittable {
   /**

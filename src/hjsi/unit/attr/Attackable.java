@@ -1,4 +1,4 @@
-package hjsi.game;
+package hjsi.unit.attr;
 
 import java.util.LinkedList;
 

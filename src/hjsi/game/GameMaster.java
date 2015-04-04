@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import hjsi.common.AppManager;
 import hjsi.common.Timer;
 import hjsi.game.Unit.Type;
+import hjsi.unit.attr.Attackable;
+import hjsi.unit.attr.Hittable;
+import hjsi.unit.skills.Projectile;
 
 /**
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
