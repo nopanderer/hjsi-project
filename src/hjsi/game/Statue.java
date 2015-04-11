@@ -3,18 +3,16 @@
  */
 package hjsi.game;
 
-import hjsi.timer.TimeManager;
-import hjsi.timer.Timer;
+import hjsi.common.Timer;
+import hjsi.unit.attr.Hittable;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 
 /**
  * 체력, 공격속도 등과 같은 능력치는 변수 타입은 정수형이지만 소수점으로 생각하고 다룬다. float 계산의 성능과 정확성 때문이다. 예를 들면, 1초당 10.5의 체력을
  * 회복할 경우 변수에 들어갈 값은 1050이다.
  */
 public class Statue extends Unit implements Hittable {
-
   /**
    * 체력 재생량
    */
@@ -32,34 +30,27 @@ public class Statue extends Unit implements Hittable {
    */
   private int armor;
 
-  /* 처리를 위한 변수 */
-  private Paint paintText;
-  private String hpText;
-
   /*
    * 쿨타임
    */
-  private static final int HP_REGEN = 0;
   private Timer timerHpRegen;
 
   /**
    *
    */
   public Statue(int x, int y, Bitmap face) {
-    super(x, y, face);
+    super(Type.STATUE, 0, x, y, face);
 
     hpRegen = 1500; // 1초당 1.5 재생 = 0.1초당 0.15 재생 = hpRegen 150
     hpMax = 1000000; // 1000.000
     hp = 100000; // 100.000
     armor = 10000; // 10.000
 
-    paintText = new Paint();
-    paintText.setTextSize(32);
-
     /*
      * 타이머 생성
      */
-    timerHpRegen = TimeManager.registerPassiveTimer(HP_REGEN, 10);
+    timerHpRegen = Timer.create("동상 체력재생", 100);
+    timerHpRegen.start();
   }
 
   /*
@@ -69,9 +60,9 @@ public class Statue extends Unit implements Hittable {
    */
   @Override
   public void action() {
-    if (timerHpRegen.isCountDone()) {
+    if (timerHpRegen.isUsable()) {
+      timerHpRegen.consumeTimer();
       hp = Math.min(hp + hpRegen, hpMax);
-      TimeManager.resetPassiveTimer(timerHpRegen);
     }
   }
 
@@ -81,14 +72,9 @@ public class Statue extends Unit implements Hittable {
    * @see hjsi.game.Unit#draw(android.graphics.Canvas)
    */
   @Override
-  public void draw(Canvas canvas) {
-    super.draw(canvas);
-
-    int hpCur = this.hp / 1000;
-    int hpMax = this.hpMax / 1000;
-    hpText = hpCur + "/" + hpMax + "(" + (int) ((float) hpCur / (float) hpMax * 100f) + "%)";
-
-    canvas.drawText(hpText, (float) x, (float) (y + height + 42), paintText);
+  public void draw(Canvas canvas, float screenRatio) {
+    super.draw(canvas, screenRatio);
+    showHealthBar(hpMax, hp, canvas, screenRatio);
   }
 
   /*
@@ -104,7 +90,35 @@ public class Statue extends Unit implements Hittable {
 
   @Override
   public void hit(int damage) {
-    // TODO Auto-generated method stub
+    if (isDestroyed() == false) {
+      hp -= damage;
+      if (hp <= 0)
+        dead();
+    }
+  }
 
+  @Override
+  public void dead() {
+    setDestroyed(true);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#unfreeze()
+   */
+  @Override
+  public void unfreeze() {
+    timerHpRegen.resume();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#freeze()
+   */
+  @Override
+  public void freeze() {
+    timerHpRegen.pause();
   }
 }

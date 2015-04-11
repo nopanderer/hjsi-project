@@ -1,12 +1,12 @@
 package hjsi.activity;
 
 import hjsi.common.AppManager;
+import hjsi.common.GameController;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -17,8 +17,14 @@ public class DlgSetting extends Dialog implements OnClickListener {
   private Button resume, help, credits, quit;
   private ToggleButton sound;
 
-  public DlgSetting(Context context) {
+  /**
+   * 통신을 위한 컨트롤러
+   */
+  private GameController controller = null;
+
+  public DlgSetting(Context context, GameController controller) {
     super(context);
+    this.controller = controller;
   }
 
   @Override
@@ -47,27 +53,27 @@ public class DlgSetting extends Dialog implements OnClickListener {
     AppManager.printDetailLog(v.toString());
 
     if (v == resume) {
-      hide();
-    } else if (v == sound) {
-      if (sound.isChecked()) {
-        sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
-        Game.music.pause();
-      } else {
-        sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundon));
-        Game.music.start();
-      }
-    } else if (v == quit) {
-      Game.music.stop();
-      Game.music.release();
-      Game.music = null;
+      controller.resumeGame();
 
+    } else if (v == sound) {
+      controller.toggleSound();
+      if (sound.isChecked())
+        sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundoff));
+      else
+        sound.setBackgroundDrawable(sound.getResources().getDrawable(R.drawable.img_set_soundon));
+
+    } else if (v == quit) {
+      controller.quitGame();
       dismiss();
     }
   }
 
+  /**
+   * 뒤로가기 버튼을 누르면 resume과 똑같은 명령을 수행하도록 기존 메소드를 덮어썼다.
+   */
   @Override
   public void onBackPressed() {
     AppManager.printSimpleLog();
-    hide();
+    onClick(resume);
   }
 }

@@ -13,13 +13,13 @@ public class Base extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    AppManager.getInstance().addActivity(this);
+    AppManager.addActivity(this);
   }
 
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    AppManager.getInstance().removeActivity(this);
+    AppManager.removeActivity(this);
   }
 
   /**

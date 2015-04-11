@@ -1,18 +1,23 @@
 package hjsi.activity;
 
 import hjsi.common.AppManager;
-import hjsi.common.Camera;
+import hjsi.common.DataManager;
+import hjsi.common.GameController;
 import hjsi.common.GameSurface;
+import hjsi.common.Timer;
 import hjsi.game.GameMaster;
 import hjsi.game.GameState;
+import hjsi.game.Tower;
 import hjsi.game.Unit;
-import hjsi.timer.TimeManager;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
+
+import java.io.IOException;
+
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,37 +25,104 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.ToggleButton;
 
-public class Game extends Base implements OnClickListener {
-  private boolean explicitQuit = false; // Map에서 사용한 리소스 해제 타이밍을 위한 변수
+public class Game extends Base implements OnClickListener, GameController {
+  /**
+   * bgm 재생 객체
+   */
+  private MediaPlayer bgMusic;
+  /**
+   * bgm 음소거 여부
+   */
+  private boolean bgmPlaying = true;
+  /**
+   * 게임을 진행하는 인게임 스레드를 가진 개체
+   */
+  private GameMaster gameMaster = null;
+  /**
+   * 게임 정보 관리 객체
+   */
+  private GameState gState = null;
+  /**
+   * 게임 그리기 클래스
+   */
+  private GameSurface surface = null;
+  /**
+   * 액티비티가 destroy 될 때, 이 변수가 설정돼 있을 때만 리소스를 해제하기 위한 변수
+   */
+  private boolean explicitQuit = false;
 
-  Button btnSetting, btnBook, btnStore, btnDeploy;
-  ToggleButton btnPlay;
-  Drawable drawableBtnPlay_Pause;
-  Drawable drawableBtnPlay_Play;
-  DlgSetting dlgSetting;
-  public static MediaPlayer music;
+  /* 자식 뷰들 */
+  private Button btnBook, btnPause, btnStore, btnDeploy;
+  private ToggleButton btnFF;
+  private Drawable btnGen;
+  private DlgSetting dlgSetting;
 
-  /** 게임을 진행하는 인게임 스레드를 가진 개체 */
-  private GameMaster gameMaster;
-  /** 카메라 */
-  private Camera camera;
+  @Override
+  public void drawWaveButton(Canvas canvas) {
+    if (!gState.isWaveStarted()) {
+      btnGen.draw(canvas);
+    }
+  }
+
+  @Override
+  public void finishWave() {}
+
+  /**
+   * @return the explicitQuit
+   */
+  protected boolean isExplicitQuit() {
+    return explicitQuit;
+  }
+
+  /**
+   * back 키를 누르면 옵션 메뉴가 열리도록 함
+   */
+  @Override
+  public void onBackPressed() {
+    AppManager.printSimpleLog();
+    pauseGame();
+  }
+
+  @Override
+  public void onClick(View v) {
+    AppManager.printDetailLog(v.toString());
+
+    if (v == btnBook) {
+      Intent Book = new Intent(Game.this, RecipeBook.class);
+      startActivity(Book);
+    }
+
+    else if (v == btnPause) {
+      pauseGame();
+    }
+
+    else if (v == btnStore) {
+      Intent Store = new Intent(Game.this, Store.class);
+      startActivity(Store);
+    }
+
+    else if (v == btnDeploy) {
+      gState.refreshArea();
+      gState.onDeployMode();
+    }
+
+    else if (v == btnFF) {
+      Timer.fastForward();
+    }
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     AppManager.printSimpleLog();
     super.onCreate(savedInstanceState);
 
-    GameState.getInstance().initState();
+    gState = AppManager.getGameState();
 
-    /*
-     * 화면 비율을 구해서 카메라를 생성할 때 넘겨준다.
-     */
-    camera = new Camera(AppManager.getInstance().getDisplayFactor());
     /*
      * surfaceview 생성 및 등록
      */
-    GameSurface gameView = new GameSurface(getApplicationContext(), camera);
-    setContentView(gameView);
+    surface = new GameSurface(getApplicationContext(), this);
+    setContentView(surface);
 
     /*
      * 기타 버튼 UI 등록
@@ -61,39 +133,74 @@ public class Game extends Base implements OnClickListener {
     /*
      * 버튼 뷰 참조자 및 드로블 가져옴
      */
-    drawableBtnPlay_Pause = getResources().getDrawable(R.drawable.btn_pause);
-    drawableBtnPlay_Play = getResources().getDrawable(R.drawable.btn_play);
-
-    btnSetting = (Button) findViewById(R.id.btn_setting);
-    btnSetting.setOnClickListener(this);
     btnBook = (Button) findViewById(R.id.btn_book);
     btnBook.setOnClickListener(this);
-    btnPlay = (ToggleButton) findViewById(R.id.btn_play);
-    btnPlay.setOnClickListener(this);
+    btnPause = (Button) findViewById(R.id.btn_pause);
+    btnPause.setOnClickListener(this);
     btnStore = (Button) findViewById(R.id.btn_store);
     btnStore.setOnClickListener(this);
     btnDeploy = (Button) findViewById(R.id.btn_deploy);
     btnDeploy.setOnClickListener(this);
+    btnFF = (ToggleButton) findViewById(R.id.btn_ff);
+    btnFF.setOnClickListener(this);
 
-    dlgSetting = new DlgSetting(Game.this);
+    int margin =
+        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15, getResources()
+            .getDisplayMetrics());
+    int size =
+        (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, getResources()
+            .getDisplayMetrics());
+    btnGen = (Drawable) getResources().getDrawable(R.drawable.btn_gen);
+    btnGen.setBounds(margin, margin, margin + size, margin + size);
+
+    dlgSetting = new DlgSetting(Game.this, this);
     dlgSetting.setCanceledOnTouchOutside(false);
-    dlgSetting.setOnDismissListener(new OnDismissListener() {
-      @Override
-      public void onDismiss(DialogInterface arg0) {
-        AppManager.printSimpleLog();
-        quitExplicitly(); // 이번에 Game.onDestroy() 될 때 리소스 해제하라고 알림
-        AppManager.getInstance().quitApp();
-      }
-    });
 
-    Game.music = MediaPlayer.create(this, R.raw.bgm);
-    Game.music.setLooping(true);
-    Game.music.start();
+    bgMusic = MediaPlayer.create(this, R.raw.bgm);
+    bgMusic.setLooping(true);
+    bgMusic.start();
 
     /* GameMaster 생성 */
     gameMaster = new GameMaster();
+    if (savedInstanceState == null) {
+      resumeGame();
+    } else {
+      pauseGame();
+    }
 
     AppManager.printDetailLog(getClass().getSimpleName() + " 초기화 완료");
+  }
+
+  @Override
+  protected void onDestroy() {
+    AppManager.printSimpleLog();
+    super.onDestroy();
+
+    if (dlgSetting != null) {
+      if (dlgSetting.isShowing())
+        dlgSetting.dismiss();
+    }
+
+    if (gameMaster != null) {
+      gameMaster.quitGame();
+      gameMaster = null;
+    }
+
+    if (bgMusic != null) {
+      bgMusic.stop();
+      bgMusic.release();
+      bgMusic = null;
+    }
+
+    // 게임 정보를 저장한다.
+    synchronized (GameState.class) {
+      DataManager.saveUserData(gState);
+    }
+
+    if (isExplicitQuit()) {
+      // 사용했던 리소스를 해제한다.
+      AppManager.allRecycle();
+    }
   }
 
   @Override
@@ -102,14 +209,34 @@ public class Game extends Base implements OnClickListener {
     super.onStop();
 
     if (gameMaster != null) {
-      gameMaster.pauseGame();
-      TimeManager.pauseTime();
-      btnPlay.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_play));
+      pauseGame();
     }
 
-    if (Game.music != null) {
-      Game.music.pause();
+    if (bgMusic != null) {
+      bgMusic.pause();
     }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see android.app.Activity#onRestoreInstanceState(android.os.Bundle)
+   */
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    AppManager.printSimpleLog();
+    super.onRestoreInstanceState(savedInstanceState);
+
+    gState = new GameState();
+    try {
+      DataManager.loadUserData(gState);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    AppManager.putGameState(gState);
+    gameMaster.refreshGameState();
+    surface.refreshGameState();
+    surface.loadCameraState(savedInstanceState.getFloatArray("camera"));
   }
 
   @Override
@@ -117,115 +244,126 @@ public class Game extends Base implements OnClickListener {
     AppManager.printSimpleLog();
     super.onResume();
 
-    if (Game.music != null) {
-      Game.music.start();
+    if (bgMusic != null) {
+      bgMusic.start();
     }
   }
 
-  @Override
-  protected void onDestroy() {
-    AppManager.printSimpleLog();
-    super.onDestroy();
-
-    if (gameMaster != null) {
-      gameMaster.quitGame();
-      TimeManager.stopTime();
-    }
-
-    if (music != null) {
-      music.stop();
-      music.release();
-    }
-
-    if (explicitQuit) {
-      /* 사용했던 리소스를 해제한다. */
-      AppManager.getInstance().allRecycle();
-      GameState.getInstance().purgeGameState(); // 게임 상태정보를 없앤다.
-    }
-  }
-
-  /**
-   * back 키를 누르면 옵션 메뉴가 열리도록 함
+  /*
+   * (non-Javadoc)
+   * 
+   * @see android.app.Activity#onSaveInstanceState(android.os.Bundle)
    */
   @Override
-  public void onBackPressed() {
+  protected void onSaveInstanceState(Bundle outState) {
     AppManager.printSimpleLog();
-    showSettingMenu();
-  }
+    super.onSaveInstanceState(outState);
 
-  @Override
-  public void onClick(View v) {
-    AppManager.printDetailLog(v.toString());
-
-    if (v == btnSetting) {
-      showSettingMenu();
-    } else if (v == btnBook) {
-      Intent Book = new Intent(Game.this, RecipeBook.class);
-      startActivity(Book);
-    }
-    /*
-     * play 버튼
-     */
-    else if (v == btnPlay) {
-      if (btnPlay.isChecked()) {
-        btnPlay.setBackgroundDrawable(drawableBtnPlay_Pause);
-        gameMaster.playGame();
-        TimeManager.startTime();
-      } else {
-        btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
-        gameMaster.pauseGame();
-        TimeManager.pauseTime();
-      }
-    } else if (v == btnStore) {
-      Intent Store = new Intent(Game.this, Store.class);
-      startActivity(Store);
-    } else if (v == btnDeploy) {
-      if (GameState.getInstance().checkDeployMode() == false)
-        GameState.getInstance().intoDeployMode();
-      else
-        GameState.getInstance().inHand = null;
-    }
+    outState.putFloatArray("camera", surface.saveCameraState());
   }
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
-    /*
-     * 기본적인 View 객체에 대한 이벤트는 해당 객체가 먼저 이벤트를 받아서 처리하므로, 여기서는 카메라 및 유닛 등의 조작에 대해서만
-     * 고려한다. 다음은 터치 이벤트 중 스크롤 및 핀치줌 인/아웃에 관한 동작은 카메라가 처리하도록 한다.
-     */
-    if (camera.touchHandler(event))
-      return true;
+    boolean consumed = false;
 
-    /*
-     * 카메라가 처리할 이벤트가 아닌 경우는 보통의 클릭 동작이며, 여러가지 게임 개체에 대한 동작을 수행한다. 가장 먼저, 화면 터치
-     * 좌표를 게임월드의 좌표로 변환한다.
-     */
-    int x = (int) ((event.getX() + camera.getX()) / camera.getScale());
-    int y = (int) ((event.getY() + camera.getY()) / camera.getScale());
-
-    Unit unit = GameState.getInstance().getUnit(x, y);
-    if (unit != null) {
-      AppManager.printInfoLog(unit.toString());
+    // 웨이브 대기 중일 때 웨이브 시작 버튼을 클릭한 경우
+    if (btnGen.getBounds().contains((int) event.getX(), (int) event.getY())
+        && !(gState.isWaveStarted())) {
+      startWave();
+      consumed = true;
+    } else {
+      // 뷰 및 버튼에 관련된 조작은 여기까지 전달되지 않는다.
+      consumed = surface.handleTouchEvent(event);
     }
 
+    /*
+     * 게임 자체에 대한 클릭 이벤트 처리
+     */
+    /* 이 액티비티의 자식 뷰가 처리한 이벤트는 이 블록까지 전달되지 않는다. */
+    /* 위에서 버튼들과 서피스뷰가 이 액티비티의 자식으로 등록되어 있으니, 이 블록에서는 유닛이나 다른 클릭 조작만 고려한다. */
+    if (!consumed) {
+      consumed = true;
 
-    return super.onTouchEvent(event);
-  }
+      // 터치로 입력받은 화면상의 좌표를 보여지는 게임월드 비율에 맞게 변환함
+      event = surface.convertGameEvent(event);
+      AppManager.printEventLog(event);
 
-  public void quitExplicitly() {
-    AppManager.printSimpleLog();
-    explicitQuit = true;
-  }
+      // 눌러진 유닛을 구한다.
+      Unit unit = gState.getUnit(event.getX(), event.getY());
 
-  private void showSettingMenu() {
-    AppManager.printSimpleLog();
-    dlgSetting.show();
+      // 아무 유닛이나 눌러졌을 때
+      if (unit != null) {
+        unit.setSelected(true);
 
-    if (btnPlay.isChecked()) {
-      btnPlay.setChecked(false);
-      btnPlay.setBackgroundDrawable(drawableBtnPlay_Play);
-      gameMaster.pauseGame();
-      TimeManager.pauseTime();
+        if (unit instanceof Tower) {
+          gState.setShowTowerMode(true);
+          gState.towerToShow((Tower) unit);
+        }
+
+        AppManager.printInfoLog(unit.toString());
+      }
+      // 유닛이 선택된 상태라도 타워 배치를 할 수 있게 앞에 둠
+      else if (gState.isDeployMode()) {
+        gState.deployTower(event.getX(), event.getY());
+      }
+
+      else if (gState.isShowTowerMode()) {
+        gState.setShowTowerMode(false);
+        for (Unit u : gState.getUnitsClone()) {
+          u.setSelected(false);
+        }
+      }
+
+      // 그 이외의 경우
+      else {
+        consumed = super.onTouchEvent(event);
+      }
     }
+
+    return consumed;
+  }
+
+  @Override
+  public void pauseGame() {
+    gameMaster.pauseGame();
+    if (!isExplicitQuit() && !(dlgSetting.isShowing())) {
+      dlgSetting.show();
+    }
+  }
+
+  @Override
+  public void quitGame() {
+    AppManager.printDetailLog("게임 종료 요청 들어옴");
+    bgMusic.stop();
+    bgMusic.release();
+    bgMusic = null;
+    setExplicitQuit(true);
+    AppManager.quitApp();
+  }
+
+  public void resumeGame() {
+    if (dlgSetting.isShowing())
+      dlgSetting.dismiss();
+    gameMaster.playGame();
+  }
+
+  /**
+   * @param explicitQuit the explicitQuit to set
+   */
+  protected void setExplicitQuit(boolean explicitQuit) {
+    this.explicitQuit = explicitQuit;
+  }
+
+  @Override
+  public void startWave() {
+    gState.waveReady();
+  }
+
+  @Override
+  public void toggleSound() {
+    if (!(bgmPlaying = !bgmPlaying))
+      bgMusic.pause();
+    else
+      bgMusic.start();
   }
 }

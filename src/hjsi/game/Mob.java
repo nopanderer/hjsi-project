@@ -1,13 +1,26 @@
 package hjsi.game;
 
+import hjsi.common.AppManager;
+import hjsi.common.Timer;
+import hjsi.game.Unit.Type;
+import hjsi.unit.attr.Attackable;
+import hjsi.unit.attr.Hittable;
+import hjsi.unit.attr.Movable;
+import hjsi.unit.skills.Projectile;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Rect;
 
 /**
  * Mob 클래스
  * 
  */
 public class Mob extends Unit implements Movable, Attackable, Hittable {
-
   /**
    * 최대 체력
    */
@@ -33,50 +46,89 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
    */
   private int armor;
   /**
-   * 사정거리
-   */
-  private int range;
-  /**
    * 웨이브 번호
    */
   private int wave;
 
   /**
-   * 몹이 생성 되었는가
-   */
-  public boolean created;
-  /**
-   * 몹이 죽었는가
-   */
-  public boolean dead;
-  /**
    * 몇 바퀴 돌았나
    */
-  public int lap;
+  private int lap;
 
-  /* 리젠 */
-  private long beforeTime;
-  private int sleep = 10;
+  private Timer timerMovement;
+  private Timer timerAttack;
+  private Timer timerSprite;
+
+  public Vector2d vector;
   /**
-   * 초기 생성 위치
+   * 정류소 번호
    */
-  private int oldX, oldY;
+  private int station;
+  /**
+   * 게임상의 모든 정류소
+   */
+  private ArrayList<Station> stations;
 
-  public Mob(int x, int y, Bitmap face, int wave) {
-    super(x, y, face);
+  /* 스프라이트 이미지를 위한 임시 변수 */
+  private Rect spriteSrc;
+  /**
+   * 프레임 갯수
+   */
+  private int frameNum;
+  /**
+   * 현재 프레임
+   */
+  private int curFrame;
+  /**
+   * 프레임 간격
+   */
+  private long framePeriod;
 
-    created = false;
-    dead = false;
-    lap = 0;
+  public Mob(int x, int y, Bitmap face, int wave, ArrayList<Station> stations) {
+    super(Type.MOB, 0, x, y, face);
+
+    setLap(0);
     this.wave = wave;
-    beforeTime = System.currentTimeMillis();
 
+    hpMax = 100;
+    hp = hpMax;
+
+    damage = 10;
+    attackSpeed = 2000;
     moveSpeed = 1;
     range = 400;
 
-    oldX = x;
-    oldY = y;
+    vector = new Vector2d();
+    station = 0;
+    this.stations = stations;
 
+    curFrame = 0;
+    frameNum = 4;
+    framePeriod = 1000 / frameNum;
+    // TODO 가로, 세로 비트맵에서 가져오면 안됨
+    width = face.getWidth() / frameNum;
+    height = face.getHeight();
+    spriteSrc = new Rect(0, 0, (int) this.width, (int) this.height);
+
+    setX(x);
+    setY(y);
+    hitRange = Math.max(width, height) / 2;
+    updateHitRect();
+
+    timerMovement = Timer.create("몹 이동", 10);
+    timerMovement.start();
+    timerAttack = Timer.create("몹 공격", (long) (attackSpeed + 0.5));
+    timerAttack.start();
+    timerSprite = Timer.create("몹 프레임", framePeriod);
+    timerSprite.start();
+  }
+
+  @Override
+  public void draw(Canvas canvas, float scale) {
+    showHealthBar(hpMax, hp, canvas, scale);
+    setDrawingBox(getHitRect(), scale);
+    canvas.drawBitmap(face, spriteSrc, getDrawingBox(), null);
+    canvas.drawRect(getDrawingBox(), borderPaint);
   }
 
   /*
@@ -91,45 +143,48 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   @Override
-  public void attack() {
-    // TODO Auto-generated method stub
+  public LinkedList<Attackable> attack(LinkedList<Hittable> units) {
+    if (timerAttack.isUsable()) {
+      timerAttack.consumeTimer();
+      LinkedList<Attackable> projs = new LinkedList<Attackable>();
 
+      for (Hittable unit : units) {
+        Statue statue = (Statue) unit;
+        if (statue.isDestroyed() == false && inRange(this, statue)) {
+          Projectile proj =
+              new Projectile(x, y, damage, statue,
+                  AppManager.getBitmap(Type.PROJECTILE.toString() + 1));
+          projs.add(proj);
+          break; // 기본적으로는 몹이 동상 한 개만 공격해야하니까 투사체 하나 만들었으면 반복문 종료
+        }
+      }
+      return projs;
+    } else
+      return null;
   }
 
   @Override
   public void move() {
-    // TODO Auto-generated method stub
-    // 10밀리세컨드 마다 5 픽셀씩 이동
-
-    if (System.currentTimeMillis() - beforeTime > sleep)
-      beforeTime = System.currentTimeMillis();
-    else
-      return;
-
-    if (x == oldX && y == oldY)
-      lap++;
-
-    // 아래로
-    if (x == oldX && y + moveSpeed <= 2160 - 900) {
-      y += moveSpeed;
-      cntrY += moveSpeed;
-    }
-    // 오른쪽
-    else if (x + moveSpeed <= 3840 - 1500 && y == 2160 - 900) {
-      x += moveSpeed;
-      cntrX += moveSpeed;
-    }
-    // 위로
-    else if (x == 3840 - 1500 && y - moveSpeed >= oldY) {
-      y -= moveSpeed;
-      cntrY -= moveSpeed;
-    }
-    // 왼쪽
-    else if (x - moveSpeed >= oldX && y == oldY) {
-      x -= moveSpeed;
-      cntrX -= moveSpeed;
+    if (isArrive()) {
+      nextStation();
     }
 
+    /* 원활한 테스트를 위해서 2바퀴 도달하면 장례식 */
+    if (getLap() == 2) {
+      dead();
+    }
+    /* 10밀리세컨드 마다 1 픽셀씩 이동 */
+    else if (timerMovement.isUsable()) {
+      timerMovement.consumeTimer();
+
+      vector.set(stations.get(station).x - x, stations.get(station).y - y);
+      vector.nor();
+      vector.mul(moveSpeed);
+
+      setX(x + vector.x);
+      setY(y + vector.y);
+      updateHitRect();
+    }
   }
 
   @Override
@@ -140,7 +195,72 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
 
   @Override
   public void hit(int damage) {
-    // TODO Auto-generated method stub
+    if (isDestroyed() == false) {
+      hp -= damage;
+      if (hp <= 0)
+        dead();
+    }
+  }
 
+  @Override
+  public void dead() {
+    setDestroyed(true);
+    GameState.curMob--;
+    GameState.deadMob++;
+  }
+
+  public boolean isArrive() {
+    return stations.get(station).arrive(this);
+  }
+
+  public void nextStation() {
+    station = (station + 1) % stations.size();
+    if (station == 0)
+      setLap(getLap() + 1);
+  }
+
+  public void update(long gameTime) {
+    if (timerSprite.isUsable()) {
+      timerSprite.consumeTimer();
+
+      curFrame++;
+      if (curFrame >= frameNum) {
+        curFrame = 0;
+      }
+    }
+    spriteSrc.left = curFrame * (int) width;
+    spriteSrc.right = spriteSrc.left + (int) width;
+  }
+
+  public int getLap() {
+    return lap;
+  }
+
+  public void setLap(int lap) {
+    this.lap = lap;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#unfreeze()
+   */
+  @Override
+  public void unfreeze() {
+    timerMovement.resume();
+    timerAttack.resume();
+    timerSprite.resume();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see hjsi.game.Unit#freeze()
+   */
+  @Override
+  public void freeze() {
+    timerMovement.pause();
+    timerAttack.pause();
+    timerSprite.pause();
   }
 }
