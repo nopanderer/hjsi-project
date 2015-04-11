@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="MAP"
+        android:textColor="#ff0000"
+        android:textSize="30sp"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn_book"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="15dp"
+        android:background="@drawable/btn_book" />
+
+    <Button
+        android:id="@+id/btn_pause"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignLeft="@id/btn_book"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/btn_pause" />
+
+    <Button
+        android:id="@+id/btn_store"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/btn_store" />
+
+    <Button
+        android:id="@+id/btn_deploy"
+        android:layout_width="40dp"
+        android:layout_height="25dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@id/btn_store"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/btn_deploy" />
+
+    <ToggleButton
+        android:id="@+id/btn_ff"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignBaseline="@+id/btn_pause"
+        android:layout_alignBottom="@+id/btn_pause"
+        android:layout_toRightOf="@+id/btn_pause"
+        android:background="@drawable/btn_ff"
+        android:textOff=""
+        android:textOn="" />
+
+</RelativeLayout>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:id="@+id/dlg_store_goods_page1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#a7a7a7"
+        android:padding="0px"
+        android:visibility="visible" >
+
+        <LinearLayout
+            android:id="@+id/dlg_store_goods_confirm"
+            android:layout_width="180dp"
+            android:layout_height="115dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical"
+            tools:ignore="UseCompoundDrawables" >
+
+            <ImageView
+                android:layout_width="180dp"
+                android:layout_height="90dp"
+                android:background="@drawable/img_goodsview_treasurebox"
+                android:contentDescription="상자 이미지"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="하급 상자"
+                android:textColor="#ffffff"
+                android:textSize="20sp"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/dlg_store_btn_buy"
+            android:layout_width="90dp"
+            android:layout_height="30dp"
+            android:layout_alignLeft="@id/dlg_store_goods_confirm"
+            android:layout_below="@id/dlg_store_goods_confirm"
+            android:gravity="center"
+            android:text="구매"
+            android:textColor="#ffffff"
+            android:textSize="25sp"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/dlg_store_btn_cancel"
+            android:layout_width="90dp"
+            android:layout_height="30dp"
+            android:layout_alignTop="@id/dlg_store_btn_buy"
+            android:layout_toRightOf="@id/dlg_store_btn_buy"
+            android:gravity="center"
+            android:text="취소"
+            android:textColor="#ffffff"
+            android:textSize="25sp"
+            tools:ignore="HardcodedText" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/dlg_store_goods_page2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#a7a7a7"
+        android:padding="0px"
+        android:visibility="invisible" >
+
+        <hjsi.customview.TowerView
+            android:id="@+id/dlg_store_goods_element"
+            android:layout_width="180dp"
+            android:layout_height="115dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true" />
+
+        <TextView
+            android:id="@+id/dlg_store_btn_morebuy"
+            android:layout_width="90dp"
+            android:layout_height="30dp"
+            android:layout_alignLeft="@id/dlg_store_goods_element"
+            android:layout_below="@id/dlg_store_goods_element"
+            android:gravity="center"
+            android:text="계속 구매"
+            android:textColor="#ffffff"
+            android:textSize="25sp"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/dlg_store_btn_arrangement"
+            android:layout_width="90dp"
+            android:layout_height="30dp"
+            android:layout_alignTop="@id/dlg_store_btn_morebuy"
+            android:layout_toRightOf="@id/dlg_store_btn_morebuy"
+            android:gravity="center"
+            android:text="배치"
+            android:textColor="#ffffff"
+            android:textSize="25sp"
+            tools:ignore="HardcodedText" />
+    </RelativeLayout>
+
+</FrameLayout>
