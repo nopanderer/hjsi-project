@@ -39,19 +39,6 @@ public class ChainProjectile extends Projectile {
     targets = new ArrayList<Hittable>(timeToLive);
   }
 
-  /**
-   * 방문횟수를 다 채웠는지 검사한다.
-   * 
-   * @return 더 이상 방문할 수 없으면 true, or false.
-   */
-  private boolean checkTimeToLive() {
-    return targets.size() >= timeToLive;
-  }
-
-  private boolean checkCollision() {
-    return target.isCollidedWith(this);
-  }
-
   @Override
   public LinkedList<Attackable> attack(LinkedList<Hittable> units) {
     // TODO 이 메소드에서 다음 타겟을 새로 구하도록 한다.
@@ -95,5 +82,18 @@ public class ChainProjectile extends Projectile {
       }
       updateHitRect();
     }
+  }
+
+  private boolean checkCollision() {
+    return target.isCollidedWith(this);
+  }
+
+  /**
+   * 방문횟수를 다 채웠는지 검사한다.
+   * 
+   * @return 더 이상 방문할 수 없으면 true, or false.
+   */
+  private boolean checkTimeToLive() {
+    return targets.size() >= timeToLive;
   }
 }
