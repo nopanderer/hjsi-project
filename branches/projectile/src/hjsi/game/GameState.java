@@ -6,6 +6,7 @@ import hjsi.common.Timer;
 import hjsi.game.Unit.Type;
 import hjsi.unit.attr.Attackable;
 import hjsi.unit.attr.Hittable;
+import hjsi.unit.attr.Movable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -243,8 +244,78 @@ public class GameState {
     spawnTimer.setEnable(false);
   }
 
+  /**
+   * Attackable 인터페이스를 구현한 Unit 객체를 모두 복제한 연결리스트를 반환한다.
+   * 
+   * @return size가 0개 이상인 연결리스트
+   */
+  public LinkedList<Attackable> getAttackables() {
+    LinkedList<Attackable> attackables = new LinkedList<Attackable>();
+    synchronized (units) {
+      for (Unit unit : units) {
+        if (unit instanceof Attackable)
+          attackables.add((Attackable) unit);
+      }
+    }
+    return attackables;
+  }
+
+  /**
+   * Hittable 인터페이스를 구현한 Unit 객체를 모두 복제한 연결리스트를 반환한다.
+   * 
+   * @return size가 0개 이상인 연결리스트
+   */
+  public LinkedList<Hittable> getHittables() {
+    LinkedList<Hittable> hittables = new LinkedList<Hittable>();
+    synchronized (units) {
+      for (Unit unit : units) {
+        if (unit instanceof Hittable)
+          hittables.add((Hittable) unit);
+      }
+    }
+    return hittables;
+  }
+
+  /**
+   * 매개변수로 지정한 종류의 Hittable 유닛 목록 복제를 반환한다.
+   * 
+   * @param type Statue 혹은 Mob의 Type 열거형
+   * @return 해당 타입 Hittable 구현 객체가 0개 이상 들어있는 연결리스트를 반환한다.
+   */
+  public LinkedList<Hittable> getHittables(Type type) {
+    if (type == Type.STATUE || type == Type.MOB) {
+      LinkedList<Hittable> clone = new LinkedList<Hittable>();
+      synchronized (units) {
+        for (int i = 0; i < units.size(); i++) {
+          Unit unit = units.get(i);
+          if (unit.getType() == type)
+            clone.add((Hittable) unit);
+        }
+      }
+      return clone;
+
+    } else
+      return null;
+  }
+
   public Tower getInHandTower() {
     return inHand;
+  }
+
+  /**
+   * Movable 인터페이스를 구현한 Unit 객체를 모두 복제한 연결리스트를 반환한다.
+   * 
+   * @return size가 0개 이상인 연결리스트
+   */
+  public LinkedList<Movable> getMovables() {
+    LinkedList<Movable> movables = new LinkedList<Movable>();
+    synchronized (units) {
+      for (Unit unit : units) {
+        if (unit instanceof Movable)
+          movables.add((Movable) unit);
+      }
+    }
+    return movables;
   }
 
   /**
@@ -327,27 +398,6 @@ public class GameState {
       }
     }
     return clone;
-  }
-
-  /**
-   * 매개변수로 지정한 종류의 Hittable 유닛 목록 복제를 반환한다.
-   * 
-   * @param type Statue 혹은 Mob의 Type 열거형
-   * @return 해당 타입 Hittable 구현 객체가 0개 이상 들어있는 연결리스트를 반환한다.
-   */
-  public LinkedList<Hittable> getHittables(Type type) {
-    if (type == Type.STATUE || type == Type.MOB) {
-      LinkedList<Hittable> clone = new LinkedList<Hittable>();
-      synchronized (units) {
-        for (int i = 0; i < units.size(); i++) {
-          if (units.get(i).getType() == type)
-            clone.add((Hittable) units.get(i));
-        }
-      }
-      return clone;
-      
-    } else
-      return null;
   }
 
   /**

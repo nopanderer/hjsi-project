@@ -2,13 +2,11 @@ package hjsi.game;
 
 import hjsi.common.AppManager;
 import hjsi.common.Timer;
-import hjsi.game.Unit.Type;
 import hjsi.unit.attr.Attackable;
 import hjsi.unit.attr.Hittable;
 import hjsi.unit.attr.Movable;
 import hjsi.unit.skills.Projectile;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -143,13 +141,21 @@ public class Mob extends Unit implements Movable, Attackable, Hittable {
   }
 
   @Override
-  public LinkedList<Attackable> attack(LinkedList<Hittable> units) {
+  public LinkedList<Attackable> attack(LinkedList<Hittable> hittables) {
+    /* !!! TEST CODE !!! */
+    if (lap < 1)
+      return null;
+    /* !!! TEST CODE !!! */
+
     if (timerAttack.isUsable()) {
       timerAttack.consumeTimer();
       LinkedList<Attackable> projs = new LinkedList<Attackable>();
 
-      for (Hittable unit : units) {
-        Statue statue = (Statue) unit;
+      for (Hittable hittable : hittables) {
+        if (((Unit) hittable).getType() != Type.STATUE)
+          continue;
+
+        Statue statue = (Statue) hittable;
         if (statue.isDestroyed() == false && inRange(this, statue)) {
           Projectile proj =
               new Projectile(x, y, damage, statue,

@@ -8,5 +8,5 @@ import java.util.LinkedList;
  *
  */
 public interface Attackable {
-  LinkedList<Attackable> attack(LinkedList<Hittable> units);
+  LinkedList<Attackable> attack(LinkedList<Hittable> hittables);
 }

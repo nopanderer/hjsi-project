@@ -1,14 +1,13 @@
 package hjsi.game;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-
 import hjsi.common.AppManager;
 import hjsi.common.Timer;
 import hjsi.game.Unit.Type;
 import hjsi.unit.attr.Attackable;
 import hjsi.unit.attr.Hittable;
-import hjsi.unit.skills.Projectile;
+import hjsi.unit.attr.Movable;
+
+import java.util.LinkedList;
 
 /**
  * 게임을 진행시키는 인게임 스레드. 화면에 보이는지나 카메라에 관한 건 전혀 신경 쓸 필요 없다.
@@ -116,36 +115,22 @@ public class GameMaster implements Runnable {
         }
 
         /*
-         * Mob 루프
+         * Movable Unit 루프
          */
-        LinkedList<Hittable> statues = gState.getHittables(Type.STATUE);
-        for (Unit unit : gState.getUnits(Type.MOB)) {
-          Mob mob = (Mob) unit;
-
-          if (mob.getLap() == 1) {
-            LinkedList<Attackable> projs = mob.attack(statues);
-            if (projs != null)
-              gState.addUnits(projs);
-          }
-
-          mob.move();
+        LinkedList<Movable> movables = gState.getMovables();
+        for (Movable movable : movables) {
+          movable.move();
         }
 
         /*
-         * Tower 루프
+         * Attackable Unit 루프
          */
-        LinkedList<Hittable> mobs = gState.getHittables(Type.MOB);
-        for (Unit tower : gState.getUnits(Type.TOWER)) {
-          LinkedList<Attackable> projs = ((Tower) tower).attack(mobs);
-          if (projs != null)
-            gState.addUnits(projs);
-        }
-
-        /*
-         * Projectile 루프
-         */
-        for (Unit proj : gState.getUnits(Type.PROJECTILE)) {
-          ((Projectile) proj).move();
+        LinkedList<Attackable> attackables = gState.getAttackables();
+        LinkedList<Hittable> hittables = gState.getHittables();
+        for (Attackable attackable : attackables) {
+          LinkedList<Attackable> projectiles = attackable.attack(hittables);
+          if (projectiles != null)
+            gState.addUnits(projectiles);
         }
 
         /*
